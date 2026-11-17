@@ -1,12 +1,15 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>CodeSentinel v3 Pitch Deck</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>CodeSentinel Pitch Deck</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
 <style>
-:root{ /* layout: a narrow evidence ledger. Left-aligned, ruled sections, mono labels for anything machine-made */
-  --bg:#ffffff;--surface:#ffffff;--ink:#101a2b;--muted:#55637a;--line:#d5dbe4;
-  --accent:#0b5cad;--accent-ink:#ffffff;--code-bg:#0f1b2d;--code-ink:#e6edf7;
-  --crit:#b42318;--high:#b4530a;--med:#8a5d00;--low:#3b6aa0;--ok:#157347;--bad:#b42318;
-  --display:"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;
-  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+:root{ /* layout: a warm paper ledger. Serif voice, mono for anything machine-made, one orange signal colour.
+          Motion: one orchestrated moment (the hero statement verifying itself), quiet reveals elsewhere. */
+  --bg:#fafaf7;--surface:#ffffff;--sunk:#f0efe8;--ink:#1a1c17;--muted:#5a584d;--ghost:#9a9687;
+  --line:#e3e1d6;--line-hot:#c9c6b8;--accent:#d97706;--accent-dim:#b45309;--accent-ink:#fffdf8;
+  --code-bg:#1a1c17;--code-ink:#f0efe8;
+  --crit:#9f1239;--high:#b45309;--med:#8a6100;--low:#4a6a8a;--ok:#3f6b2a;--bad:#9f1239;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --body:"Fraunces",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1);color-scheme:light}
 @page{size:13.333in 7.5in;margin:0}*{box-sizing:border-box}body{margin:0;font-family:var(--body);background:#fff}
 
 .slide{background:var(--surface);color:var(--ink);border:1px solid var(--line);aspect-ratio:16/9;
@@ -14,7 +17,7 @@
 .slide header{display:flex;justify-content:space-between;font:600 1.5cqw/1 var(--mono);letter-spacing:.08em;
   text-transform:uppercase;color:var(--accent)}
 .slide .num{color:var(--muted)}
-.slide h3{font:600 3.5cqw/1.12 var(--display);margin:0;text-wrap:balance;max-width:26ch}
+.slide h3{font:500 3.6cqw/1.08 var(--display);letter-spacing:-.015em;margin:0;text-wrap:balance;max-width:26ch}
 .slide .sbody{font-size:2.05cqw;line-height:1.42;flex:1;display:flex;flex-direction:column;gap:1.4cqw;justify-content:center}
 .slide .lead{font-size:2.6cqw;max-width:46ch;margin:0}
 .slide .meta{color:var(--muted);margin:0}
@@ -22,7 +25,7 @@
 .slide .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4cqw}
 .slide .cols.four{grid-template-columns:repeat(4,1fr)}
 .slide .cols>div{border-top:.35cqw solid var(--accent);padding-top:1.1cqw}
-.slide h4{font:600 2.3cqw/1.2 var(--display);margin:0 0 .7cqw}
+.slide h4{font:500 2.3cqw/1.2 var(--display);margin:0 0 .7cqw}
 .slide table{border-collapse:collapse;width:100%;font-size:1.8cqw}
 .slide th,.slide td{text-align:left;padding:.75cqw 1cqw;border-bottom:1px solid var(--line);vertical-align:top}
 .slide th{font:600 1.35cqw/1.2 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -31,78 +34,78 @@
 .slide sup{font-size:.6em;color:var(--accent)}
 .slide .src{columns:2;margin:0;padding-left:2.2cqw;font-size:1.75cqw}
 .slide footer{font:500 1.15cqw/1 var(--mono);color:var(--muted);letter-spacing:.04em}
-.slide{width:13.333in;height:7.5in;aspect-ratio:auto;border:0;page-break-after:always;break-after:page}</style></head>
-<body><section class="slide"><header><span class="kicker">CodeSentinel v3</span><span class="num">1 / 13</span></header><h3>AI code security review that can prove where every finding came from</h3><div class="sbody"><p class="lead">An open-source scanner, a test rig that measures whether AI review earns its cost,
+.slide{width:13.333in;height:7.5in;aspect-ratio:auto;border:0;background:var(--bg);page-break-after:always;break-after:page}</style></head>
+<body><section class="slide"><header><span class="kicker">CodeSentinel</span><span class="num">1 / 13</span></header><h3>AI code security review that can prove where every finding came from</h3><div class="sbody"><p class="lead">An open-source scanner, a test rig that measures whether AI review earns its cost,
      and a provenance layer that makes every finding replayable and tamper-evident.</p>
-     <p class="meta">Aravind Balaji · Northeastern University · November 2026<br>Built for INFO 7375 Computational Scepticism</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="meta">Aravind Balaji · Northeastern University · November 2026<br>Built for INFO 7375 Computational Scepticism</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">The problem</span><span class="num">2 / 13</span></header><h3>AI reviewers produce findings nobody can trace</h3><div class="sbody"><div class="cols"><div><h4>More code, less scrutiny</h4><p>A 2025 Veracode study reported that
      <b>45%</b> of AI-generated code samples failed security tests.<sup>5</sup> Teams are adding AI reviewers to cope.</p></div>
      <div><h4>No record of why</h4><p>An AI finding arrives without the model version, prompt or evidence that
      produced it. It cannot be re-derived, so it cannot be audited.</p></div>
      <div><h4>No way to compare</h4><p>Vendors quote false-positive reductions measured on their own data.
-     A buyer has no controlled way to test the claim on their own code.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     A buyer has no controlled way to test the claim on their own code.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">The product</span><span class="num">3 / 13</span></header><h3>One tool, three layers</h3><div class="sbody"><table><tr><th>Layer</th><th>What it does</th><th>State</th></tr>
      <tr><td><b>Scanner</b></td><td>32 offline rules across 7 languages, plus a three-agent AI pipeline: a Sentinel that must cite evidence, an Auditor, and an Evaluator that can reject findings</td><td>Built, tested</td></tr>
      <tr><td><b>Verification and provenance</b></td><td>Records every model response once. Attaches a hash-chained statement to each result. <code>verify</code> re-derives the findings from recordings</td><td>Built, tested</td></tr>
      <tr><td><b>Router</b></td><td>A bandit that learns when a cheaper configuration is enough, scored on recorded real runs</td><td>Built, exploratory</td></tr></table>
-     <p class="note">Open source under Apache-2.0. 72 automated tests pass.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="note">Open source under Apache-2.0. 72 automated tests pass.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">How verification works</span><span class="num">4 / 13</span></header><h3>Four checks, no model calls</h3><div class="sbody"><div class="cols four"><div><h4>1 · Chain</h4><p>Has any statement been altered, removed or reordered?</p></div>
      <div><h4>2 · Records</h4><p>Does every cited model response still hash to what was recorded?</p></div>
      <div><h4>3 · Replay</h4><p>Does re-running on the recordings give exactly the same findings?</p></div>
      <div><h4>4 · Evidence</h4><p>Does every finding point at lines that exist?</p></div></div>
      <p class="note">It proves a finding is the unedited, reproducible output of a named model and code version.
-     It does not prove the finding is true. That is what the labelled evaluation measures.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     It does not prove the finding is true. That is what the labelled evaluation measures.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Evidence so far</span><span class="num">5 / 13</span></header><h3>What our own pilot does and does not show</h3><div class="sbody"><div class="cols"><div><h4>Established</h4><p>Every stored result from the April 2026 pilot is reproduced from its recordings.
      In one real-model run on 10 samples, false positives were <b>30</b> for a single prompt and <b>1</b> for the pipeline, with equal recall.</p></div>
      <div><h4>Weaker than it looked</h4><p>The pipeline returned nothing in 2 of 3 runs that day. 20 of the 30 false positives were
      extra findings on flawed samples. The two arms used different prompts.</p></div>
      <div><h4>Not done yet</h4><p>The evaluation on a hand-verified dataset with replicates, on a hosted model and an
      open-weight model. 204 candidate pairs are collected and waiting for verification.</p></div></div>
-     <p class="note">We publish this because a product about verification has to pass its own test.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="note">We publish this because a product about verification has to pass its own test.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Market size</span><span class="num">6 / 13</span></header><h3>A multi-billion dollar market growing at double-digit rates</h3><div class="sbody"><table><tr><th>Scope</th><th>2025</th><th>Forecast</th><th>Growth a year</th></tr>
      <tr><td>Application security, broad<sup>1</sup></td><td>$12.19B</td><td>$23.45B by 2031</td><td>11.5%</td></tr>
      <tr><td>Application security, broad<sup>3</sup></td><td>$11.9B</td><td>$37.6B by 2034</td><td>13.21%</td></tr>
      <tr><td>Application security testing<sup>2</sup></td><td>$1.83B</td><td>$7.60B by 2031</td><td>26.7%</td></tr>
      <tr><td>Static testing only<sup>4</sup></td><td>$0.55B</td><td>$1.89B by 2031</td><td>22.82%</td></tr></table>
      <p class="note">Analysts define the market differently, so the estimates differ widely. We show the range, not an average.
-     One analyst puts static testing at 38.6% of the market by testing type.<sup>3</sup></p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     One analyst puts static testing at 38.6% of the market by testing type.<sup>3</sup></p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Why now</span><span class="num">7 / 13</span></header><h3>Money and regulation are both moving toward checkable AI output</h3><div class="sbody"><div class="cols"><div><h4>Capital</h4><p>CodeRabbit raised $143M at a $1.5B valuation for AI code review.<sup>6</sup>
      Endor Labs raised $93M to scan AI-generated code.<sup>7</sup> Semgrep raised a $100M Series D.<sup>8</sup></p></div>
      <div><h4>Regulation</h4><p>EU Cyber Resilience Act reporting duties applied from 11 September 2026; the Act applies in full from
      11 December 2027.<sup>12</sup> Vulnerability handling now needs a record.</p></div>
      <div><h4>Technology</h4><p>Open-weight code models can be served on a single GPU, so AI review with pinned weights and no code
-     leaving the building is practical.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     leaving the building is practical.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Competition</span><span class="num">8 / 13</span></header><h3>Incumbents already use AI. We focus on evidence</h3><div class="sbody"><table><tr><th>Product</th><th>Strength</th><th>Published team price</th></tr>
      <tr><td>Semgrep</td><td>Large rule ecosystem; a 2026 engine pairing code parsing with model reasoning<sup>8</sup></td><td>$30 per contributor a month<sup>10</sup></td></tr>
      <tr><td>Snyk Code</td><td>Broad platform; about $326M annual recurring revenue<sup>9</sup></td><td>$25 per developer a month, up to 10<sup>11</sup></td></tr>
      <tr><td>GitHub Advanced Security, Checkmarx, Veracode</td><td>Data-flow analysis in the platform; enterprise compliance suites</td><td>Add-on or custom</td></tr>
      <tr><td><b>CodeSentinel</b></td><td>Replayable per-finding provenance; open evaluation rig; stated limits</td><td>Free core; $29 indicative</td></tr></table>
-     <p class="note">We do not compete on rule coverage or depth. "Unique" is a hypothesis to test with buyers, not a surveyed fact.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="note">We do not compete on rule coverage or depth. "Unique" is a hypothesis to test with buyers, not a surveyed fact.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Positioning</span><span class="num">9 / 13</span></header><h3>The audit trail for AI code review</h3><div class="sbody"><div class="cols"><div><h4>Who buys first</h4><p>Application security leads deciding whether an AI reviewer earns its cost.
      Regulated teams that need a record for automated findings and code that stays on their machines.</p></div>
      <div><h4>What they get</h4><p>A controlled comparison on their own code with intervals, and findings that an auditor
      can re-derive without trusting the vendor.</p></div>
      <div><h4>Why it survives a null result</h4><p>If the pipeline does not beat a single prompt, the rig and the provenance
-     layer are still useful. Only the "fewer false positives" claim would go.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     layer are still useful. Only the "fewer false positives" claim would go.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Business model</span><span class="num">10 / 13</span></header><h3>Open core, with evaluation as a service as the first offer to test</h3><div class="sbody"><table><tr><th>Edition</th><th>For</th><th>Adds</th></tr>
      <tr><td>Community (free)</td><td>Everyone</td><td>Scanner, rig, provenance, router, all report formats</td></tr>
      <tr><td>Team ($29 per contributor a month, indicative)</td><td>Squads</td><td>Private rule packs, support</td></tr>
      <tr><td>Enterprise and Government (custom)</td><td>Regulated buyers</td><td>SSO, audit export, compliance packs, supported air-gapped operation</td></tr></table>
      <p class="note">Illustrative arithmetic, not a forecast: 200 teams of 25 contributors at $29 a month is about $1.7M a year.
-     Prices are placeholders and the commercial licence has not had legal review.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
-<section class="slide"><header><span class="kicker">Where we are</span><span class="num">11 / 13</span></header><h3>An honest status</h3><div class="sbody"><div class="cols"><div><h4>Done</h4><p>Unified v3 codebase. Rig, provenance and router working offline. Pilot results
+     Prices are placeholders and the commercial licence has not had legal review.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Where we are</span><span class="num">11 / 13</span></header><h3>An honest status</h3><div class="sbody"><div class="cols"><div><h4>Done</h4><p>One unified codebase. Rig, provenance and router working offline. Pilot results
      recomputed. 204 candidate pairs from 113 open-source projects. Cluster job script written.</p></div>
      <div><h4>Next four weeks</h4><p>Verify labels. Pre-register. Run on a hosted model and on an open-weight model with seeded
      replicates. Adversarial and faithfulness checks. Course paper, then a preprint.</p></div>
-     <div><h4>Not yet</h4><p>No customers. No revenue. No large evaluation. One developer. Statements are hashed, not yet signed.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <div><h4>Not yet</h4><p>No customers. No revenue. No large evaluation. One developer. Statements are hashed, not yet signed.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">What we are asking for</span><span class="num">12 / 13</span></header><h3>Design partners and reviewers, not capital</h3><div class="sbody"><div class="cols"><div><h4>Design partners</h4><p>Two or three security teams willing to run the rig on their own code and
      tell us whether the provenance record is what their auditors need.</p></div>
      <div><h4>Reviewers</h4><p>A second labeller for the dataset, and critics for the pre-registration before any model is run.</p></div>
-     <div><h4>Contact</h4><p>Aravind Balaji<br>balaji.ara@northeastern.edu<br>github.com/AravindB98/CodeSentinel-v3</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <div><h4>Contact</h4><p>Aravind Balaji<br>balaji.ara@northeastern.edu<br>github.com/AravindB98/CodeSentinel-v3</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Sources</span><span class="num">13 / 13</span></header><h3>Read in November 2026</h3><div class="sbody"><ol class="src">
      <li>MarketsandMarkets, Application Security Market</li><li>MarketsandMarkets, Application Security Testing Market</li>
      <li>IMARC Group, Application Security Market</li><li>Mordor Intelligence, Static Application Security Testing Market</li>
      <li>Veracode 2025 GenAI Code Security Report, as cited by SSOJet</li><li>Finimize (Reuters), CodeRabbit funding</li>
      <li>TechCrunch, Endor Labs funding</li><li>Sacra, Semgrep research</li><li>Sacra, Snyk research</li>
      <li>semgrep.dev/pricing</li><li>Snyk pricing breakdown, dev.to</li><li>Travers Smith, EU Cyber Resilience Act timeline</li></ol>
-     <p class="note">Full links are in docs/MARKET_ANALYSIS.md. Several are secondary reports; check the primary source before quoting a figure.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section></body></html>
+     <p class="note">Full links are in docs/MARKET_ANALYSIS.md. Several are secondary reports; check the primary source before quoting a figure.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section></body></html>

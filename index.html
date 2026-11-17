@@ -1,104 +1,158 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CodeSentinel v3</title>
+<title>CodeSentinel</title>
 <meta name="description" content="AI code security review that can prove where every finding came from. Built for INFO 7375 Computational Scepticism.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap" rel="stylesheet"><style>
-:root{ /* layout: a narrow evidence ledger. Left-aligned, ruled sections, mono labels for anything machine-made */
-  --bg:#f3f5f7;--surface:#ffffff;--ink:#101a2b;--muted:#55637a;--line:#d5dbe4;
-  --accent:#0b5cad;--accent-ink:#ffffff;--code-bg:#0f1b2d;--code-ink:#e6edf7;
-  --crit:#b42318;--high:#b4530a;--med:#8a5d00;--low:#3b6aa0;--ok:#157347;--bad:#b42318;
-  --display:"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;
-  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet"><style>
+:root{ /* layout: a warm paper ledger. Serif voice, mono for anything machine-made, one orange signal colour.
+          Motion: one orchestrated moment (the hero statement verifying itself), quiet reveals elsewhere. */
+  --bg:#fafaf7;--surface:#ffffff;--sunk:#f0efe8;--ink:#1a1c17;--muted:#5a584d;--ghost:#9a9687;
+  --line:#e3e1d6;--line-hot:#c9c6b8;--accent:#d97706;--accent-dim:#b45309;--accent-ink:#fffdf8;
+  --code-bg:#1a1c17;--code-ink:#f0efe8;
+  --crit:#9f1239;--high:#b45309;--med:#8a6100;--low:#4a6a8a;--ok:#3f6b2a;--bad:#9f1239;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --body:"Fraunces",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1);color-scheme:light}
 
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1320;--surface:#141e2f;--ink:#e7ecf3;--muted:#9aa8bc;--line:#2a374b;--accent:#74b3ff;--accent-ink:#0c1320;--code-bg:#0a101b;--code-ink:#dfe7f2;--crit:#ff8a7a;--high:#ffab66;--med:#e6c067;--low:#8fb8e8;--ok:#5fd39a;--bad:#ff8a7a;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0c1320;--surface:#141e2f;--ink:#e7ecf3;--muted:#9aa8bc;--line:#2a374b;--accent:#74b3ff;--accent-ink:#0c1320;--code-bg:#0a101b;--code-ink:#dfe7f2;--crit:#ff8a7a;--high:#ffab66;--med:#e6c067;--low:#8fb8e8;--ok:#5fd39a;--bad:#ff8a7a;color-scheme:dark}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:104px}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body)}
-a{color:var(--accent)} a:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.course{background:var(--ink);color:var(--bg);font:500 12.5px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:7px 20px;text-align:center}
-.top{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
-.top .in{max-width:1180px;margin:auto;padding:10px 20px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-.brand{display:flex;gap:10px;align-items:center;font:700 20px/1 var(--display);color:var(--ink);text-decoration:none;margin-right:auto}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--body);font-feature-settings:"ss01","ss02";overflow-x:hidden}
+body::before{content:"";position:fixed;inset:-20%;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 20% 10%,rgba(217,119,6,.07),transparent 42%),radial-gradient(circle at 85% 85%,rgba(159,18,57,.05),transparent 48%);
+  animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(4%,-3%,0)}}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.22;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .1 0 0 0 0 .1 0 0 0 0 .09 0 0 0 .5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+.course,.top,main,footer.site{position:relative;z-index:2}
+a{color:var(--accent-dim)} a:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--accent);z-index:60}
+.course{background:var(--ink);color:var(--bg);font:500 11.5px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:8px 20px;text-align:center}
+.top{position:sticky;top:0;z-index:50;background:rgba(250,250,247,.86);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1180px;margin:auto;padding:12px 24px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;gap:10px;align-items:center;font:600 21px/1 var(--display);color:var(--ink);text-decoration:none;margin-right:auto;letter-spacing:-.01em}
 .brand svg{width:26px;height:26px}
-nav{display:flex;gap:4px 16px;flex-wrap:wrap;font-size:14.5px}
-nav a{color:var(--ink);text-decoration:none;padding:4px 0;border-bottom:2px solid transparent}
-nav a:hover,nav a[aria-current="page"]{border-bottom-color:var(--accent)}
-main{max-width:1180px;margin:auto;padding:0 20px 64px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+nav{display:flex;gap:4px 18px;flex-wrap:wrap;font:400 12.5px/1 var(--mono);letter-spacing:.04em}
+nav a{color:var(--muted);text-decoration:none;padding:6px 0;background:linear-gradient(var(--accent),var(--accent)) 0 100%/0 2px no-repeat;transition:color .2s,background-size .35s var(--ease)}
+nav a:hover,nav a[aria-current="page"],nav a.on{color:var(--ink);background-size:100% 2px}
+main{max-width:1180px;margin:auto;padding:0 24px 72px}
 .view[hidden]{display:none}
-h1{font:700 clamp(34px,5.2vw,58px)/1.04 var(--display);margin:0;text-wrap:balance;max-width:17ch}
-h2{font:600 30px/1.15 var(--display);margin:0 0 6px;text-wrap:balance}
-.eyebrow{font:500 12.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 12px}
-.sec{padding:52px 0 0}
-.sec>.lede{color:var(--muted);max-width:68ch;margin:0 0 22px}
-.hero{padding:54px 0 8px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:start}
-.hero p.sub{font-size:19px;max-width:54ch;margin:18px 0 22px}
-.btns{display:flex;gap:10px;flex-wrap:wrap}
-.btn{display:inline-block;font:600 15px/1 var(--body);padding:12px 16px;border:1px solid var(--ink);color:var(--ink);background:transparent;text-decoration:none;cursor:pointer;border-radius:3px}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.status{border:1px solid var(--line);border-left:4px solid var(--high);background:var(--surface);padding:12px 16px;margin-top:24px;font-size:14.5px;max-width:62ch}
-.ledger{background:var(--surface);border:1px solid var(--line);font:13px/1.55 var(--mono)}
-.ledger .row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;padding:9px 14px;border-bottom:1px solid var(--line)}
-.ledger .row:last-child{border-bottom:0}.ledger .k{color:var(--muted)}.ledger .v{overflow-wrap:anywhere}
-.ledger .hd{padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;display:flex;justify-content:space-between;gap:10px}
-.pill{font:600 11.5px/1 var(--mono);padding:4px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap}
-.pill.ok{color:var(--ok)}.pill.bad{color:var(--bad)}
-.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);background:var(--surface)}
-.grid3>div{padding:20px;border-right:1px solid var(--line)}.grid3>div:last-child{border-right:0}
-.grid3 h3{font:600 20px/1.2 var(--display);margin:0 0 4px}.grid3 .tag{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.grid3 ul{margin:10px 0 0;padding-left:18px;font-size:15px}.grid3 li{margin:4px 0}
-.demo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;border:1px solid var(--line);background:var(--surface)}
-.demo>div{padding:16px;min-width:0}.demo>div+div{border-left:1px solid var(--line)}
-.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
-.bar label{font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-select{font:inherit;font-size:14.5px;padding:7px 8px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:3px}
-textarea{width:100%;height:360px;resize:vertical;font:13px/1.55 var(--mono);background:var(--code-bg);color:var(--code-ink);border:0;padding:14px;border-radius:3px;tab-size:2}
-.out{display:flex;flex-direction:column;gap:10px;max-height:412px;overflow:auto}
-.finding{border:1px solid var(--line);border-left:4px solid var(--low);padding:10px 12px;font-size:14px}
+h1{font:500 clamp(40px,6.4vw,78px)/1.0 var(--display);letter-spacing:-.025em;margin:0;text-wrap:balance;max-width:15ch}
+h1 em{font-style:italic;color:var(--accent-dim)}
+h1 .w{display:inline-block;animation:rise .9s var(--ease) both;animation-delay:calc(var(--i)*70ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+h2{font:500 clamp(28px,3.4vw,40px)/1.1 var(--display);letter-spacing:-.015em;margin:0 0 8px;text-wrap:balance}
+.eyebrow{font:500 11.5px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent-dim);margin:0 0 14px;display:flex;gap:10px;align-items:center}
+.eyebrow::before{content:"";width:28px;height:1px;background:var(--accent)}
+.sec{padding:76px 0 0}
+.sec>.lede{color:var(--muted);max-width:66ch;margin:0 0 26px;font-size:18px}
+.hero{padding:64px 0 8px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:48px;align-items:center}
+.hero p.sub{font-size:20px;max-width:52ch;margin:22px 0 26px;color:var(--muted);animation:rise .9s var(--ease) .5s both}
+.btns{display:flex;gap:10px;flex-wrap:wrap;animation:rise .9s var(--ease) .62s both}
+.btn{display:inline-flex;align-items:center;gap:10px;font:500 13px/1 var(--mono);letter-spacing:.04em;padding:14px 20px;border:1px solid var(--line-hot);color:var(--ink);background:var(--surface);text-decoration:none;cursor:pointer;transition:transform .2s var(--ease),border-color .2s,color .2s,box-shadow .2s,background .2s}
+.btn:hover{border-color:var(--accent);color:var(--accent-dim);transform:translateY(-2px);box-shadow:0 8px 20px -12px rgba(180,83,9,.55)}
+.btn:active{transform:translateY(0)}
+.btn.primary{background:var(--accent-dim);border-color:var(--accent-dim);color:var(--accent-ink)}
+.btn.primary:hover{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.btn .arr{transition:transform .25s var(--ease)}.btn:hover .arr{transform:translateX(4px)}
+.status{border-left:3px solid var(--accent);background:var(--sunk);padding:12px 16px;margin-top:26px;font-size:15px;max-width:60ch;animation:rise .9s var(--ease) .74s both}
+.ledger{background:var(--surface);border:1px solid var(--line-hot);font:12.5px/1.55 var(--mono);box-shadow:0 30px 60px -40px rgba(26,28,23,.45);animation:rise 1s var(--ease) .3s both;position:relative}
+.ledger .row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);transition:background .4s}
+.ledger .row.live{background:rgba(217,119,6,.09)}
+.ledger .row:last-child{border-bottom:0}.ledger .k{color:var(--ghost);text-transform:uppercase;font-size:10.5px;letter-spacing:.1em;padding-top:2px}.ledger .v{overflow-wrap:anywhere}
+.ledger .hd{padding:11px 16px;border-bottom:1px solid var(--line);font-weight:500;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--sunk)}
+.ledger .replay{font:500 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;background:none;border:0;color:var(--muted);cursor:pointer;padding:4px}
+.ledger .replay:hover{color:var(--accent-dim)}
+.chk{display:inline-block;margin-right:12px;transition:color .3s,opacity .3s}.chk.wait{color:var(--ghost);opacity:.55}.chk.done{color:var(--ok)}
+.pill{font:500 10.5px/1 var(--mono);letter-spacing:.08em;padding:5px 8px;border:1px solid currentColor;white-space:nowrap;transition:color .3s}
+.pill.ok{color:var(--ok)}.pill.bad{color:var(--bad)}.pill.run{color:var(--accent-dim)}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--line-hot);border-bottom:1px solid var(--line-hot);margin-top:56px}
+.stats>div{padding:22px 12px;border-right:1px solid var(--line)}.stats>div:last-child{border-right:0}
+.stats b{display:block;font:500 clamp(34px,4.4vw,52px)/1 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stats span{font:400 11px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);padding:26px;position:relative;overflow:hidden;transition:transform .35s var(--ease),border-color .3s,box-shadow .35s}
+.card::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--ease)}
+.card:hover{transform:translateY(-4px);border-color:var(--line-hot);box-shadow:0 24px 40px -30px rgba(26,28,23,.5)}.card:hover::before{transform:scaleX(1)}
+.card h3{font:500 24px/1.15 var(--display);margin:6px 0 4px}.card .tag{font:500 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dim)}
+.card ul{margin:12px 0 0;padding-left:18px;font-size:16px;color:var(--muted)}.card li{margin:6px 0}
+.flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;align-items:stretch}
+.node{background:var(--surface);border:1px solid var(--line-hot);padding:14px 12px;position:relative;font-size:15px;line-height:1.3;margin-right:26px}
+.node b{display:block;font:500 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dim);margin-bottom:6px}
+.node:not(:last-child)::after{content:"";position:absolute;left:100%;top:50%;width:26px;height:2px;
+  background:repeating-linear-gradient(90deg,var(--accent) 0 6px,transparent 6px 12px);background-size:12px 2px;animation:dash .7s linear infinite}
+@keyframes dash{to{background-position:12px 0}}
+.node.hot{border-color:var(--accent);box-shadow:0 0 0 3px rgba(217,119,6,.14)}
+.flow .node{animation:glow 7.2s linear infinite;animation-delay:calc(var(--i)*1.2s)}
+@keyframes glow{0%,12%{border-color:var(--accent);box-shadow:0 0 0 3px rgba(217,119,6,.16)}18%,100%{border-color:var(--line-hot);box-shadow:none}}
+.flownote{font:400 12px/1.5 var(--mono);color:var(--muted);margin:14px 0 26px;display:flex;gap:10px;align-items:center}
+.flownote i{font-style:normal;color:var(--crit)}
+.flow.two{grid-template-columns:repeat(4,minmax(0,1fr))}
+.demo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;border:1px solid var(--line-hot);background:var(--surface);box-shadow:0 30px 60px -45px rgba(26,28,23,.5)}
+.demo>div{padding:18px;min-width:0}.demo>div+div{border-left:1px solid var(--line)}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.bar label{font:500 10.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.bar .btn{padding:10px 14px}
+select{font:400 13px var(--mono);padding:9px 10px;background:var(--surface);color:var(--ink);border:1px solid var(--line-hot)}
+textarea{width:100%;height:372px;resize:vertical;font:12.5px/1.6 var(--mono);background:var(--code-bg);color:var(--code-ink);border:0;padding:16px;tab-size:2}
+.out{display:flex;flex-direction:column;gap:10px;max-height:424px;overflow:auto}
+.finding{border:1px solid var(--line);border-left:4px solid var(--low);padding:11px 13px;font-size:15px;animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0)*70ms)}
 .finding.CRITICAL{border-left-color:var(--crit)}.finding.HIGH{border-left-color:var(--high)}.finding.MEDIUM{border-left-color:var(--med)}
-.finding .h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-weight:600}
-.finding .sev{font:600 11.5px/1 var(--mono)}.CRITICAL .sev{color:var(--crit)}.HIGH .sev{color:var(--high)}.MEDIUM .sev{color:var(--med)}.LOW .sev{color:var(--low)}
-.finding code,.finding .prov{font:12.5px/1.5 var(--mono);overflow-wrap:anywhere}.finding .prov{color:var(--muted)}
-.finding code{display:block;background:var(--bg);padding:5px 8px;margin:6px 0}
-.sum{font:500 13px/1.4 var(--mono);color:var(--muted)}
-.chain{display:flex;flex-direction:column;gap:8px}
-.stmt{border:1px solid var(--line);padding:10px 12px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;font:13px/1.5 var(--mono)}
-.stmt.bad{border-color:var(--bad)}.stmt .why{grid-column:2/4;color:var(--bad)}.stmt .f{overflow-wrap:anywhere}.stmt .hash{color:var(--muted);grid-column:2/4;overflow-wrap:anywhere}
-pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;overflow-x:auto;font:13px/1.6 var(--mono);border-radius:3px;margin:0;position:relative}
-.cmd{position:relative}.cmd button{position:absolute;top:8px;right:8px;font:500 11.5px/1 var(--mono);background:transparent;color:var(--code-ink);border:1px solid #ffffff55;padding:5px 7px;cursor:pointer;border-radius:2px}
-.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.steps h3{font:600 18px/1.2 var(--display);margin:0 0 8px}.steps p{margin:8px 0 0;font-size:14.5px;color:var(--muted)}
+.finding .h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-weight:500}
+.finding .sev{font:500 10.5px/1 var(--mono);letter-spacing:.08em}.CRITICAL .sev{color:var(--crit)}.HIGH .sev{color:var(--high)}.MEDIUM .sev{color:var(--med)}.LOW .sev{color:var(--low)}
+.finding code,.finding .prov{font:12px/1.5 var(--mono);overflow-wrap:anywhere}.finding .prov{color:var(--muted)}
+.finding code{display:block;background:var(--sunk);padding:6px 9px;margin:7px 0}
+.sum{font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.03em}
+.chain{display:flex;flex-direction:column;gap:0}
+.stmt{border:1px solid var(--line);padding:11px 13px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;font:12.5px/1.5 var(--mono);background:var(--surface);transition:border-color .3s,background .3s}
+.stmt+.stmt{margin-top:18px;position:relative}
+.stmt+.stmt::before{content:"";position:absolute;left:22px;top:-19px;height:18px;width:2px;background:var(--line-hot)}
+.stmt.busy{border-color:var(--accent);background:rgba(217,119,6,.06)}
+.stmt.bad{border-color:var(--bad);background:rgba(159,18,57,.05);animation:shake .45s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+.stmt .why{grid-column:2/4;color:var(--bad)}.stmt .f{overflow-wrap:anywhere}.stmt .hash{color:var(--ghost);grid-column:2/4;overflow-wrap:anywhere}
+pre{background:var(--code-bg);color:var(--code-ink);padding:16px 18px;overflow-x:auto;font:12.5px/1.65 var(--mono);margin:0;position:relative}
+.cmd{position:relative}.cmd button{position:absolute;top:8px;right:8px;font:500 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--code-ink);border:1px solid #ffffff44;padding:6px 8px;cursor:pointer;transition:border-color .2s,color .2s}
+.cmd button:hover{border-color:var(--accent);color:var(--accent)}
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px}
+.steps h3{font:500 21px/1.2 var(--display);margin:0 0 10px}.steps h3 span{font:500 11px/1 var(--mono);color:var(--accent-dim);letter-spacing:.1em;margin-right:10px}
+.steps p{margin:10px 0 0;font-size:15.5px;color:var(--muted)}
 .tablewrap{overflow-x:auto;margin:14px 0}
-table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--surface)}
-th,td{text-align:left;padding:8px 12px;border:1px solid var(--line);vertical-align:top}
-th{font:600 12px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;background:var(--surface)}
+th,td{text-align:left;padding:10px 14px;border:1px solid var(--line);vertical-align:top}
+th{font:500 10.5px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);background:var(--sunk)}
 td{font-variant-numeric:tabular-nums}
-.docs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);background:var(--surface)}
-.docs a{padding:18px;border-right:1px solid var(--line);text-decoration:none;color:var(--ink);display:block}
-.docs a:last-child{border-right:0}.docs a:hover{background:var(--bg)}
-.docs b{font:600 19px/1.2 var(--display);display:block}.docs span{font-size:14px;color:var(--muted)}
-.doc{max-width:860px;padding-top:40px}
-.doc h1{font-size:40px;max-width:none}.doc h2{margin-top:44px;padding-top:18px;border-top:1px solid var(--line)}
-.doc h3{font:600 20px/1.25 var(--display);margin:28px 0 6px}.doc p,.doc li{max-width:72ch}
-.doc code{font:.88em var(--mono);background:var(--surface);border:1px solid var(--line);padding:1px 4px;border-radius:2px}
-.doc pre{margin:12px 0}.doc pre code{background:none;border:0;padding:0;font-size:13px}
-.back{font:500 13px/1 var(--mono);text-decoration:none}
-.deck{display:grid;gap:18px;max-width:1040px}
-footer.site{border-top:1px solid var(--line);margin-top:20px;background:var(--surface)}
-footer.site .in{max-width:1180px;margin:auto;padding:22px 20px;display:flex;gap:10px 28px;flex-wrap:wrap;justify-content:space-between;font-size:14px;color:var(--muted)}
-footer.site b{color:var(--ink)}
-@media (max-width:900px){.hero,.demo,.steps{grid-template-columns:minmax(0,1fr)}.demo>div+div{border-left:0;border-top:1px solid var(--line)}
- .grid3,.docs{grid-template-columns:minmax(0,1fr)}.grid3>div,.docs a{border-right:0;border-bottom:1px solid var(--line)}
+.docs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.docs a{padding:24px;border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink);display:block;transition:transform .35s var(--ease),border-color .3s,box-shadow .35s}
+.docs a:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 24px 40px -30px rgba(180,83,9,.6)}
+.docs b{font:500 22px/1.2 var(--display);display:block;margin-bottom:6px}.docs span{font-size:15px;color:var(--muted)}
+.docs i{font:500 11px/1 var(--mono);font-style:normal;color:var(--accent-dim);letter-spacing:.1em;display:block;margin-top:14px;transition:transform .25s var(--ease)}.docs a:hover i{transform:translateX(5px)}
+.doc{max-width:860px;padding-top:44px}
+.doc h1{font-size:clamp(36px,5vw,54px);max-width:none}.doc h2{margin-top:48px;padding-top:20px;border-top:1px solid var(--line-hot);font-size:30px}
+.doc h3{font:500 22px/1.25 var(--display);margin:30px 0 6px}.doc p,.doc li{max-width:70ch}
+.doc code{font:.8em var(--mono);background:var(--sunk);border:1px solid var(--line);padding:1px 5px}
+.doc pre{margin:14px 0}.doc pre code{background:none;border:0;padding:0;font-size:12.5px}
+.back{font:500 12px/1 var(--mono);letter-spacing:.06em;text-decoration:none}
+.deck{display:grid;gap:22px;max-width:1040px}
+.rv.pre{opacity:0;transform:translateY(22px)}
+.rv{transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:calc(var(--d,0)*90ms)}
+footer.site{border-top:1px solid var(--line-hot);margin-top:24px;background:var(--sunk)}
+footer.site .in{max-width:1180px;margin:auto;padding:26px 24px;display:flex;gap:10px 28px;flex-wrap:wrap;justify-content:space-between;font-size:15px;color:var(--muted)}
+footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase}
+@media (max-width:900px){.top .in{flex-wrap:nowrap;gap:14px;padding:10px 16px}nav{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;min-width:0;padding-right:8px}nav::-webkit-scrollbar{display:none}
+ .hero,.demo,.steps{grid-template-columns:minmax(0,1fr)}.demo>div+div{border-left:0;border-top:1px solid var(--line)}
+ .grid3,.docs{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats>div{border-right:0;border-bottom:1px solid var(--line)}
+ .flow,.flow.two{grid-template-columns:minmax(0,1fr);gap:18px}.node{margin-right:0}.node:not(:last-child)::after{left:22px;top:100%;width:2px;height:18px;background:var(--accent);animation:none}
  .slide .cols,.slide .cols.four{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.rv.pre{opacity:1;transform:none}}
 
 .slide{background:var(--surface);color:var(--ink);border:1px solid var(--line);aspect-ratio:16/9;
   padding:4.2% 5%;display:flex;flex-direction:column;gap:2.2%;overflow:hidden;container-type:inline-size}
 .slide header{display:flex;justify-content:space-between;font:600 1.5cqw/1 var(--mono);letter-spacing:.08em;
   text-transform:uppercase;color:var(--accent)}
 .slide .num{color:var(--muted)}
-.slide h3{font:600 3.5cqw/1.12 var(--display);margin:0;text-wrap:balance;max-width:26ch}
+.slide h3{font:500 3.6cqw/1.08 var(--display);letter-spacing:-.015em;margin:0;text-wrap:balance;max-width:26ch}
 .slide .sbody{font-size:2.05cqw;line-height:1.42;flex:1;display:flex;flex-direction:column;gap:1.4cqw;justify-content:center}
 .slide .lead{font-size:2.6cqw;max-width:46ch;margin:0}
 .slide .meta{color:var(--muted);margin:0}
@@ -106,7 +160,7 @@ footer.site b{color:var(--ink)}
 .slide .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4cqw}
 .slide .cols.four{grid-template-columns:repeat(4,1fr)}
 .slide .cols>div{border-top:.35cqw solid var(--accent);padding-top:1.1cqw}
-.slide h4{font:600 2.3cqw/1.2 var(--display);margin:0 0 .7cqw}
+.slide h4{font:500 2.3cqw/1.2 var(--display);margin:0 0 .7cqw}
 .slide table{border-collapse:collapse;width:100%;font-size:1.8cqw}
 .slide th,.slide td{text-align:left;padding:.75cqw 1cqw;border-bottom:1px solid var(--line);vertical-align:top}
 .slide th{font:600 1.35cqw/1.2 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -116,57 +170,78 @@ footer.site b{color:var(--ink)}
 .slide .src{columns:2;margin:0;padding-left:2.2cqw;font-size:1.75cqw}
 .slide footer{font:500 1.15cqw/1 var(--mono);color:var(--muted);letter-spacing:.04em}
 </style></head><body>
+<div class="progress" id="progress"></div>
 <div class="course">Built for INFO 7375 Computational Scepticism · Northeastern University · Fall 2026</div>
-<header class="top"><div class="in"><a class="brand" href="#home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 6.5v8.2c0 7.3 4.9 12.6 12 15.3 7.1-2.7 12-8 12-15.3V6.5z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="m10.5 16 3.8 3.8 7.4-8" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="square"/></svg><span>CodeSentinel v3</span></a>
-<nav aria-label="Site"><a href="#home">Overview</a><a href="#demo">Live demo</a><a href="#install">Install and run</a>
+<header class="top"><div class="in"><a class="brand" href="#home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 6.5v8.2c0 7.3 4.9 12.6 12 15.3 7.1-2.7 12-8 12-15.3V6.5z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="m10.5 16 3.8 3.8 7.4-8" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="square"/></svg><span>CodeSentinel</span><span class="dot" aria-hidden="true"></span></a>
+<nav aria-label="Site"><a href="#home">Overview</a><a href="#how">How it works</a><a href="#demo">Live demo</a><a href="#install">Install and run</a>
 <a href="#user-manual">User manual</a><a href="#technical-manual">Technical manual</a><a href="#pitch-deck">Pitch deck</a>
-<a href="#market-analysis">Market analysis</a><a href="https://github.com/AravindB98/CodeSentinel-v3" target="_blank" rel="noopener">GitHub</a></nav></div></header>
+<a href="#market-analysis">Market analysis</a></nav></div></header>
 <main>
 <div class="view" data-view="home" id="home">
 <section class="hero">
   <div>
     <p class="eyebrow">Open source · Apache-2.0 · Research preview</p>
-    <h1>AI code review that can prove where every finding came from</h1>
-    <p class="sub">CodeSentinel scans code for security flaws with an offline rule engine or a three-agent AI pipeline.
-    Version 3 records what produced each result, so anyone can re-derive it and see that nothing was edited.</p>
-    <div class="btns"><a class="btn primary" href="#demo">Try the live demo</a><a class="btn" href="#install">Install and run</a>
-    <a class="btn" href="https://github.com/AravindB98/CodeSentinel-v3" target="_blank" rel="noopener">GitHub repository</a></div>
-    <div class="status"><b>Status, stated plainly.</b> The scanner, test rig, provenance layer and router run and pass 72 tests.
-    The evaluation on a hand-verified dataset has not been run yet. Every performance number here comes from a small April 2026 pilot.</div>
+    <h1><span class="w" style="--i:0">AI</span> <span class="w" style="--i:1">code</span> <span class="w" style="--i:2">review</span> <span class="w" style="--i:3">that</span> <span class="w" style="--i:4">can</span> <span class="w" style="--i:5"><em>prove</em></span> <span class="w" style="--i:6">where</span> <span class="w" style="--i:7">every</span> <span class="w" style="--i:8">finding</span> <span class="w" style="--i:9">came</span> <span class="w" style="--i:10">from</span></h1>
+    <p class="sub">CodeSentinel scans code for security flaws with an offline rule engine or a three-agent AI pipeline, and
+    records what produced each result, so anyone can re-derive it and see that nothing was edited.</p>
+    <div class="btns"><a class="btn primary" href="#demo">Try the live demo <span class="arr">→</span></a><a class="btn" href="#install">Install and run</a>
+    <a class="btn" href="#pitch-deck">Pitch deck</a></div>
+    <div class="status"><b>Status, stated plainly.</b> Every feature here runs and is covered by 72 tests.
+    The evaluation on a hand-verified dataset has not been run yet. Every performance number comes from a small April 2026 pilot.</div>
   </div>
-  <div class="ledger" aria-label="Example provenance statement">
-    <div class="hd"><span>provenance statement</span><span class="pill ok">VERIFIED</span></div>
-    <div class="row"><span class="k">subject</span><span class="v">PAIR-SQLI-TP · code sha256 0c722572…</span></div>
+  <div class="ledger" id="ledger" aria-label="Example provenance statement">
+    <div class="hd"><span>provenance statement</span><span><button type="button" class="replay" id="replay">replay</button> <span class="pill ok" id="lpill">VERIFIED</span></span></div>
+    <div class="row"><span class="k">subject</span><span class="v">PAIR-SQLI-TP · code sha256 <span class="hx" data-h="0c722572a91f">0c722572a91f</span>…</span></div>
     <div class="row"><span class="k">configuration</span><span class="v">full pipeline, replicate 0</span></div>
-    <div class="row"><span class="k">model calls</span><span class="v">3 recorded · 528ee443… b6ac635d… d17ea206…</span></div>
+    <div class="row"><span class="k">model calls</span><span class="v">3 recorded · <span class="hx" data-h="528ee443">528ee443</span>… <span class="hx" data-h="b6ac635d">b6ac635d</span>… <span class="hx" data-h="d17ea206">d17ea206</span>…</span></div>
     <div class="row"><span class="k">retrieval</span><span class="v">patterns.md::PY-01 and 5 more passages</span></div>
     <div class="row"><span class="k">review trail</span><span class="v">sentinel: 1 finding → evaluator: APPROVED</span></div>
     <div class="row"><span class="k">finding</span><span class="v">CWE-89, line 8</span></div>
-    <div class="row"><span class="k">checks</span><span class="v">chain ✓ · records ✓ · replay ✓ · evidence ✓</span></div>
+    <div class="row"><span class="k">checks</span><span class="v"><span class="chk done">chain ✓</span><span class="chk done">records ✓</span><span class="chk done">replay ✓</span><span class="chk done">evidence ✓</span></span></div>
   </div>
 </section>
 
+<div class="stats rv">
+  <div><b data-n="32">32</b><span>offline rules</span></div><div><b data-n="7">7</b><span>languages</span></div>
+  <div><b data-n="6">6</b><span>evaluation configurations</span></div><div><b data-n="4">4</b><span>verification checks</span></div>
+  <div><b data-n="72">72</b><span>automated tests</span></div>
+</div>
+
 <section class="sec" id="what">
-  <p class="eyebrow">What it is</p><h2>One tool, three layers</h2>
-  <p class="lede">The scanner is unchanged from version 2. Version 3 adds a layer that measures it and a layer that makes its output checkable.</p>
+  <p class="eyebrow">What it is</p><h2 class="rv">Scan. Prove. Measure.</h2>
+  <p class="lede rv">One product with three jobs: find the flaw, keep a checkable record of what found it, and measure whether the AI doing the finding is worth its cost.</p>
   <div class="grid3">
-    <div><span class="tag">Layer 1 · from v2</span><h3>Scanner</h3><ul><li>32 offline rules across Python, JavaScript, TypeScript, Java, Go, Ruby and PHP</li>
-      <li>AI pipeline: a Sentinel that must cite evidence, a Quality Auditor, and an Evaluator that can reject findings</li>
+    <div class="card rv" style="--d:0"><span class="tag">01 · Scan</span><h3>Two engines</h3><ul><li>32 offline rules across Python, JavaScript, TypeScript, Java, Go, Ruby and PHP</li>
+      <li>An AI pipeline: a Sentinel that must cite evidence, a Quality Auditor, and an Evaluator that can reject findings</li>
       <li>Text, JSON, SARIF, Markdown and HTML reports; CI gating; REST service; Docker and Helm</li></ul></div>
-    <div><span class="tag">Layer 2 · new</span><h3>Verification and provenance</h3><ul><li>Every model response recorded once and never requested again</li>
+    <div class="card rv" style="--d:1"><span class="tag">02 · Prove</span><h3>Provenance</h3><ul><li>Every model response recorded once and never requested again</li>
       <li>A hash-chained statement per result: code, model calls, prompts, retrieval, review trail, findings, code version</li>
       <li><code>verify</code> checks the chain, the records, a full replay and the evidence, with no model calls</li></ul></div>
-    <div><span class="tag">Layer 3 · exploratory</span><h3>Router</h3><ul><li>A UCB-1 bandit that learns when a cheaper configuration is enough</li>
-      <li>Scored on recorded real runs, not a simulator, at no extra model cost</li>
-      <li>Reported as exploratory until the evaluation shows whether it helps</li></ul></div>
+    <div class="card rv" style="--d:2"><span class="tag">03 · Measure</span><h3>Evaluation and routing</h3><ul><li>Six configurations of one model, compared with paired statistics and intervals</li>
+      <li>Hosted models or your own open-weight model, including on an HPC cluster</li>
+      <li>A router that learns when a cheaper configuration is enough, scored on recorded runs</li></ul></div>
+  </div>
+</section>
+
+<section class="sec" id="how">
+  <p class="eyebrow">How it works</p><h2 class="rv">From source code to a finding you can check</h2>
+  <p class="lede rv">The AI pipeline grounds each claim in a knowledge base, has a second agent challenge it, then leaves a record anyone can replay.</p>
+  <div class="flow rv">
+    <div class="node" style="--i:0"><b>Input</b>Source code</div><div class="node" style="--i:1"><b>Retrieve</b>OWASP and CWE passages</div><div class="node" style="--i:2"><b>Sentinel</b>Finds flaws, must cite a passage</div>
+    <div class="node" style="--i:3"><b>Auditor</b>Maintainability findings</div><div class="node" style="--i:4"><b>Evaluator</b>Checks citation, evidence, fix</div><div class="node" style="--i:5"><b>Report</b>Approved findings only</div>
+  </div>
+  <p class="flownote"><i>↺</i> A rejected finding goes back to the Sentinel with feedback, for at most three rounds.</p>
+  <div class="flow two rv">
+    <div class="node" style="--i:0"><b>Record</b>Each model response stored once, keyed by hash</div><div class="node" style="--i:1"><b>Attest</b>A chained statement per result</div>
+    <div class="node" style="--i:2"><b>Verify</b>Chain, records, replay, evidence</div><div class="node" style="--i:3"><b>Measure</b>Paired comparison across six configurations</div>
   </div>
 </section>
 
 <section class="sec" id="demo">
-  <p class="eyebrow">Live demo 1</p><h2>Scan code in your browser</h2>
-  <p class="lede">This runs the real offline rule set, exported from the repository, on your device. Nothing is uploaded. Edit the code and scan again.
+  <p class="eyebrow">Live demo 1</p><h2 class="rv">Scan code in your browser</h2>
+  <p class="lede rv">This runs the real offline rule set on your device. Nothing is uploaded. Edit the code and scan again.
   The AI pipeline needs a model and is not part of this demo.</p>
-  <div class="demo">
+  <div class="demo rv">
     <div>
       <div class="bar"><label for="lang">Language</label><select id="lang"></select>
         <button type="button" class="btn primary" id="scan">Scan</button><button type="button" class="btn" id="reset">Reset sample</button></div>
@@ -174,20 +249,20 @@ footer.site b{color:var(--ink)}
     </div>
     <div><div class="bar"><span class="sum" id="sum"></span></div><div class="out" id="out" aria-live="polite"></div></div>
   </div>
-  <p class="lede" style="margin-top:14px">Rules are patterns. They cannot follow data across functions, so they miss some flaws and can flag safe code.
+  <p class="lede" style="margin-top:16px">Rules are patterns. They cannot follow data across functions, so they miss some flaws and can flag safe code.
   The samples include lines the rules miss on purpose. That gap is the reason the AI pipeline exists, and the reason it has to be measured.</p>
 </section>
 
 <section class="sec" id="verify">
-  <p class="eyebrow">Live demo 2</p><h2>Verify a provenance chain, then break it</h2>
-  <p class="lede">These four statements come from a real run of the test rig on the offline mock. Your browser recomputes every SHA-256 hash.
-  Forge a finding and see which statement stops verifying. (The full <code>verify</code> command also re-hashes model responses and replays the run.)</p>
-  <div class="demo">
+  <p class="eyebrow">Live demo 2</p><h2 class="rv">Verify a provenance chain, then break it</h2>
+  <p class="lede rv">These four statements come from a real run of the evaluation rig on the offline mock. Your browser recomputes every SHA-256 hash.
+  Forge a finding and watch which statement stops verifying. (The full <code>verify</code> command also re-hashes model responses and replays the run.)</p>
+  <div class="demo rv">
     <div><div class="bar"><button type="button" class="btn primary" id="vchain">Verify chain</button>
       <button type="button" class="btn" id="tamper">Forge a finding in statement 2</button><button type="button" class="btn" id="restore">Restore</button></div>
       <div class="chain" id="chain"></div></div>
     <div><div class="bar"><span class="sum" id="vsum"></span></div>
-      <div class="ledger"><div class="hd"><span>what a pass means</span></div>
+      <div class="ledger" style="animation:none;box-shadow:none"><div class="hd"><span>what a pass means</span></div>
       <div class="row"><span class="k">it shows</span><span class="v">each finding is the unedited output of a recorded model response, prompt, retrieval result and code version</span></div>
       <div class="row"><span class="k">it does not show</span><span class="v">that the finding is true. Labelled evaluation measures that</span></div>
       <div class="row"><span class="k">limit</span><span class="v">statements are hashed, not signed. Publish the head hash somewhere the author cannot rewrite</span></div></div></div>
@@ -195,52 +270,52 @@ footer.site b{color:var(--ink)}
 </section>
 
 <section class="sec" id="install">
-  <p class="eyebrow">Install and run</p><h2>From clone to first scan in about a minute</h2>
-  <p class="lede">Python 3.10 or newer. Install from the repository: the name <code>codesentinel</code> on PyPI is an unrelated project.</p>
+  <p class="eyebrow">Install and run</p><h2 class="rv">From clone to a verified result in about a minute</h2>
+  <p class="lede rv">Python 3.10 or newer. Install from the repository: the name <code>codesentinel</code> on PyPI is an unrelated project.</p>
   <div class="steps">
-    <div><h3>1. Install and run the demo</h3><div class="cmd"><pre>git clone https://github.com/AravindB98/CodeSentinel-v3.git
+    <div class="rv"><h3><span>01</span>Install and run the demo</h3><div class="cmd"><pre>git clone https://github.com/AravindB98/CodeSentinel-v3.git
 cd CodeSentinel-v3
 pip install -e .
 python -m codesentinel.demo</pre><button type="button" class="copy">Copy</button></div><p>No API key, no network at run time. The demo takes about ten seconds.</p></div>
-    <div><h3>2. Scan</h3><div class="cmd"><pre>codesentinel scan ./your-repo --mock
+    <div class="rv" style="--d:1"><h3><span>02</span>Scan</h3><div class="cmd"><pre>codesentinel scan ./your-repo --mock
 codesentinel scan . --mock --fail-on HIGH -f sarif -o results.sarif</pre><button type="button" class="copy">Copy</button></div><p>The second line gates a build and writes SARIF for code scanning.</p></div>
-    <div><h3>3. Add AI review (optional)</h3><div class="cmd"><pre>pip install -e &quot;.[llm,rag,graph]&quot;
+    <div class="rv"><h3><span>03</span>Add AI review (optional)</h3><div class="cmd"><pre>pip install -e &quot;.[llm,rag,graph]&quot;
 export ANTHROPIC_API_KEY=sk-ant-...
 codesentinel ingest
-codesentinel scan ./your-repo</pre><button type="button" class="copy">Copy</button></div><p>Sends code to the model provider. To keep code in your network, serve an open-weight model and use the rig with <code>--backend openai</code>.</p></div>
-    <div><h3>4. Produce and verify provenance</h3><div class="cmd"><pre>python -m codesentinel.rig run --dataset eval/datasets/paired_suite.json \
+codesentinel scan ./your-repo</pre><button type="button" class="copy">Copy</button></div><p>Sends code to the model provider. To keep code in your network, serve an open-weight model and use <code>--backend openai</code>.</p></div>
+    <div class="rv" style="--d:1"><h3><span>04</span>Produce and verify provenance</h3><div class="cmd"><pre>python -m codesentinel.rig run --dataset eval/datasets/paired_suite.json \
        --out runs/demo --backend mock
 python -m codesentinel.rig attest runs/demo
 python -m codesentinel.rig verify runs/demo \
        --dataset eval/datasets/paired_suite.json</pre><button type="button" class="copy">Copy</button></div><p>Offline demonstration of the mechanism. Expect <code>"verified": true</code> with 120 statements.</p></div>
-    <div><h3>5. Run as a service</h3><div class="cmd"><pre>cp .env.example .env      # set CODESENTINEL_API_KEYS=tenant:secret
+    <div class="rv"><h3><span>05</span>Run as a service</h3><div class="cmd"><pre>cp .env.example .env      # set CODESENTINEL_API_KEYS=tenant:secret
 docker compose up --build</pre><button type="button" class="copy">Copy</button></div><p>REST API on port 8080 with API-key authentication.</p></div>
-    <div><h3>6. Run the tests</h3><div class="cmd"><pre>pip install -e &quot;.[all,dev]&quot;
+    <div class="rv" style="--d:1"><h3><span>06</span>Run the tests</h3><div class="cmd"><pre>pip install -e &quot;.[all,dev]&quot;
 make test
 make replay</pre><button type="button" class="copy">Copy</button></div><p><code>make replay</code> recomputes the April 2026 pilot from its recordings.</p></div>
   </div>
 </section>
 
 <section class="sec" id="evidence">
-  <p class="eyebrow">Evidence</p><h2>What is proven and what is not</h2>
-  <p class="lede">Recomputed from the recorded outputs of the April 2026 pilot, with no model calls.</p>
-  <div class="tablewrap"><table>
+  <p class="eyebrow">Evidence</p><h2 class="rv">What is proven and what is not</h2>
+  <p class="lede rv">Recomputed from the recorded outputs of the April 2026 pilot, with no model calls. A product about verification has to pass its own test.</p>
+  <div class="tablewrap rv"><table>
    <tr><th>Claim</th><th>Standing</th><th>Detail</th></tr>
-   <tr><td>April results are reproducible</td><td><span class="pill ok">ESTABLISHED</span></td><td>Every stored count is reproduced from stored predictions and answer keys</td></tr>
+   <tr><td>Pilot results are reproducible</td><td><span class="pill ok">ESTABLISHED</span></td><td>Every stored count is reproduced from stored predictions and answer keys</td></tr>
    <tr><td>Pipeline cut false positives from 30 to 1</td><td><span class="pill bad">WEAK</span></td><td>One real-model run of 10 samples. 20 of the 30 were extra findings on flawed samples; only 2 samples are flaw-free</td></tr>
    <tr><td>The pipeline is reliable run to run</td><td><span class="pill bad">NOT SHOWN</span></td><td>It returned nothing in 2 of 3 runs that day, from an integration fault fixed afterwards</td></tr>
-   <tr><td>The gain comes from the architecture</td><td><span class="pill bad">CONFOUNDED</span></td><td>The two arms used different prompts. A new configuration separates prompt from architecture</td></tr>
+   <tr><td>The gain comes from the architecture</td><td><span class="pill bad">CONFOUNDED</span></td><td>The two arms used different prompts. One evaluation configuration now separates prompt from architecture</td></tr>
    <tr><td>Accuracy on real-world code</td><td><span class="pill bad">NOT MEASURED</span></td><td>204 candidate pairs from 113 projects await hand verification</td></tr>
   </table></div>
 </section>
 
 <section class="sec" id="docs">
-  <p class="eyebrow">Documentation</p><h2>Manuals, deck and market analysis</h2>
+  <p class="eyebrow">Documentation</p><h2 class="rv">Manuals, deck and market analysis</h2>
   <div class="docs">
-    <a href="#user-manual"><b>User manual</b><span>Scanning, CI, configuration, verifying results, labelling, troubleshooting</span></a>
-    <a href="#technical-manual"><b>Technical manual</b><span>Architecture, scoring, statistics, provenance design, file formats, extending</span></a>
-    <a href="#pitch-deck"><b>Pitch deck</b><span>Thirteen slides, with a PDF version</span></a>
-    <a href="#market-analysis"><b>Market analysis</b><span>Size, competitors, positioning and risks, with sources</span></a>
+    <a class="rv" style="--d:0" href="#user-manual"><b>User manual</b><span>Scanning, CI, configuration, verifying results, labelling, troubleshooting</span><i>READ →</i></a>
+    <a class="rv" style="--d:1" href="#technical-manual"><b>Technical manual</b><span>Architecture, scoring, statistics, provenance design, file formats, extending</span><i>READ →</i></a>
+    <a class="rv" style="--d:2" href="#pitch-deck"><b>Pitch deck</b><span>Thirteen slides, with a PDF version</span><i>VIEW →</i></a>
+    <a class="rv" style="--d:3" href="#market-analysis"><b>Market analysis</b><span>Size, competitors, positioning and risks, with sources</span><i>READ →</i></a>
   </div>
 </section>
 </div>
@@ -1767,83 +1842,83 @@ ruff check codesentinel tests
 <article class="view doc" data-view="pitch-deck" hidden style="max-width:1040px"><a class="back" href="#docs">← All documentation</a>
 <h1>Pitch deck</h1><p>Thirteen slides. <a href="CodeSentinel_v3_Pitch_Deck.pdf" target="_blank" rel="noopener">Open the PDF version</a>.
 Market figures are sourced on the last slide and in the <a href="#market-analysis">market analysis</a>.</p>
-<div class="deck"><section class="slide"><header><span class="kicker">CodeSentinel v3</span><span class="num">1 / 13</span></header><h3>AI code security review that can prove where every finding came from</h3><div class="sbody"><p class="lead">An open-source scanner, a test rig that measures whether AI review earns its cost,
+<div class="deck"><section class="slide"><header><span class="kicker">CodeSentinel</span><span class="num">1 / 13</span></header><h3>AI code security review that can prove where every finding came from</h3><div class="sbody"><p class="lead">An open-source scanner, a test rig that measures whether AI review earns its cost,
      and a provenance layer that makes every finding replayable and tamper-evident.</p>
-     <p class="meta">Aravind Balaji · Northeastern University · November 2026<br>Built for INFO 7375 Computational Scepticism</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="meta">Aravind Balaji · Northeastern University · November 2026<br>Built for INFO 7375 Computational Scepticism</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">The problem</span><span class="num">2 / 13</span></header><h3>AI reviewers produce findings nobody can trace</h3><div class="sbody"><div class="cols"><div><h4>More code, less scrutiny</h4><p>A 2025 Veracode study reported that
      <b>45%</b> of AI-generated code samples failed security tests.<sup>5</sup> Teams are adding AI reviewers to cope.</p></div>
      <div><h4>No record of why</h4><p>An AI finding arrives without the model version, prompt or evidence that
      produced it. It cannot be re-derived, so it cannot be audited.</p></div>
      <div><h4>No way to compare</h4><p>Vendors quote false-positive reductions measured on their own data.
-     A buyer has no controlled way to test the claim on their own code.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     A buyer has no controlled way to test the claim on their own code.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">The product</span><span class="num">3 / 13</span></header><h3>One tool, three layers</h3><div class="sbody"><table><tr><th>Layer</th><th>What it does</th><th>State</th></tr>
      <tr><td><b>Scanner</b></td><td>32 offline rules across 7 languages, plus a three-agent AI pipeline: a Sentinel that must cite evidence, an Auditor, and an Evaluator that can reject findings</td><td>Built, tested</td></tr>
      <tr><td><b>Verification and provenance</b></td><td>Records every model response once. Attaches a hash-chained statement to each result. <code>verify</code> re-derives the findings from recordings</td><td>Built, tested</td></tr>
      <tr><td><b>Router</b></td><td>A bandit that learns when a cheaper configuration is enough, scored on recorded real runs</td><td>Built, exploratory</td></tr></table>
-     <p class="note">Open source under Apache-2.0. 72 automated tests pass.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="note">Open source under Apache-2.0. 72 automated tests pass.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">How verification works</span><span class="num">4 / 13</span></header><h3>Four checks, no model calls</h3><div class="sbody"><div class="cols four"><div><h4>1 · Chain</h4><p>Has any statement been altered, removed or reordered?</p></div>
      <div><h4>2 · Records</h4><p>Does every cited model response still hash to what was recorded?</p></div>
      <div><h4>3 · Replay</h4><p>Does re-running on the recordings give exactly the same findings?</p></div>
      <div><h4>4 · Evidence</h4><p>Does every finding point at lines that exist?</p></div></div>
      <p class="note">It proves a finding is the unedited, reproducible output of a named model and code version.
-     It does not prove the finding is true. That is what the labelled evaluation measures.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     It does not prove the finding is true. That is what the labelled evaluation measures.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Evidence so far</span><span class="num">5 / 13</span></header><h3>What our own pilot does and does not show</h3><div class="sbody"><div class="cols"><div><h4>Established</h4><p>Every stored result from the April 2026 pilot is reproduced from its recordings.
      In one real-model run on 10 samples, false positives were <b>30</b> for a single prompt and <b>1</b> for the pipeline, with equal recall.</p></div>
      <div><h4>Weaker than it looked</h4><p>The pipeline returned nothing in 2 of 3 runs that day. 20 of the 30 false positives were
      extra findings on flawed samples. The two arms used different prompts.</p></div>
      <div><h4>Not done yet</h4><p>The evaluation on a hand-verified dataset with replicates, on a hosted model and an
      open-weight model. 204 candidate pairs are collected and waiting for verification.</p></div></div>
-     <p class="note">We publish this because a product about verification has to pass its own test.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="note">We publish this because a product about verification has to pass its own test.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Market size</span><span class="num">6 / 13</span></header><h3>A multi-billion dollar market growing at double-digit rates</h3><div class="sbody"><table><tr><th>Scope</th><th>2025</th><th>Forecast</th><th>Growth a year</th></tr>
      <tr><td>Application security, broad<sup>1</sup></td><td>$12.19B</td><td>$23.45B by 2031</td><td>11.5%</td></tr>
      <tr><td>Application security, broad<sup>3</sup></td><td>$11.9B</td><td>$37.6B by 2034</td><td>13.21%</td></tr>
      <tr><td>Application security testing<sup>2</sup></td><td>$1.83B</td><td>$7.60B by 2031</td><td>26.7%</td></tr>
      <tr><td>Static testing only<sup>4</sup></td><td>$0.55B</td><td>$1.89B by 2031</td><td>22.82%</td></tr></table>
      <p class="note">Analysts define the market differently, so the estimates differ widely. We show the range, not an average.
-     One analyst puts static testing at 38.6% of the market by testing type.<sup>3</sup></p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     One analyst puts static testing at 38.6% of the market by testing type.<sup>3</sup></p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Why now</span><span class="num">7 / 13</span></header><h3>Money and regulation are both moving toward checkable AI output</h3><div class="sbody"><div class="cols"><div><h4>Capital</h4><p>CodeRabbit raised $143M at a $1.5B valuation for AI code review.<sup>6</sup>
      Endor Labs raised $93M to scan AI-generated code.<sup>7</sup> Semgrep raised a $100M Series D.<sup>8</sup></p></div>
      <div><h4>Regulation</h4><p>EU Cyber Resilience Act reporting duties applied from 11 September 2026; the Act applies in full from
      11 December 2027.<sup>12</sup> Vulnerability handling now needs a record.</p></div>
      <div><h4>Technology</h4><p>Open-weight code models can be served on a single GPU, so AI review with pinned weights and no code
-     leaving the building is practical.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     leaving the building is practical.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Competition</span><span class="num">8 / 13</span></header><h3>Incumbents already use AI. We focus on evidence</h3><div class="sbody"><table><tr><th>Product</th><th>Strength</th><th>Published team price</th></tr>
      <tr><td>Semgrep</td><td>Large rule ecosystem; a 2026 engine pairing code parsing with model reasoning<sup>8</sup></td><td>$30 per contributor a month<sup>10</sup></td></tr>
      <tr><td>Snyk Code</td><td>Broad platform; about $326M annual recurring revenue<sup>9</sup></td><td>$25 per developer a month, up to 10<sup>11</sup></td></tr>
      <tr><td>GitHub Advanced Security, Checkmarx, Veracode</td><td>Data-flow analysis in the platform; enterprise compliance suites</td><td>Add-on or custom</td></tr>
      <tr><td><b>CodeSentinel</b></td><td>Replayable per-finding provenance; open evaluation rig; stated limits</td><td>Free core; $29 indicative</td></tr></table>
-     <p class="note">We do not compete on rule coverage or depth. "Unique" is a hypothesis to test with buyers, not a surveyed fact.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="note">We do not compete on rule coverage or depth. "Unique" is a hypothesis to test with buyers, not a surveyed fact.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Positioning</span><span class="num">9 / 13</span></header><h3>The audit trail for AI code review</h3><div class="sbody"><div class="cols"><div><h4>Who buys first</h4><p>Application security leads deciding whether an AI reviewer earns its cost.
      Regulated teams that need a record for automated findings and code that stays on their machines.</p></div>
      <div><h4>What they get</h4><p>A controlled comparison on their own code with intervals, and findings that an auditor
      can re-derive without trusting the vendor.</p></div>
      <div><h4>Why it survives a null result</h4><p>If the pipeline does not beat a single prompt, the rig and the provenance
-     layer are still useful. Only the "fewer false positives" claim would go.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     layer are still useful. Only the "fewer false positives" claim would go.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Business model</span><span class="num">10 / 13</span></header><h3>Open core, with evaluation as a service as the first offer to test</h3><div class="sbody"><table><tr><th>Edition</th><th>For</th><th>Adds</th></tr>
      <tr><td>Community (free)</td><td>Everyone</td><td>Scanner, rig, provenance, router, all report formats</td></tr>
      <tr><td>Team ($29 per contributor a month, indicative)</td><td>Squads</td><td>Private rule packs, support</td></tr>
      <tr><td>Enterprise and Government (custom)</td><td>Regulated buyers</td><td>SSO, audit export, compliance packs, supported air-gapped operation</td></tr></table>
      <p class="note">Illustrative arithmetic, not a forecast: 200 teams of 25 contributors at $29 a month is about $1.7M a year.
-     Prices are placeholders and the commercial licence has not had legal review.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
-<section class="slide"><header><span class="kicker">Where we are</span><span class="num">11 / 13</span></header><h3>An honest status</h3><div class="sbody"><div class="cols"><div><h4>Done</h4><p>Unified v3 codebase. Rig, provenance and router working offline. Pilot results
+     Prices are placeholders and the commercial licence has not had legal review.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Where we are</span><span class="num">11 / 13</span></header><h3>An honest status</h3><div class="sbody"><div class="cols"><div><h4>Done</h4><p>One unified codebase. Rig, provenance and router working offline. Pilot results
      recomputed. 204 candidate pairs from 113 open-source projects. Cluster job script written.</p></div>
      <div><h4>Next four weeks</h4><p>Verify labels. Pre-register. Run on a hosted model and on an open-weight model with seeded
      replicates. Adversarial and faithfulness checks. Course paper, then a preprint.</p></div>
-     <div><h4>Not yet</h4><p>No customers. No revenue. No large evaluation. One developer. Statements are hashed, not yet signed.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <div><h4>Not yet</h4><p>No customers. No revenue. No large evaluation. One developer. Statements are hashed, not yet signed.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">What we are asking for</span><span class="num">12 / 13</span></header><h3>Design partners and reviewers, not capital</h3><div class="sbody"><div class="cols"><div><h4>Design partners</h4><p>Two or three security teams willing to run the rig on their own code and
      tell us whether the provenance record is what their auditors need.</p></div>
      <div><h4>Reviewers</h4><p>A second labeller for the dataset, and critics for the pre-registration before any model is run.</p></div>
-     <div><h4>Contact</h4><p>Aravind Balaji<br>balaji.ara@northeastern.edu<br>github.com/AravindB98/CodeSentinel-v3</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+     <div><h4>Contact</h4><p>Aravind Balaji<br>balaji.ara@northeastern.edu<br>github.com/AravindB98/CodeSentinel-v3</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Sources</span><span class="num">13 / 13</span></header><h3>Read in November 2026</h3><div class="sbody"><ol class="src">
      <li>MarketsandMarkets, Application Security Market</li><li>MarketsandMarkets, Application Security Testing Market</li>
      <li>IMARC Group, Application Security Market</li><li>Mordor Intelligence, Static Application Security Testing Market</li>
      <li>Veracode 2025 GenAI Code Security Report, as cited by SSOJet</li><li>Finimize (Reuters), CodeRabbit funding</li>
      <li>TechCrunch, Endor Labs funding</li><li>Sacra, Semgrep research</li><li>Sacra, Snyk research</li>
      <li>semgrep.dev/pricing</li><li>Snyk pricing breakdown, dev.to</li><li>Travers Smith, EU Cyber Resilience Act timeline</li></ol>
-     <p class="note">Full links are in docs/MARKET_ANALYSIS.md. Several are secondary reports; check the primary source before quoting a figure.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section></div></article>
+     <p class="note">Full links are in docs/MARKET_ANALYSIS.md. Several are secondary reports; check the primary source before quoting a figure.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section></div></article>
 </main>
-<footer class="site"><div class="in"><span><b>Built for INFO 7375 Computational Scepticism</b> · Northeastern University · Fall 2026</span>
-<span>Aravind Balaji · <a href="https://github.com/AravindB98/CodeSentinel-v3" target="_blank" rel="noopener">github.com/AravindB98/CodeSentinel-v3</a> · Apache-2.0</span>
+<footer class="site"><div class="in"><span><b>Built for INFO 7375 Computational Scepticism</b><br>Northeastern University · Fall 2026</span>
+<span>Aravind Balaji · <a href="https://aravindbalaji.com" target="_blank" rel="noopener">aravindbalaji.com</a> · Apache-2.0</span>
 <span>Research preview. No accuracy claim is made for production code.</span></div></footer>
 <script>// CodeSentinel in-browser demo engine. Mirrors codesentinel/rules.py::detect and
 // the chain check of codesentinel/provenance/attest.py::verify.
@@ -1911,27 +1986,95 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const NAMES = {python:"Python", javascript:"JavaScript", java:"Java", go:"Go", php:"PHP", ruby:"Ruby"};
 const ORDER = {CRITICAL:0, HIGH:1, MEDIUM:2, LOW:3, INFO:4};
+const CALM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep = ms => new Promise(r => setTimeout(r, CALM ? 0 : ms));
+const HEX = "0123456789abcdef";
+const noise = n => Array.from({length: n}, () => HEX[Math.floor(Math.random() * 16)]).join("");
+
 function scan() {
   const lang = $("lang").value, found = csDetect(RULES, $("code").value, lang);
   found.sort((a, b) => (ORDER[a.rule.severity] - ORDER[b.rule.severity]) || (a.line - b.line));
   $("sum").textContent = found.length + " finding" + (found.length === 1 ? "" : "s") + " · " + RULES.filter(r => r.language === lang).length + " " + NAMES[lang] + " rules · offline engine";
-  $("out").innerHTML = found.length ? found.map(f => `<div class="finding ${f.rule.severity}"><div class="h"><span class="sev">${f.rule.severity}</span>
+  $("out").innerHTML = found.length ? found.map((f, i) => `<div class="finding ${f.rule.severity}" style="--i:${i}"><div class="h"><span class="sev">${f.rule.severity}</span>
     <span>${esc(f.rule.title)}</span><span class="prov">${f.rule.cwe} · line ${f.line}</span></div>
     <code>${esc(f.snippet)}</code><div>${esc(f.rule.fix)}</div>
     <div class="prov">${esc(f.rule.owasp)} · provenance ${esc(f.rule.rag_doc)}::${esc(f.rule.rag_pid)} · confidence ${f.rule.confidence} · ${f.rule.rule_id}</div></div>`).join("")
     : '<div class="finding"><div class="h">No rule matched</div><div>That means no pattern fired. It does not mean the code is safe.</div></div>';
 }
-let chain = JSON.parse(JSON.stringify(CHAIN0));
-function drawChain(res) {
-  $("chain").innerHTML = chain.map((s, i) => { const r = res && res[i];
-    return `<div class="stmt ${r && !r.ok ? "bad" : ""}"><b>${i + 1}</b><span class="f">${esc(s.subject.sample_id)} · ${esc(s.configuration)} · findings ${esc(JSON.stringify(s.findings))}</span>
-      ${r ? `<span class="pill ${r.ok ? "ok" : "bad"}">${r.ok ? "OK" : "FAILED"}</span>` : "<span></span>"}
-      <span class="hash">hash ${s.hash.slice(0, 24)}…</span>${r && !r.ok ? `<span class="why">${r.why}</span>` : ""}</div>`; }).join("");
-  if (res) { const bad = res.filter(r => !r.ok).length;
-    $("vsum").textContent = bad ? `NOT VERIFIED · ${bad} of ${res.length} statements failed` : `VERIFIED · ${res.length} statements · head ${chain[chain.length - 1].hash.slice(0, 16)}…`;
-    $("vsum").style.color = bad ? "var(--bad)" : "var(--ok)"; } else { $("vsum").textContent = ""; }
+
+let chain = JSON.parse(JSON.stringify(CHAIN0)), vrun = 0;
+function stmtHtml(s, i, r, busy) {
+  return `<div class="stmt ${busy ? "busy" : ""} ${r && !r.ok ? "bad" : ""}"><b>${i + 1}</b><span class="f">${esc(s.subject.sample_id)} · ${esc(s.configuration)} · findings ${esc(JSON.stringify(s.findings))}</span>
+    ${r ? `<span class="pill ${r.ok ? "ok" : "bad"}">${r.ok ? "OK" : "FAILED"}</span>` : (busy ? '<span class="pill run">HASHING</span>' : "<span></span>")}
+    <span class="hash">hash ${busy ? noise(24) : s.hash.slice(0, 24)}…</span>${r && !r.ok ? `<span class="why">${r.why}</span>` : ""}</div>`;
 }
-const verifyChain = () => drawChain(csVerifyChain(chain));
+async function verifyChain() {
+  const run = ++vrun, res = csVerifyChain(chain), shown = [];
+  $("vsum").textContent = "recomputing SHA-256…"; $("vsum").style.color = "";
+  for (let i = 0; i < chain.length; i++) {
+    for (let t = 0; t < (CALM ? 0 : 5); t++) {
+      if (run !== vrun) return;
+      $("chain").innerHTML = chain.map((s, j) => stmtHtml(s, j, shown[j], j === i)).join("");
+      await sleep(70);
+    }
+    shown[i] = res[i];
+  }
+  if (run !== vrun) return;
+  $("chain").innerHTML = chain.map((s, j) => stmtHtml(s, j, res[j], false)).join("");
+  const bad = res.filter(r => !r.ok).length;
+  $("vsum").textContent = bad ? `NOT VERIFIED · ${bad} of ${res.length} statements failed` : `VERIFIED · ${res.length} statements · head ${chain[chain.length - 1].hash.slice(0, 16)}…`;
+  $("vsum").style.color = bad ? "var(--bad)" : "var(--ok)";
+}
+
+let lrun = 0;
+async function ledger() {
+  if (CALM) return;
+  const run = ++lrun, box = $("ledger"), pill = $("lpill");
+  const rows = [...box.querySelectorAll(".row")], hx = [...box.querySelectorAll(".hx")], chks = [...box.querySelectorAll(".chk")];
+  pill.className = "pill run"; pill.textContent = "VERIFYING";
+  chks.forEach(c => { c.className = "chk wait"; c.textContent = c.textContent.replace("✓", "·"); });
+  const spin = setInterval(() => hx.forEach(h => { if (!h.dataset.set) h.textContent = noise(h.dataset.h.length); }), 60);
+  hx.forEach(h => delete h.dataset.set);
+  for (let i = 0; i < rows.length; i++) {
+    if (run !== lrun) { clearInterval(spin); return; }
+    rows[i].classList.add("live");
+    await sleep(260);
+    rows[i].querySelectorAll(".hx").forEach(h => { h.dataset.set = 1; h.textContent = h.dataset.h; });
+    rows[i].classList.remove("live");
+  }
+  clearInterval(spin);
+  for (const c of chks) {
+    if (run !== lrun) return;
+    await sleep(240); c.className = "chk done"; c.textContent = c.textContent.replace("·", "✓");
+  }
+  await sleep(200); pill.className = "pill ok"; pill.textContent = "VERIFIED";
+}
+
+function motion() {
+  const bar = $("progress");
+  let tick = false;
+  const onScroll = () => { if (tick) return; tick = true; requestAnimationFrame(() => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`; tick = false; }); };
+  addEventListener("scroll", onScroll, {passive: true}); onScroll();
+  if (CALM || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) {
+    e.target.classList.remove("pre"); io.unobserve(e.target);
+    e.target.querySelectorAll("b[data-n]").forEach(count); } }), {rootMargin: "0px 0px -8% 0px"});
+  document.querySelectorAll('.view[data-view="home"] .rv').forEach(el => {
+    if (el.getBoundingClientRect().top > innerHeight * 0.92) el.classList.add("pre");
+    io.observe(el); });
+  const secs = [...document.querySelectorAll('.view[data-view="home"] section[id]')];
+  const spy = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !document.querySelector('.view[data-view="home"]').hidden) {
+    document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + (e.target.id === "what" ? "home" : e.target.id))); } }), {rootMargin: "-40% 0px -55% 0px"});
+  secs.forEach(s => spy.observe(s));
+}
+function count(el) {
+  const end = +el.dataset.n, t0 = performance.now(), dur = 900;
+  const step = t => { const p = Math.min(1, (t - t0) / dur); el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
 const VIEWS = ["user-manual", "technical-manual", "pitch-deck", "market-analysis"];
 function route() {
   const h = decodeURIComponent(location.hash.slice(1));
@@ -1939,8 +2082,8 @@ function route() {
   if (VIEWS.includes(h)) view = h;
   else if (h) { target = document.getElementById(h); const v = target && target.closest(".view"); if (v) view = v.dataset.view; }
   document.querySelectorAll(".view").forEach(v => v.hidden = v.dataset.view !== view);
-  document.querySelectorAll("nav a").forEach(a => { const on = a.getAttribute("href") === "#" + view; if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
-  if (target && !VIEWS.includes(h)) target.scrollIntoView(); else window.scrollTo(0, 0);
+  document.querySelectorAll("nav a").forEach(a => { const on = a.getAttribute("href") === "#" + view; a.classList.toggle("on", on && view === "home"); if (on && view !== "home") a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (target && !VIEWS.includes(h)) { target.classList.remove("pre"); target.scrollIntoView(); } else window.scrollTo(0, 0);
 }
 document.addEventListener("DOMContentLoaded", () => {
   $("lang").innerHTML = Object.keys(SAMPLES).map(k => `<option value="${k}">${NAMES[k]}</option>`).join("");
@@ -1949,11 +2092,15 @@ document.addEventListener("DOMContentLoaded", () => {
   $("vchain").addEventListener("click", verifyChain);
   $("tamper").addEventListener("click", () => { chain[1].findings = [["CWE-89", 8, 8], ["CWE-798", 2, 2]]; verifyChain(); });
   $("restore").addEventListener("click", () => { chain = JSON.parse(JSON.stringify(CHAIN0)); verifyChain(); });
+  $("replay").addEventListener("click", ledger);
   document.querySelectorAll(".copy").forEach(b => b.addEventListener("click", () => {
     const t = b.previousElementSibling.textContent;
     (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = "Copied"; }, () => { b.textContent = "Select and copy"; });
     setTimeout(() => { b.textContent = "Copy"; }, 1600); }));
-  load(); verifyChain(); route();
+  load(); route(); motion();
+  $("chain").innerHTML = chain.map((s, j) => stmtHtml(s, j, csVerifyChain(chain)[j], false)).join("");
+  $("vsum").textContent = `VERIFIED · ${chain.length} statements · head ${chain[chain.length - 1].hash.slice(0, 16)}…`; $("vsum").style.color = "var(--ok)";
+  setTimeout(ledger, 900);
 });
 window.addEventListener("hashchange", route);
 </script></body></html>
