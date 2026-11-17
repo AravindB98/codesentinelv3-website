@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeSentinel v3</title>
+<meta name="description" content="AI code security review that can prove where every finding came from. Built for INFO 7375 Computational Scepticism.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap" rel="stylesheet"><style>
+:root{ /* layout: a narrow evidence ledger. Left-aligned, ruled sections, mono labels for anything machine-made */
+  --bg:#f3f5f7;--surface:#ffffff;--ink:#101a2b;--muted:#55637a;--line:#d5dbe4;
+  --accent:#0b5cad;--accent-ink:#ffffff;--code-bg:#0f1b2d;--code-ink:#e6edf7;
+  --crit:#b42318;--high:#b4530a;--med:#8a5d00;--low:#3b6aa0;--ok:#157347;--bad:#b42318;
+  --display:"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1320;--surface:#141e2f;--ink:#e7ecf3;--muted:#9aa8bc;--line:#2a374b;--accent:#74b3ff;--accent-ink:#0c1320;--code-bg:#0a101b;--code-ink:#dfe7f2;--crit:#ff8a7a;--high:#ffab66;--med:#e6c067;--low:#8fb8e8;--ok:#5fd39a;--bad:#ff8a7a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0c1320;--surface:#141e2f;--ink:#e7ecf3;--muted:#9aa8bc;--line:#2a374b;--accent:#74b3ff;--accent-ink:#0c1320;--code-bg:#0a101b;--code-ink:#dfe7f2;--crit:#ff8a7a;--high:#ffab66;--med:#e6c067;--low:#8fb8e8;--ok:#5fd39a;--bad:#ff8a7a;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:104px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body)}
+a{color:var(--accent)} a:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.course{background:var(--ink);color:var(--bg);font:500 12.5px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:7px 20px;text-align:center}
+.top{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .in{max-width:1180px;margin:auto;padding:10px 20px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;gap:10px;align-items:center;font:700 20px/1 var(--display);color:var(--ink);text-decoration:none;margin-right:auto}
+.brand svg{width:26px;height:26px}
+nav{display:flex;gap:4px 16px;flex-wrap:wrap;font-size:14.5px}
+nav a{color:var(--ink);text-decoration:none;padding:4px 0;border-bottom:2px solid transparent}
+nav a:hover,nav a[aria-current="page"]{border-bottom-color:var(--accent)}
+main{max-width:1180px;margin:auto;padding:0 20px 64px}
+.view[hidden]{display:none}
+h1{font:700 clamp(34px,5.2vw,58px)/1.04 var(--display);margin:0;text-wrap:balance;max-width:17ch}
+h2{font:600 30px/1.15 var(--display);margin:0 0 6px;text-wrap:balance}
+.eyebrow{font:500 12.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 12px}
+.sec{padding:52px 0 0}
+.sec>.lede{color:var(--muted);max-width:68ch;margin:0 0 22px}
+.hero{padding:54px 0 8px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:start}
+.hero p.sub{font-size:19px;max-width:54ch;margin:18px 0 22px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;font:600 15px/1 var(--body);padding:12px 16px;border:1px solid var(--ink);color:var(--ink);background:transparent;text-decoration:none;cursor:pointer;border-radius:3px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.status{border:1px solid var(--line);border-left:4px solid var(--high);background:var(--surface);padding:12px 16px;margin-top:24px;font-size:14.5px;max-width:62ch}
+.ledger{background:var(--surface);border:1px solid var(--line);font:13px/1.55 var(--mono)}
+.ledger .row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;padding:9px 14px;border-bottom:1px solid var(--line)}
+.ledger .row:last-child{border-bottom:0}.ledger .k{color:var(--muted)}.ledger .v{overflow-wrap:anywhere}
+.ledger .hd{padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;display:flex;justify-content:space-between;gap:10px}
+.pill{font:600 11.5px/1 var(--mono);padding:4px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap}
+.pill.ok{color:var(--ok)}.pill.bad{color:var(--bad)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);background:var(--surface)}
+.grid3>div{padding:20px;border-right:1px solid var(--line)}.grid3>div:last-child{border-right:0}
+.grid3 h3{font:600 20px/1.2 var(--display);margin:0 0 4px}.grid3 .tag{font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.grid3 ul{margin:10px 0 0;padding-left:18px;font-size:15px}.grid3 li{margin:4px 0}
+.demo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;border:1px solid var(--line);background:var(--surface)}
+.demo>div{padding:16px;min-width:0}.demo>div+div{border-left:1px solid var(--line)}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.bar label{font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+select{font:inherit;font-size:14.5px;padding:7px 8px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:3px}
+textarea{width:100%;height:360px;resize:vertical;font:13px/1.55 var(--mono);background:var(--code-bg);color:var(--code-ink);border:0;padding:14px;border-radius:3px;tab-size:2}
+.out{display:flex;flex-direction:column;gap:10px;max-height:412px;overflow:auto}
+.finding{border:1px solid var(--line);border-left:4px solid var(--low);padding:10px 12px;font-size:14px}
+.finding.CRITICAL{border-left-color:var(--crit)}.finding.HIGH{border-left-color:var(--high)}.finding.MEDIUM{border-left-color:var(--med)}
+.finding .h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-weight:600}
+.finding .sev{font:600 11.5px/1 var(--mono)}.CRITICAL .sev{color:var(--crit)}.HIGH .sev{color:var(--high)}.MEDIUM .sev{color:var(--med)}.LOW .sev{color:var(--low)}
+.finding code,.finding .prov{font:12.5px/1.5 var(--mono);overflow-wrap:anywhere}.finding .prov{color:var(--muted)}
+.finding code{display:block;background:var(--bg);padding:5px 8px;margin:6px 0}
+.sum{font:500 13px/1.4 var(--mono);color:var(--muted)}
+.chain{display:flex;flex-direction:column;gap:8px}
+.stmt{border:1px solid var(--line);padding:10px 12px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;font:13px/1.5 var(--mono)}
+.stmt.bad{border-color:var(--bad)}.stmt .why{grid-column:2/4;color:var(--bad)}.stmt .f{overflow-wrap:anywhere}.stmt .hash{color:var(--muted);grid-column:2/4;overflow-wrap:anywhere}
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;overflow-x:auto;font:13px/1.6 var(--mono);border-radius:3px;margin:0;position:relative}
+.cmd{position:relative}.cmd button{position:absolute;top:8px;right:8px;font:500 11.5px/1 var(--mono);background:transparent;color:var(--code-ink);border:1px solid #ffffff55;padding:5px 7px;cursor:pointer;border-radius:2px}
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.steps h3{font:600 18px/1.2 var(--display);margin:0 0 8px}.steps p{margin:8px 0 0;font-size:14.5px;color:var(--muted)}
+.tablewrap{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--surface)}
+th,td{text-align:left;padding:8px 12px;border:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+td{font-variant-numeric:tabular-nums}
+.docs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);background:var(--surface)}
+.docs a{padding:18px;border-right:1px solid var(--line);text-decoration:none;color:var(--ink);display:block}
+.docs a:last-child{border-right:0}.docs a:hover{background:var(--bg)}
+.docs b{font:600 19px/1.2 var(--display);display:block}.docs span{font-size:14px;color:var(--muted)}
+.doc{max-width:860px;padding-top:40px}
+.doc h1{font-size:40px;max-width:none}.doc h2{margin-top:44px;padding-top:18px;border-top:1px solid var(--line)}
+.doc h3{font:600 20px/1.25 var(--display);margin:28px 0 6px}.doc p,.doc li{max-width:72ch}
+.doc code{font:.88em var(--mono);background:var(--surface);border:1px solid var(--line);padding:1px 4px;border-radius:2px}
+.doc pre{margin:12px 0}.doc pre code{background:none;border:0;padding:0;font-size:13px}
+.back{font:500 13px/1 var(--mono);text-decoration:none}
+.deck{display:grid;gap:18px;max-width:1040px}
+footer.site{border-top:1px solid var(--line);margin-top:20px;background:var(--surface)}
+footer.site .in{max-width:1180px;margin:auto;padding:22px 20px;display:flex;gap:10px 28px;flex-wrap:wrap;justify-content:space-between;font-size:14px;color:var(--muted)}
+footer.site b{color:var(--ink)}
+@media (max-width:900px){.hero,.demo,.steps{grid-template-columns:minmax(0,1fr)}.demo>div+div{border-left:0;border-top:1px solid var(--line)}
+ .grid3,.docs{grid-template-columns:minmax(0,1fr)}.grid3>div,.docs a{border-right:0;border-bottom:1px solid var(--line)}
+ .slide .cols,.slide .cols.four{grid-template-columns:repeat(2,1fr)}}
+
+.slide{background:var(--surface);color:var(--ink);border:1px solid var(--line);aspect-ratio:16/9;
+  padding:4.2% 5%;display:flex;flex-direction:column;gap:2.2%;overflow:hidden;container-type:inline-size}
+.slide header{display:flex;justify-content:space-between;font:600 1.5cqw/1 var(--mono);letter-spacing:.08em;
+  text-transform:uppercase;color:var(--accent)}
+.slide .num{color:var(--muted)}
+.slide h3{font:600 3.5cqw/1.12 var(--display);margin:0;text-wrap:balance;max-width:26ch}
+.slide .sbody{font-size:2.05cqw;line-height:1.42;flex:1;display:flex;flex-direction:column;gap:1.4cqw;justify-content:center}
+.slide .lead{font-size:2.6cqw;max-width:46ch;margin:0}
+.slide .meta{color:var(--muted);margin:0}
+.slide p{margin:0}
+.slide .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4cqw}
+.slide .cols.four{grid-template-columns:repeat(4,1fr)}
+.slide .cols>div{border-top:.35cqw solid var(--accent);padding-top:1.1cqw}
+.slide h4{font:600 2.3cqw/1.2 var(--display);margin:0 0 .7cqw}
+.slide table{border-collapse:collapse;width:100%;font-size:1.8cqw}
+.slide th,.slide td{text-align:left;padding:.75cqw 1cqw;border-bottom:1px solid var(--line);vertical-align:top}
+.slide th{font:600 1.35cqw/1.2 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.slide .note{color:var(--muted);font-size:1.6cqw;border-left:.3cqw solid var(--line);padding-left:1cqw}
+.slide code{font-family:var(--mono);font-size:.92em}
+.slide sup{font-size:.6em;color:var(--accent)}
+.slide .src{columns:2;margin:0;padding-left:2.2cqw;font-size:1.75cqw}
+.slide footer{font:500 1.15cqw/1 var(--mono);color:var(--muted);letter-spacing:.04em}
+</style></head><body>
+<div class="course">Built for INFO 7375 Computational Scepticism · Northeastern University · Fall 2026</div>
+<header class="top"><div class="in"><a class="brand" href="#home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 6.5v8.2c0 7.3 4.9 12.6 12 15.3 7.1-2.7 12-8 12-15.3V6.5z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="m10.5 16 3.8 3.8 7.4-8" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="square"/></svg><span>CodeSentinel v3</span></a>
+<nav aria-label="Site"><a href="#home">Overview</a><a href="#demo">Live demo</a><a href="#install">Install and run</a>
+<a href="#user-manual">User manual</a><a href="#technical-manual">Technical manual</a><a href="#pitch-deck">Pitch deck</a>
+<a href="#market-analysis">Market analysis</a><a href="https://github.com/AravindB98/CodeSentinel-v3" target="_blank" rel="noopener">GitHub</a></nav></div></header>
+<main>
+<div class="view" data-view="home" id="home">
+<section class="hero">
+  <div>
+    <p class="eyebrow">Open source · Apache-2.0 · Research preview</p>
+    <h1>AI code review that can prove where every finding came from</h1>
+    <p class="sub">CodeSentinel scans code for security flaws with an offline rule engine or a three-agent AI pipeline.
+    Version 3 records what produced each result, so anyone can re-derive it and see that nothing was edited.</p>
+    <div class="btns"><a class="btn primary" href="#demo">Try the live demo</a><a class="btn" href="#install">Install and run</a>
+    <a class="btn" href="https://github.com/AravindB98/CodeSentinel-v3" target="_blank" rel="noopener">GitHub repository</a></div>
+    <div class="status"><b>Status, stated plainly.</b> The scanner, test rig, provenance layer and router run and pass 72 tests.
+    The evaluation on a hand-verified dataset has not been run yet. Every performance number here comes from a small April 2026 pilot.</div>
+  </div>
+  <div class="ledger" aria-label="Example provenance statement">
+    <div class="hd"><span>provenance statement</span><span class="pill ok">VERIFIED</span></div>
+    <div class="row"><span class="k">subject</span><span class="v">PAIR-SQLI-TP · code sha256 0c722572…</span></div>
+    <div class="row"><span class="k">configuration</span><span class="v">full pipeline, replicate 0</span></div>
+    <div class="row"><span class="k">model calls</span><span class="v">3 recorded · 528ee443… b6ac635d… d17ea206…</span></div>
+    <div class="row"><span class="k">retrieval</span><span class="v">patterns.md::PY-01 and 5 more passages</span></div>
+    <div class="row"><span class="k">review trail</span><span class="v">sentinel: 1 finding → evaluator: APPROVED</span></div>
+    <div class="row"><span class="k">finding</span><span class="v">CWE-89, line 8</span></div>
+    <div class="row"><span class="k">checks</span><span class="v">chain ✓ · records ✓ · replay ✓ · evidence ✓</span></div>
+  </div>
+</section>
+
+<section class="sec" id="what">
+  <p class="eyebrow">What it is</p><h2>One tool, three layers</h2>
+  <p class="lede">The scanner is unchanged from version 2. Version 3 adds a layer that measures it and a layer that makes its output checkable.</p>
+  <div class="grid3">
+    <div><span class="tag">Layer 1 · from v2</span><h3>Scanner</h3><ul><li>32 offline rules across Python, JavaScript, TypeScript, Java, Go, Ruby and PHP</li>
+      <li>AI pipeline: a Sentinel that must cite evidence, a Quality Auditor, and an Evaluator that can reject findings</li>
+      <li>Text, JSON, SARIF, Markdown and HTML reports; CI gating; REST service; Docker and Helm</li></ul></div>
+    <div><span class="tag">Layer 2 · new</span><h3>Verification and provenance</h3><ul><li>Every model response recorded once and never requested again</li>
+      <li>A hash-chained statement per result: code, model calls, prompts, retrieval, review trail, findings, code version</li>
+      <li><code>verify</code> checks the chain, the records, a full replay and the evidence, with no model calls</li></ul></div>
+    <div><span class="tag">Layer 3 · exploratory</span><h3>Router</h3><ul><li>A UCB-1 bandit that learns when a cheaper configuration is enough</li>
+      <li>Scored on recorded real runs, not a simulator, at no extra model cost</li>
+      <li>Reported as exploratory until the evaluation shows whether it helps</li></ul></div>
+  </div>
+</section>
+
+<section class="sec" id="demo">
+  <p class="eyebrow">Live demo 1</p><h2>Scan code in your browser</h2>
+  <p class="lede">This runs the real offline rule set, exported from the repository, on your device. Nothing is uploaded. Edit the code and scan again.
+  The AI pipeline needs a model and is not part of this demo.</p>
+  <div class="demo">
+    <div>
+      <div class="bar"><label for="lang">Language</label><select id="lang"></select>
+        <button type="button" class="btn primary" id="scan">Scan</button><button type="button" class="btn" id="reset">Reset sample</button></div>
+      <textarea id="code" spellcheck="false" aria-label="Code to scan"></textarea>
+    </div>
+    <div><div class="bar"><span class="sum" id="sum"></span></div><div class="out" id="out" aria-live="polite"></div></div>
+  </div>
+  <p class="lede" style="margin-top:14px">Rules are patterns. They cannot follow data across functions, so they miss some flaws and can flag safe code.
+  The samples include lines the rules miss on purpose. That gap is the reason the AI pipeline exists, and the reason it has to be measured.</p>
+</section>
+
+<section class="sec" id="verify">
+  <p class="eyebrow">Live demo 2</p><h2>Verify a provenance chain, then break it</h2>
+  <p class="lede">These four statements come from a real run of the test rig on the offline mock. Your browser recomputes every SHA-256 hash.
+  Forge a finding and see which statement stops verifying. (The full <code>verify</code> command also re-hashes model responses and replays the run.)</p>
+  <div class="demo">
+    <div><div class="bar"><button type="button" class="btn primary" id="vchain">Verify chain</button>
+      <button type="button" class="btn" id="tamper">Forge a finding in statement 2</button><button type="button" class="btn" id="restore">Restore</button></div>
+      <div class="chain" id="chain"></div></div>
+    <div><div class="bar"><span class="sum" id="vsum"></span></div>
+      <div class="ledger"><div class="hd"><span>what a pass means</span></div>
+      <div class="row"><span class="k">it shows</span><span class="v">each finding is the unedited output of a recorded model response, prompt, retrieval result and code version</span></div>
+      <div class="row"><span class="k">it does not show</span><span class="v">that the finding is true. Labelled evaluation measures that</span></div>
+      <div class="row"><span class="k">limit</span><span class="v">statements are hashed, not signed. Publish the head hash somewhere the author cannot rewrite</span></div></div></div>
+  </div>
+</section>
+
+<section class="sec" id="install">
+  <p class="eyebrow">Install and run</p><h2>From clone to first scan in about a minute</h2>
+  <p class="lede">Python 3.10 or newer. Install from the repository: the name <code>codesentinel</code> on PyPI is an unrelated project.</p>
+  <div class="steps">
+    <div><h3>1. Install and run the demo</h3><div class="cmd"><pre>git clone https://github.com/AravindB98/CodeSentinel-v3.git
+cd CodeSentinel-v3
+pip install -e .
+python -m codesentinel.demo</pre><button type="button" class="copy">Copy</button></div><p>No API key, no network at run time. The demo takes about ten seconds.</p></div>
+    <div><h3>2. Scan</h3><div class="cmd"><pre>codesentinel scan ./your-repo --mock
+codesentinel scan . --mock --fail-on HIGH -f sarif -o results.sarif</pre><button type="button" class="copy">Copy</button></div><p>The second line gates a build and writes SARIF for code scanning.</p></div>
+    <div><h3>3. Add AI review (optional)</h3><div class="cmd"><pre>pip install -e &quot;.[llm,rag,graph]&quot;
+export ANTHROPIC_API_KEY=sk-ant-...
+codesentinel ingest
+codesentinel scan ./your-repo</pre><button type="button" class="copy">Copy</button></div><p>Sends code to the model provider. To keep code in your network, serve an open-weight model and use the rig with <code>--backend openai</code>.</p></div>
+    <div><h3>4. Produce and verify provenance</h3><div class="cmd"><pre>python -m codesentinel.rig run --dataset eval/datasets/paired_suite.json \
+       --out runs/demo --backend mock
+python -m codesentinel.rig attest runs/demo
+python -m codesentinel.rig verify runs/demo \
+       --dataset eval/datasets/paired_suite.json</pre><button type="button" class="copy">Copy</button></div><p>Offline demonstration of the mechanism. Expect <code>"verified": true</code> with 120 statements.</p></div>
+    <div><h3>5. Run as a service</h3><div class="cmd"><pre>cp .env.example .env      # set CODESENTINEL_API_KEYS=tenant:secret
+docker compose up --build</pre><button type="button" class="copy">Copy</button></div><p>REST API on port 8080 with API-key authentication.</p></div>
+    <div><h3>6. Run the tests</h3><div class="cmd"><pre>pip install -e &quot;.[all,dev]&quot;
+make test
+make replay</pre><button type="button" class="copy">Copy</button></div><p><code>make replay</code> recomputes the April 2026 pilot from its recordings.</p></div>
+  </div>
+</section>
+
+<section class="sec" id="evidence">
+  <p class="eyebrow">Evidence</p><h2>What is proven and what is not</h2>
+  <p class="lede">Recomputed from the recorded outputs of the April 2026 pilot, with no model calls.</p>
+  <div class="tablewrap"><table>
+   <tr><th>Claim</th><th>Standing</th><th>Detail</th></tr>
+   <tr><td>April results are reproducible</td><td><span class="pill ok">ESTABLISHED</span></td><td>Every stored count is reproduced from stored predictions and answer keys</td></tr>
+   <tr><td>Pipeline cut false positives from 30 to 1</td><td><span class="pill bad">WEAK</span></td><td>One real-model run of 10 samples. 20 of the 30 were extra findings on flawed samples; only 2 samples are flaw-free</td></tr>
+   <tr><td>The pipeline is reliable run to run</td><td><span class="pill bad">NOT SHOWN</span></td><td>It returned nothing in 2 of 3 runs that day, from an integration fault fixed afterwards</td></tr>
+   <tr><td>The gain comes from the architecture</td><td><span class="pill bad">CONFOUNDED</span></td><td>The two arms used different prompts. A new configuration separates prompt from architecture</td></tr>
+   <tr><td>Accuracy on real-world code</td><td><span class="pill bad">NOT MEASURED</span></td><td>204 candidate pairs from 113 projects await hand verification</td></tr>
+  </table></div>
+</section>
+
+<section class="sec" id="docs">
+  <p class="eyebrow">Documentation</p><h2>Manuals, deck and market analysis</h2>
+  <div class="docs">
+    <a href="#user-manual"><b>User manual</b><span>Scanning, CI, configuration, verifying results, labelling, troubleshooting</span></a>
+    <a href="#technical-manual"><b>Technical manual</b><span>Architecture, scoring, statistics, provenance design, file formats, extending</span></a>
+    <a href="#pitch-deck"><b>Pitch deck</b><span>Thirteen slides, with a PDF version</span></a>
+    <a href="#market-analysis"><b>Market analysis</b><span>Size, competitors, positioning and risks, with sources</span></a>
+  </div>
+</section>
+</div>
+<article class="view doc" data-view="user-manual" hidden><a class="back" href="#docs">← All documentation</a><h1>User manual</h1><p>For developers, security engineers and reviewers who want to scan code, gate builds, and check where a finding came from. No knowledge of the internals is needed. Engineers extending or operating the system should read the <a href="#technical-manual">Technical Manual</a>.</p>
+<h2 id="um-contents">Contents</h2>
+<ol>
+<li><a href="#um-1-which-mode-do-i-need">Which mode do I need?</a></li>
+<li><a href="#um-2-install">Install</a></li>
+<li><a href="#um-3-your-first-scan">Your first scan</a></li>
+<li><a href="#um-4-reading-a-finding">Reading a finding</a></li>
+<li><a href="#um-5-command-reference">Command reference</a></li>
+<li><a href="#um-6-report-formats">Report formats</a></li>
+<li><a href="#um-7-using-it-in-ci">Using it in CI</a></li>
+<li><a href="#um-8-adopting-on-an-existing-codebase">Adopting on an existing codebase</a></li>
+<li><a href="#um-9-configuration-file">Configuration file</a></li>
+<li><a href="#um-10-running-the-rest-service">Running the REST service</a></li>
+<li><a href="#um-11-verifying-where-a-result-came-from">Verifying where a result came from</a></li>
+<li><a href="#um-12-running-an-evaluation">Running an evaluation</a></li>
+<li><a href="#um-13-labelling-samples">Labelling samples</a></li>
+<li><a href="#um-14-troubleshooting">Troubleshooting</a></li>
+<li><a href="#um-15-frequently-asked-questions">Frequently asked questions</a></li>
+<li><a href="#um-16-glossary">Glossary</a></li>
+</ol>
+<hr />
+<h2 id="um-1-which-mode-do-i-need">1. Which mode do I need?</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>You want to</th>
+<th>Use</th>
+<th>Needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scan code with no network, no cost, same result every time</td>
+<td>Offline rule engine: <code>codesentinel scan PATH --mock</code></td>
+<td>Python only</td>
+</tr>
+<tr>
+<td>Scan code with AI reasoning beyond fixed patterns</td>
+<td>AI pipeline: <code>codesentinel scan PATH</code></td>
+<td>An Anthropic API key</td>
+</tr>
+<tr>
+<td>Keep scanned code inside your own network but still use AI</td>
+<td>The rig with your own model server: <code>--backend openai --base-url ...</code></td>
+<td>A GPU machine serving an open-weight model</td>
+</tr>
+<tr>
+<td>Check that a result was not edited and can be reproduced</td>
+<td><code>python -m codesentinel.rig verify</code></td>
+<td>The run folder and its dataset</td>
+</tr>
+<tr>
+<td>Measure whether the AI pipeline is worth its cost on your code</td>
+<td><code>python -m codesentinel.rig run</code> and <code>analyze</code></td>
+<td>A labelled dataset</td>
+</tr>
+</tbody>
+</table></div>
+<p>One caution before you start: the AI pipeline has only been measured in a small pilot. Treat its output as a reviewer's suggestions, not as a verdict. See the README section "What is proven and what is not".</p>
+<hr />
+<h2 id="um-2-install">2. Install</h2>
+<p>Python 3.10 or newer.</p>
+<pre><code class="language-bash">git clone https://github.com/AravindB98/CodeSentinel-v3.git
+cd CodeSentinel-v3
+pip install -e .                     # offline scanner, rig, provenance, router
+</code></pre>
+<p>Add capabilities only if you need them:</p>
+<pre><code class="language-bash">pip install -e &quot;.[llm,rag,graph]&quot;    # AI review with a hosted model
+pip install -e &quot;.[api]&quot;              # REST service
+pip install -e &quot;.[all,dev]&quot;          # everything, plus test tools
+</code></pre>
+<p>Do not run <code>pip install codesentinel</code>. That name on PyPI is an unrelated project.</p>
+<p>See everything work end to end, offline, in about ten seconds:</p>
+<pre><code class="language-bash">python -m codesentinel.demo          # or: make demo
+</code></pre>
+<p>It scans a vulnerable file, runs the six evaluation configurations on a bundled dataset with the offline mock, writes and verifies provenance, shows verification catching a forged finding, and scores the router.</p>
+<p>Check the install:</p>
+<pre><code class="language-bash">codesentinel version
+codesentinel rules | tail -1         # prints: 32 rules across 6 languages.
+</code></pre>
+<p>For AI review, set the key and build the knowledge base index once:</p>
+<pre><code class="language-bash">export ANTHROPIC_API_KEY=sk-ant-...
+codesentinel ingest
+</code></pre>
+<hr />
+<h2 id="um-3-your-first-scan">3. Your first scan</h2>
+<p>Create a file with three obvious flaws:</p>
+<pre><code class="language-python"># demo.py
+import os, pickle, sqlite3
+def f(cur, x):
+    cur.execute(f&quot;select * from t where id={x}&quot;)
+    os.system(&quot;ls &quot; + x)
+    return pickle.loads(x)
+</code></pre>
+<p>Scan it offline:</p>
+<pre><code class="language-bash">codesentinel scan demo.py --mock
+</code></pre>
+<p>You should see three findings: SQL injection (CWE-89), insecure deserialization (CWE-502) and command injection (CWE-78), followed by a summary line.</p>
+<p>Scan a whole project:</p>
+<pre><code class="language-bash">codesentinel scan ./my-project --mock
+</code></pre>
+<p>The exit code is 0 unless you ask for a gate with <code>--fail-on</code>.</p>
+<hr />
+<h2 id="um-4-reading-a-finding">4. Reading a finding</h2>
+<pre><code class="language-text">CRITICAL CWE-89     demo.py:3
+  SQL Injection: CWE-89 (A03:2025 Injection)
+  &gt; cur.execute(f&quot;select * from t where id={x}&quot;)
+  fix: Use parameterized queries with placeholders instead of f-strings.
+  provenance: patterns.md::PY-01 | confidence 0.94
+</code></pre>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CRITICAL</code></td>
+<td>Severity: CRITICAL, HIGH, MEDIUM, LOW or INFO</td>
+</tr>
+<tr>
+<td><code>CWE-89</code></td>
+<td>The weakness class in the Common Weakness Enumeration</td>
+</tr>
+<tr>
+<td><code>demo.py:3</code></td>
+<td>File and line</td>
+</tr>
+<tr>
+<td><code>A03:2025 Injection</code></td>
+<td>OWASP Top 10 2025 category</td>
+</tr>
+<tr>
+<td><code>&gt;</code> line</td>
+<td>The code that triggered the finding</td>
+</tr>
+<tr>
+<td><code>fix</code></td>
+<td>A concrete remediation</td>
+</tr>
+<tr>
+<td><code>provenance</code></td>
+<td>The knowledge base passage that grounds the claim (<code>document::passage id</code>)</td>
+</tr>
+<tr>
+<td><code>confidence</code></td>
+<td>0 to 1. For rules it is a fixed value per rule; for AI review it is the model's own estimate and is not calibrated</td>
+</tr>
+</tbody>
+</table></div>
+<p>A finding is a claim to check, not a fact. Open the file, read the line, and decide.</p>
+<hr />
+<h2 id="um-5-command-reference">5. Command reference</h2>
+<p>The command is <code>codesentinel</code>. <code>cs</code> is a short alias.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>codesentinel scan PATH</code></td>
+<td>Scan a file or directory</td>
+</tr>
+<tr>
+<td><code>codesentinel baseline PATH -o FILE</code></td>
+<td>Record current findings so only new ones fail later</td>
+</tr>
+<tr>
+<td><code>codesentinel rules</code></td>
+<td>List the detection rules (<code>--json</code> for machine output)</td>
+</tr>
+<tr>
+<td><code>codesentinel ingest</code></td>
+<td>Build or rebuild the knowledge base index</td>
+</tr>
+<tr>
+<td><code>codesentinel serve</code></td>
+<td>Run the REST service</td>
+</tr>
+<tr>
+<td><code>codesentinel sbom</code></td>
+<td>Print a CycloneDX software bill of materials</td>
+</tr>
+<tr>
+<td><code>codesentinel license info</code></td>
+<td>Show the active edition</td>
+</tr>
+<tr>
+<td><code>codesentinel version</code></td>
+<td>Print version and edition</td>
+</tr>
+</tbody>
+</table></div>
+<p>Options for <code>scan</code>:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-f text\|json\|sarif\|markdown\|html</code></td>
+<td>Report format, default <code>text</code></td>
+</tr>
+<tr>
+<td><code>-o FILE</code></td>
+<td>Write the report to a file</td>
+</tr>
+<tr>
+<td><code>--fail-on SEVERITY</code></td>
+<td>Exit 1 if any finding is at or above this severity</td>
+</tr>
+<tr>
+<td><code>--severity-threshold SEVERITY</code></td>
+<td>Hide findings below this severity</td>
+</tr>
+<tr>
+<td><code>--baseline FILE</code></td>
+<td>Suppress findings recorded in a baseline</td>
+</tr>
+<tr>
+<td><code>--mock</code></td>
+<td>Force the offline rule engine</td>
+</tr>
+<tr>
+<td><code>--no-quality</code></td>
+<td>Security findings only</td>
+</tr>
+<tr>
+<td><code>--concurrency N</code></td>
+<td>Parallel file workers</td>
+</tr>
+<tr>
+<td><code>-c FILE</code></td>
+<td>Use a specific <code>.codesentinel.yml</code></td>
+</tr>
+<tr>
+<td><code>--no-color</code>, <code>--quiet</code></td>
+<td>Plain or minimal terminal output</td>
+</tr>
+</tbody>
+</table></div>
+<p>v3 commands, all under <code>python -m codesentinel.rig</code>:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>replay</code></td>
+<td>Recompute the April 2026 pilot from recorded outputs. No model calls. Also <code>make replay</code></td>
+</tr>
+<tr>
+<td><code>run</code></td>
+<td>Run configurations over a dataset, recording every model response once</td>
+</tr>
+<tr>
+<td><code>analyze RUN_DIR</code></td>
+<td>Tables and paired comparisons for a run</td>
+</tr>
+<tr>
+<td><code>attest RUN_DIR</code></td>
+<td>Write provenance statements for a run</td>
+</tr>
+<tr>
+<td><code>verify RUN_DIR --dataset FILE</code></td>
+<td>Check a run's provenance. Exit code 1 on any failure</td>
+</tr>
+<tr>
+<td><code>route RUN_DIR --dataset FILE</code></td>
+<td>Score the routing policy on a recorded run (exploratory)</td>
+</tr>
+<tr>
+<td><code>label --reviewer NAME</code></td>
+<td>Open the labelling tool. Also <code>make label REVIEWER=NAME</code></td>
+</tr>
+<tr>
+<td><code>build-dataset --primary NAME</code></td>
+<td>Turn label decisions into a dataset</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="um-6-report-formats">6. Report formats</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td>Reading in a terminal</td>
+</tr>
+<tr>
+<td><code>json</code></td>
+<td>Scripts and dashboards</td>
+</tr>
+<tr>
+<td><code>sarif</code></td>
+<td>GitHub code scanning and other tools that read SARIF 2.1.0</td>
+</tr>
+<tr>
+<td><code>markdown</code></td>
+<td>Pull request comments, wikis</td>
+</tr>
+<tr>
+<td><code>html</code></td>
+<td>A standalone report to send to someone</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-bash">codesentinel scan . -f html -o report.html
+codesentinel scan . -f sarif -o results.sarif
+</code></pre>
+<hr />
+<h2 id="um-7-using-it-in-ci">7. Using it in CI</h2>
+<p>The exit code does the gating. This fails the job when any finding is HIGH or CRITICAL:</p>
+<pre><code class="language-bash">codesentinel scan . --mock --fail-on HIGH -f sarif -o results.sarif
+</code></pre>
+<p>GitHub Actions:</p>
+<pre><code class="language-yaml">name: CodeSentinel
+on: [pull_request]
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: AravindB98/CodeSentinel-v3@main
+        with:
+          path: .
+          fail-on: HIGH
+          offline: &quot;true&quot;            # rule engine only; remove and add anthropic-api-key for AI review
+</code></pre>
+<p>A complete workflow is in <code>examples/github-code-scanning.yml</code>. On GitLab, Azure DevOps or Jenkins, run the CLI and publish the SARIF file as an artifact.</p>
+<p>Recommendation: gate builds on the offline rule engine, which gives the same answer every run. Use AI review as an advisory step until it has been evaluated on your own code.</p>
+<hr />
+<h2 id="um-8-adopting-on-an-existing-codebase">8. Adopting on an existing codebase</h2>
+<p>A first scan of an old project can return hundreds of findings. Record them once, then fail only on new ones:</p>
+<pre><code class="language-bash">codesentinel baseline . -o .codesentinel-baseline.json
+git add .codesentinel-baseline.json
+codesentinel scan . --baseline .codesentinel-baseline.json --fail-on HIGH
+</code></pre>
+<p>Baselines store fingerprints that do not depend on line numbers, so moving code does not bring old findings back. Work the baseline down over time; it is a list of known debt, not an approval.</p>
+<hr />
+<h2 id="um-9-configuration-file">9. Configuration file</h2>
+<p>Put <code>.codesentinel.yml</code> in the project root. Flags override environment variables, which override this file.</p>
+<pre><code class="language-yaml">include: [&quot;**/*&quot;]
+exclude: [&quot;**/vendor/**&quot;, &quot;**/node_modules/**&quot;, &quot;**/*.min.js&quot;]
+max_file_bytes: 1000000
+concurrency: 8
+quality: true                 # include maintainability findings
+min_confidence: 0.5           # drop findings below this confidence
+engine: auto                  # auto | deterministic | llm
+baseline: .codesentinel-baseline.json
+disabled_rules: [&quot;CS-PY-WEAKHASH&quot;]   # a rule id, a CWE, or a category
+gate:
+  severity_threshold: INFO
+  fail_on: HIGH
+llm:
+  model: claude-sonnet-5-5
+  retrieval_k: 6
+  max_retries: 3
+</code></pre>
+<p>Environment variables are listed in <a href="https://github.com/AravindB98/CodeSentinel-v3/blob/main/docs/ADMIN.md" target="_blank" rel="noopener">ADMIN.md</a>.</p>
+<hr />
+<h2 id="um-10-running-the-rest-service">10. Running the REST service</h2>
+<pre><code class="language-bash">pip install -e &quot;.[api]&quot;
+export CODESENTINEL_API_KEYS=&quot;acme:long-random-secret&quot;
+codesentinel serve                    # listens on 0.0.0.0:8080
+</code></pre>
+<p>or with Docker:</p>
+<pre><code class="language-bash">cp .env.example .env                  # set CODESENTINEL_API_KEYS
+docker compose up --build
+</code></pre>
+<p>Scan a snippet:</p>
+<pre><code class="language-bash">curl -s http://localhost:8080/v1/scan \
+  -H &quot;X-API-Key: acme:long-random-secret&quot; -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;code&quot;:&quot;cur.execute(f\&quot;select {x}\&quot;)&quot;,&quot;language&quot;:&quot;python&quot;,&quot;filename&quot;:&quot;db.py&quot;}'
+</code></pre>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /v1/scan</code></td>
+<td>Scan submitted code. Add <code>"format":"sarif"</code> for SARIF</td>
+</tr>
+<tr>
+<td><code>GET /v1/scans</code>, <code>GET /v1/scans/{id}</code></td>
+<td>Past scans for the calling tenant</td>
+</tr>
+<tr>
+<td><code>GET /v1/rules</code></td>
+<td>The rule list</td>
+</tr>
+<tr>
+<td><code>GET /healthz</code>, <code>GET /readyz</code>, <code>GET /metrics</code>, <code>GET /version</code></td>
+<td>Operations</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each API key is <code>tenant:secret</code>, and a tenant sees only its own scans. Full reference: <a href="https://github.com/AravindB98/CodeSentinel-v3/blob/main/docs/API.md" target="_blank" rel="noopener">API.md</a>. Kubernetes and air-gapped installs: <a href="https://github.com/AravindB98/CodeSentinel-v3/blob/main/docs/DEPLOYMENT.md" target="_blank" rel="noopener">DEPLOYMENT.md</a>.</p>
+<hr />
+<h2 id="um-11-verifying-where-a-result-came-from">11. Verifying where a result came from</h2>
+<p>Use this when someone hands you a set of AI findings and you need to know they are the unedited output of a specific model and code version.</p>
+<p><strong>Try it offline in two minutes:</strong></p>
+<pre><code class="language-bash">python -m codesentinel.rig run --dataset eval/datasets/paired_suite.json --out runs/demo --backend mock
+python -m codesentinel.rig attest runs/demo
+python -m codesentinel.rig verify runs/demo --dataset eval/datasets/paired_suite.json
+</code></pre>
+<p>Expected: <code>"verified": true</code>, 120 statements, an empty <code>failures</code> list. (This demo uses the built-in offline mock, so it shows the mechanism, not model quality.)</p>
+<p><strong>What you receive from a run's author</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>File in the run folder</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>per_sample_*.jsonl</code></td>
+<td>One line per configuration, sample and replicate: findings, scores, cost</td>
+</tr>
+<tr>
+<td><code>records_*.jsonl</code></td>
+<td>Every model request and response, stored once</td>
+</tr>
+<tr>
+<td><code>attestations.jsonl</code></td>
+<td>One provenance statement per result, chained by hash</td>
+</tr>
+<tr>
+<td><code>attestation_head.json</code></td>
+<td>The final hash, which identifies the whole run</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>How to check it</strong></p>
+<ol>
+<li>Get the head hash from a place the author cannot change afterwards: a signed commit, a release note, a paper.</li>
+<li>Compare it with <code>attestation_head.json</code>.</li>
+<li>Run <code>verify</code> with the same dataset. Exit code 0 means every check passed.</li>
+</ol>
+<p><strong>Reading a failure</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th><code>check</code></th>
+<th>What went wrong</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chain</code></td>
+<td>A statement was altered, removed or reordered, or the head hash does not match</td>
+</tr>
+<tr>
+<td><code>records</code></td>
+<td>A model response is missing or its content no longer matches its recorded hash</td>
+</tr>
+<tr>
+<td><code>replay</code></td>
+<td>Re-running on recorded responses gives different findings, or needs a model call that was never recorded</td>
+</tr>
+<tr>
+<td><code>evidence</code></td>
+<td>A finding points at lines that do not exist in the code</td>
+</tr>
+<tr>
+<td><code>subject</code></td>
+<td>The scanned code is missing from the dataset or has changed</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>code_matches_attested_version: false</code> is a warning, not a failure: the code you are verifying with differs from the version that produced the run. A passing replay under a different version is still informative, but note it.</p>
+<p><strong>What a pass means.</strong> The findings are the reproducible output of the recorded model responses under the stated configuration, and nothing was edited after attestation. It does not mean the findings are correct.</p>
+<hr />
+<h2 id="um-12-running-an-evaluation">12. Running an evaluation</h2>
+<p>You need a dataset: a JSON Lines file where each line has <code>sample_id</code>, <code>language</code>, <code>code</code> and <code>ground_truth</code> (a list of <code>{cwe_id, line_start, line_end}</code>, empty for flaw-free samples). Section 13 shows how to build one.</p>
+<p><strong>Hosted model</strong></p>
+<pre><code class="language-bash">export ANTHROPIC_API_KEY=sk-ant-...
+python -m codesentinel.rig run --dataset study/data/dataset.jsonl \
+       --out study/results/run-001 --backend anthropic --model &lt;model id&gt; --replicates 3
+</code></pre>
+<p><strong>Your own model server</strong> (anything with an OpenAI-compatible endpoint, such as vLLM)</p>
+<pre><code class="language-bash">python -m codesentinel.rig run --dataset study/data/dataset.jsonl \
+       --out study/results/run-002 --backend openai \
+       --model &lt;model name&gt; --base-url http://HOST:8000/v1 --replicates 5 --seed 1000
+</code></pre>
+<p><strong>Then</strong></p>
+<pre><code class="language-bash">python -m codesentinel.rig analyze study/results/run-001
+python -m codesentinel.rig attest  study/results/run-001
+python -m codesentinel.rig verify  study/results/run-001 --dataset study/data/dataset.jsonl
+</code></pre>
+<p>Useful <code>run</code> options:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--arms a b c</code></td>
+<td>Run only some configurations. <code>equal_call</code> needs <code>full</code> in the same run</td>
+</tr>
+<tr>
+<td><code>--replicates N</code></td>
+<td>Repeat the whole run N times to measure run-to-run spread</td>
+</tr>
+<tr>
+<td><code>--seed S</code></td>
+<td>Base seed; replicate k uses S + k (honoured by servers that accept a seed)</td>
+</tr>
+<tr>
+<td><code>--limit N</code></td>
+<td>First N samples only, for a smoke test</td>
+</tr>
+<tr>
+<td><code>--shard i/n</code></td>
+<td>Process shard i of n, for cluster job arrays</td>
+</tr>
+</tbody>
+</table></div>
+<p>A run can be stopped and restarted. It skips what is already done and never requests a recorded response twice, so you are not charged again.</p>
+<p><strong>Reading <code>analyze</code> output</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recall_per_flaw</code></td>
+<td>Share of labelled flaws found</td>
+</tr>
+<tr>
+<td><code>detected_all</code></td>
+<td>Share of flawed samples where every flaw was found</td>
+</tr>
+<tr>
+<td><code>false_alarm_rate</code></td>
+<td>Share of flaw-free samples that got at least one finding</td>
+</tr>
+<tr>
+<td><code>false_discovery_rate</code></td>
+<td>Share of all findings that matched no labelled flaw</td>
+</tr>
+<tr>
+<td><code>silent_samples</code></td>
+<td>Samples with no findings at all. A sudden jump signals a broken run</td>
+</tr>
+<tr>
+<td><code>primary_fp_difference_b_minus_a</code></td>
+<td>Mean per-sample difference in false positives, with a 95% bootstrap interval</td>
+</tr>
+<tr>
+<td><code>recall_guardrail_0.05_met</code></td>
+<td>Whether recall dropped by no more than 0.05</td>
+</tr>
+<tr>
+<td><code>tokens_per_true_finding</code></td>
+<td>Cost of one correct finding</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every proportion carries a 95% interval. With a small dataset the intervals are wide; report them as they are.</p>
+<p>Running on a university or company cluster: <a href="https://github.com/AravindB98/CodeSentinel-v3/blob/main/study/hpc/README.md" target="_blank" rel="noopener">study/hpc/README.md</a>.</p>
+<hr />
+<h2 id="um-13-labelling-samples">13. Labelling samples</h2>
+<pre><code class="language-bash">make label REVIEWER=yourname          # opens http://127.0.0.1:8765
+</code></pre>
+<p>The tool shows one candidate at a time: the code with line numbers, the lines the fix changed (highlighted), a link to the fix commit and the advisory. Choose one decision:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Flaw is real, of this class, and visible in this snippet</td>
+<td>You can point to the flaw in the code shown. Enter the lines</td>
+</tr>
+<tr>
+<td>Flaw is real but cannot be judged from this snippet alone</td>
+<td>The fix depends on code outside the function</td>
+</tr>
+<tr>
+<td>No flaw of any class in this snippet</td>
+<td>Use for the after-fix twin when the fix is complete here</td>
+</tr>
+<tr>
+<td>Not this flaw, but another real flaw is present</td>
+<td>Describe it in the notes</td>
+</tr>
+<tr>
+<td>Unsure</td>
+<td>It will be excluded and logged</td>
+</tr>
+</tbody>
+</table></div>
+<p>Rules for honest labels:
+- Open the fix commit. The highlighted lines are a hint, not a label.
+- Label before any model has been run on the dataset.
+- Have a second person label a subset independently, with their own reviewer name.</p>
+<p>Decisions are appended to <code>study/data/labels/labels.jsonl</code> with your name and the time. Build the dataset and measure agreement:</p>
+<pre><code class="language-bash">python -m codesentinel.rig build-dataset --primary yourname --second colleague --pairs-only
+</code></pre>
+<p>This writes <code>study/data/dataset.jsonl</code> and an inclusion log listing every excluded candidate and why.</p>
+<hr />
+<h2 id="um-14-troubleshooting">14. Troubleshooting</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Cause and fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pip install codesentinel</code> installed something else</td>
+<td>That is a different project on PyPI. Uninstall it and install from this repository</td>
+</tr>
+<tr>
+<td>AI scan returns the same thing as <code>--mock</code></td>
+<td>No API key is set, or <code>CODESENTINEL_MOCK_LLM=1</code> is set. Check <code>echo $ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>AI pipeline returns no findings on code that clearly has flaws</td>
+<td>The knowledge base index is missing or was built with different library versions. Run <code>codesentinel ingest</code>. This exact fault caused empty runs in April 2026</td>
+</tr>
+<tr>
+<td><code>InconsistentVersionWarning</code> from scikit-learn</td>
+<td>The bundled index was built with another scikit-learn version. Run <code>codesentinel ingest</code> to rebuild</td>
+</tr>
+<tr>
+<td><code>equal_call needs the full pipeline's call count</code></td>
+<td>Include <code>full</code> in <code>--arms</code></td>
+</tr>
+<tr>
+<td><code>verify</code> reports <code>replay ... needs an unrecorded model call</code></td>
+<td>The record files are incomplete, or the prompts or code changed since the run. Check <code>code_matches_attested_version</code></td>
+</tr>
+<tr>
+<td><code>verify</code> fails with <code>chain</code> on a run you just made</td>
+<td>You re-ran <code>run</code> after <code>attest</code>. Run <code>attest</code> again</td>
+</tr>
+<tr>
+<td>Label tool says the port is in use</td>
+<td><code>python -m codesentinel.rig label --reviewer NAME --port 8766</code></td>
+</tr>
+<tr>
+<td>REST service returns 401</td>
+<td>The <code>X-API-Key</code> header must be the full <code>tenant:secret</code> string</td>
+</tr>
+<tr>
+<td>REST service returns 402</td>
+<td>The endpoint needs a paid edition</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="um-15-frequently-asked-questions">15. Frequently asked questions</h2>
+<p><strong>Does my code leave my machine?</strong> Not with the rule engine. With AI review it goes to the model provider, unless you serve an open-weight model yourself and use <code>--backend openai</code>.</p>
+<p><strong>Can I trust the AI pipeline's findings?</strong> Treat them as suggestions from a reviewer who is sometimes wrong. The pilot evidence is small. The rig exists so you can measure it on your own code.</p>
+<p><strong>Does a verified result mean the finding is real?</strong> No. Verification shows the finding is the unedited, reproducible output of a named model and code version. Whether it is true is a separate question answered by labelled evaluation.</p>
+<p><strong>Why did two AI scans of the same file differ?</strong> Hosted models are not perfectly repeatable even at temperature 0. The rig's <code>--replicates</code> option measures this spread.</p>
+<p><strong>How much does an AI evaluation cost?</strong> The full pipeline makes about three to six model calls per sample, and the six configurations together make roughly fifteen. Run with <code>--limit 5</code> first and read <code>tokens_per_sample</code> in <code>analyze</code>.</p>
+<p><strong>Which languages are supported?</strong> The rule engine covers Python, JavaScript, TypeScript, Java, Go, Ruby and PHP. The AI pipeline accepts any of them but has been benchmarked only on Python.</p>
+<p><strong>Is it a replacement for Semgrep, CodeQL or Snyk?</strong> No. Those have far larger rule sets and data-flow analysis. Use CodeSentinel alongside them, or use its rig to evaluate an AI reviewer you are considering.</p>
+<hr />
+<h2 id="um-16-glossary">16. Glossary</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ablation</td>
+<td>Running the system with one component removed to see what that component contributes</td>
+</tr>
+<tr>
+<td>Attestation</td>
+<td>A recorded statement of what produced a result</td>
+</tr>
+<tr>
+<td>Baseline (scan)</td>
+<td>A snapshot of existing findings to suppress in later scans</td>
+</tr>
+<tr>
+<td>Baseline (evaluation)</td>
+<td>The single-prompt configuration the pipeline is compared against</td>
+</tr>
+<tr>
+<td>Configuration, arm</td>
+<td>One way of running the model: single prompt, full pipeline, or an ablation</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>Common Weakness Enumeration, a catalogue of weakness types</td>
+</tr>
+<tr>
+<td>False alarm rate</td>
+<td>Share of flaw-free samples that received a finding</td>
+</tr>
+<tr>
+<td>False discovery rate</td>
+<td>Share of findings that are wrong</td>
+</tr>
+<tr>
+<td>Head hash</td>
+<td>The last hash in a provenance chain; it identifies the whole run</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>Share of real flaws that were found</td>
+</tr>
+<tr>
+<td>Replicate</td>
+<td>A full repeat of a run, used to measure run-to-run variation</td>
+</tr>
+<tr>
+<td>SARIF</td>
+<td>A standard JSON format for static analysis results</td>
+</tr>
+</tbody>
+</table></div></article><article class="view doc" data-view="technical-manual" hidden><a class="back" href="#docs">← All documentation</a><h1>Technical manual</h1><p>For engineers who extend, operate or audit CodeSentinel. It describes how the system is built, the data it writes, the rules it scores by, and how to change it safely. For day-to-day use see the <a href="#user-manual">User Manual</a>.</p>
+<h2 id="tm-contents">Contents</h2>
+<ol>
+<li><a href="#tm-1-system-overview">System overview</a></li>
+<li><a href="#tm-2-scanner">Scanner</a></li>
+<li><a href="#tm-3-record-once-model-access">Record-once model access</a></li>
+<li><a href="#tm-4-configurations-and-ablation-switches">Configurations and ablation switches</a></li>
+<li><a href="#tm-5-scoring">Scoring</a></li>
+<li><a href="#tm-6-statistics">Statistics</a></li>
+<li><a href="#tm-7-provenance">Provenance</a></li>
+<li><a href="#tm-8-router">Router</a></li>
+<li><a href="#tm-9-dataset-pipeline">Dataset pipeline</a></li>
+<li><a href="#tm-10-file-formats">File formats</a></li>
+<li><a href="#tm-11-running-on-a-cluster">Running on a cluster</a></li>
+<li><a href="#tm-12-extending-the-system">Extending the system</a></li>
+<li><a href="#tm-13-testing-and-quality-gates">Testing and quality gates</a></li>
+<li><a href="#tm-14-security-considerations">Security considerations</a></li>
+<li><a href="#tm-15-known-issues-and-design-debts">Known issues and design debts</a></li>
+</ol>
+<hr />
+<h2 id="tm-1-system-overview">1. System overview</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Package</th>
+<th>Depends on</th>
+<th>Third-party requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scanner</td>
+<td><code>codesentinel.engine</code>, <code>.rules</code>, <code>.graph</code>, <code>.rag</code>, <code>.reporters</code>, <code>.api</code></td>
+<td>nothing above it</td>
+<td>pydantic, PyYAML, NumPy; optional Anthropic SDK, LangGraph, ChromaDB, FastAPI</td>
+</tr>
+<tr>
+<td>Rig</td>
+<td><code>codesentinel.rig</code></td>
+<td>Scanner</td>
+<td>standard library only</td>
+</tr>
+<tr>
+<td>Provenance</td>
+<td><code>codesentinel.provenance</code></td>
+<td>Rig</td>
+<td>standard library only</td>
+</tr>
+<tr>
+<td>Router</td>
+<td><code>codesentinel.router</code></td>
+<td>Rig, <code>codesentinel.rl.bandit</code></td>
+<td>standard library only</td>
+</tr>
+</tbody>
+</table></div>
+<p>Design rules that hold across v3:</p>
+<ul>
+<li><strong>The scanner source is not edited by the research layers.</strong> Ablations are applied from outside, as patches that are undone after each call.</li>
+<li><strong>A model is called at most once per distinct request.</strong> Everything after that is replay.</li>
+<li><strong>The sample is the unit of analysis.</strong> Findings are deduplicated before counting.</li>
+<li><strong>Mock output is never evidence.</strong> The offline mock exists to test plumbing.</li>
+</ul>
+<p>Entry points: <code>codesentinel</code> (scanner CLI, <code>codesentinel/cli.py</code>) and <code>python -m codesentinel.rig</code> (<code>codesentinel/rig/cli.py</code>).</p>
+<hr />
+<h2 id="tm-2-scanner">2. Scanner</h2>
+<h3 id="tm-2-1-engine">2.1 Engine</h3>
+<p><code>codesentinel/engine.py</code> discovers files (include and exclude globs, size cap), detects language per file, and routes each file to one of two backends:</p>
+<ul>
+<li><code>_scan_one_deterministic</code>: calls <code>rules.detect(code, language)</code>.</li>
+<li><code>_scan_one</code>: runs the agent graph.</li>
+</ul>
+<p>Results from either are projected onto one <code>Finding</code> model (<code>codesentinel/models.py</code>), deduplicated by fingerprint, filtered by baseline and policy (<code>min_confidence</code>, severity threshold), and handed to a reporter.</p>
+<h3 id="tm-2-2-rule-engine">2.2 Rule engine</h3>
+<p><code>codesentinel/rules.py</code> holds a list of <code>Rule</code> dataclasses:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rule_id</code></td>
+<td>For example <code>CS-PY-SQLI-FSTRING</code></td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>One of python, javascript, typescript, java, go, ruby, php. JavaScript rules also apply to TypeScript</td>
+</tr>
+<tr>
+<td><code>cwe</code>, <code>owasp</code>, <code>category</code>, <code>severity</code>, <code>confidence</code>, <code>title</code>, <code>fix</code></td>
+<td>Reported as is</td>
+</tr>
+<tr>
+<td><code>pattern</code></td>
+<td>A regular expression matched per line, case-insensitive</td>
+</tr>
+<tr>
+<td><code>requires</code></td>
+<td>Optional substring that must appear somewhere in the file</td>
+</tr>
+<tr>
+<td><code>rag_doc</code>, <code>rag_pid</code></td>
+<td>The knowledge base passage the rule cites</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>detect</code> walks the lines once. For each line it takes the first applicable rule that matches and moves to the next line, so a line yields at most one finding. There is no data-flow analysis.</p>
+<h3 id="tm-2-3-agent-graph">2.3 Agent graph</h3>
+<p><code>codesentinel/graph/build_graph.py</code> builds a LangGraph <code>StateGraph</code> over <code>CodeSentinelState</code> (a <code>TypedDict</code> in <code>graph/state.py</code>), or a hand-written runner with the same routing when LangGraph is not installed.</p>
+<pre><code>security_sentinel -&gt; code_quality_auditor -&gt; evaluator -&gt; (approved) assemble_report
+                           ^                                   |
+                           +------- (rejected, &lt; 3 rounds) ----+
+</code></pre>
+<ul>
+<li><strong>Security Sentinel</strong> (<code>graph/agents/security_sentinel.py</code>): builds a retrieval query from the language, a keyword list and the first 800 characters; retrieves 6 passages; calls the model with <code>prompts/security.md</code>; parses findings into <code>SecurityFinding</code> objects, dropping any that fail validation.</li>
+<li><strong>Code Quality Auditor</strong>: maintainability findings, never scored by the rig.</li>
+<li><strong>Evaluator Guardian</strong> (<code>graph/agents/evaluator_guardian.py</code>): first a programmatic check (citation present and in the retrieved set, fix at least 20 characters, confidence at least 0.5), then a model review with <code>prompts/evaluator.md</code> that can override the programmatic notes. A rejection writes feedback into the state and routes back to the Sentinel.</li>
+<li><strong>Circuit breaker</strong>: after 3 Sentinel rounds the graph terminates.</li>
+</ul>
+<p>Two behaviours to know when reading results:</p>
+<ol>
+<li>When the breaker fires, <code>assemble_report</code> shows all Sentinel findings to the user, but the rig counts only Evaluator-approved findings, as the April harness did.</li>
+<li>A model or parse error in an agent is caught and becomes "no findings" with <code>state["error"]</code> set. The rig records <code>error</code> per row so a silent failure is visible.</li>
+</ol>
+<h3 id="tm-2-4-retrieval">2.4 Retrieval</h3>
+<p><code>codesentinel/rag/retriever.py</code> tries three backends in order: ChromaDB (<code>rag/chroma_store</code>), a pickled scikit-learn TF-IDF index (<code>rag/tfidf_index.pkl</code>), then a pure-Python TF-IDF index. The corpus is three files in <code>rag/data/</code>: <code>owasp_top10_2025.txt</code>, <code>cwe_subset.csv</code>, <code>patterns.md</code>.</p>
+<p>The backend in use changes what the Sentinel sees. The rig records it per result (<code>retrieval.backend</code>), and the provenance layer hashes the corpus and prompts into <code>code_version.prompts_and_corpus_sha256</code>. A stale pickled index was one cause of the empty runs of April 2026.</p>
+<h3 id="tm-2-5-model-client">2.5 Model client</h3>
+<p><code>codesentinel/utils/llm_client.py</code> exposes a module-level singleton through <code>get_llm()</code> with one method, <code>complete(system, user, max_tokens, temperature) -&gt; str</code>, and a <code>mode</code> attribute (<code>"real"</code> or <code>"mock"</code>). The rig substitutes its own client by assigning <code>llm_client._client</code>.</p>
+<h3 id="tm-2-6-service-audit-licensing">2.6 Service, audit, licensing</h3>
+<p><code>codesentinel/api</code> is a FastAPI app with API-key authentication (<code>tenant:secret</code>), tenant-scoped scan storage, rate limiting and Prometheus metrics. <code>codesentinel/audit.py</code> writes a hash-chained audit log of API activity. <code>codesentinel/editions.py</code> verifies Ed25519-signed licence tokens offline. These are documented in <a href="https://github.com/AravindB98/CodeSentinel-v3/blob/main/docs/API.md" target="_blank" rel="noopener">API.md</a>, <a href="https://github.com/AravindB98/CodeSentinel-v3/blob/main/docs/ADMIN.md" target="_blank" rel="noopener">ADMIN.md</a> and <a href="https://github.com/AravindB98/CodeSentinel-v3/blob/main/docs/DEPLOYMENT.md" target="_blank" rel="noopener">DEPLOYMENT.md</a>. Note that the audit log (who called the service) and v3 provenance (what produced a finding) are separate chains.</p>
+<hr />
+<h2 id="tm-3-record-once-model-access">3. Record-once model access</h2>
+<p><code>codesentinel/rig/record.py</code>.</p>
+<h3 id="tm-3-1-request-key">3.1 Request key</h3>
+<pre><code>key = sha256( json([model, sha256(system_prompt), user_prompt,
+                    max_tokens, temperature, seed, replicate]) )
+</code></pre>
+<p>Compact separators, <code>ensure_ascii=False</code>. The system prompt enters by hash so a stored record can be re-hashed without shipping the prompt text. <code>replicate</code> is part of the key, so replicate 1 is a new request even at temperature 0.</p>
+<h3 id="tm-3-2-store">3.2 Store</h3>
+<p><code>RecordStore</code> is an append-only JSON Lines file. <code>put</code> refuses to overwrite an existing key. Each record holds the request fields, the response, <code>response_sha256</code>, token usage, the served model string, latency and a UTC timestamp. <code>record_is_intact(rec)</code> recomputes both hashes.</p>
+<h3 id="tm-3-3-clients">3.3 Clients</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Backend flag</th>
+<th>Talks to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AnthropicInner</code></td>
+<td><code>anthropic</code></td>
+<td>Anthropic Messages API</td>
+</tr>
+<tr>
+<td><code>OpenAICompatInner</code></td>
+<td><code>openai</code></td>
+<td>Any OpenAI-compatible <code>/chat/completions</code> endpoint, through <code>urllib</code>; sends <code>seed</code> when given</td>
+</tr>
+<tr>
+<td><code>CodeSentinelMockInner</code></td>
+<td><code>mock</code></td>
+<td>The scanner's offline mock</td>
+</tr>
+<tr>
+<td>none</td>
+<td><code>replay</code></td>
+<td>Nothing; a missing record raises</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>RecordingClient</code> wraps one of these and presents the scanner's client interface. It returns the stored response when the key exists and calls the inner client otherwise.</p>
+<h3 id="tm-3-4-replaymiss">3.4 ReplayMiss</h3>
+<p>In replay-only mode an unrecorded request raises <code>ReplayMiss</code>, which derives from <code>BaseException</code>. This is deliberate. The agents catch <code>Exception</code> and convert failures to "no findings"; if <code>ReplayMiss</code> were an <code>Exception</code>, a missing recording would silently become a clean result.</p>
+<hr />
+<h2 id="tm-4-configurations-and-ablation-switches">4. Configurations and ablation switches</h2>
+<p><code>codesentinel/rig/arms.py</code>.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>single_prompt</code></td>
+<td>One call with <code>GENERIC_PROMPT</code>, the April baseline prompt copied verbatim</td>
+</tr>
+<tr>
+<td><code>equal_call</code></td>
+<td><code>single_prompt</code>, then <code>n - 1</code> rounds with <code>REVIEW_PROMPT</code>, where <code>n</code> is the number of calls <code>full</code> made on the same sample and replicate. No roles, no retrieval</td>
+</tr>
+<tr>
+<td><code>full</code></td>
+<td><code>build_graph().invoke(state)</code>, findings filtered to Evaluator-approved ids</td>
+</tr>
+<tr>
+<td><code>no_evaluator</code></td>
+<td><code>run_security_sentinel(state)</code> only</td>
+</tr>
+<tr>
+<td><code>no_grounding</code></td>
+<td><code>full</code> with <code>security_sentinel.get_retriever</code> replaced by a stub returning no passages</td>
+</tr>
+<tr>
+<td><code>no_specialisation</code></td>
+<td><code>full</code> with <code>security_sentinel._load_system_prompt</code> returning <code>GENERIC_PROMPT</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>_patched(client, ablation)</code> is a context manager that swaps the client and applies one switch, then restores all three patched names in a <code>finally</code> block.</p>
+<p>Limits to state when reporting:</p>
+<ul>
+<li><code>no_grounding</code> leaves the Evaluator's citation rules on. It measures grounding removed with the citation policy intact.</li>
+<li><code>no_specialisation</code> changes only the Sentinel's prompt. The Evaluator keeps its own.</li>
+<li><code>equal_call</code> matches call count, not token count.</li>
+</ul>
+<p>The runner orders configurations so <code>full</code> runs before <code>equal_call</code> within each sample.</p>
+<hr />
+<h2 id="tm-5-scoring">5. Scoring</h2>
+<p><code>codesentinel/rig/scoring.py</code>.</p>
+<p><strong>Matching.</strong> A prediction matches a ground-truth flaw when the CWE ids are equal and the line ranges overlap within <code>TOLERANCE = 2</code> lines. Each flaw is matched at most once.</p>
+<p><strong>Deduplication (new runs only).</strong> Predictions with the same CWE whose line ranges overlap or touch are merged before matching.</p>
+<p><strong>Sample-level outcomes.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>is_positive</code></td>
+<td>The sample has at least one labelled flaw</td>
+</tr>
+<tr>
+<td><code>tp</code>, <code>fn</code></td>
+<td>Labelled flaws found and missed</td>
+</tr>
+<tr>
+<td><code>fp</code></td>
+<td>Deduplicated findings matching no labelled flaw</td>
+</tr>
+<tr>
+<td><code>detected_all</code></td>
+<td>Positive sample with <code>fn == 0</code></td>
+</tr>
+<tr>
+<td><code>alarmed</code></td>
+<td>At least one finding</td>
+</tr>
+<tr>
+<td><code>false_alarm</code></td>
+<td>Flaw-free sample with at least one finding</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>score_legacy</code> reproduces the April rule exactly (no deduplication) and is used only by <code>replay</code>.</p>
+<p><strong>Known weakness.</strong> <code>fp</code> on a positive sample counts any finding beyond the labelled flaws as false, even if it is a real second flaw. The pre-registration draft proposes hand adjudication of those findings, or restricting the primary outcome to flaw-free samples.</p>
+<p>Metric names are used strictly: false discovery rate is FP / (FP + TP); false-alarm rate is the share of flaw-free samples with a finding. The April files label the former "FPR".</p>
+<hr />
+<h2 id="tm-6-statistics">6. Statistics</h2>
+<p><code>codesentinel/rig/stats.py</code>, standard library only so results do not depend on a numerical library version.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Use</th>
+<th>Does not license</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wilson(k, n)</code></td>
+<td>95% score interval for a proportion</td>
+<td>Anything when <code>n == 0</code> (returns <code>None</code>)</td>
+</tr>
+<tr>
+<td><code>mcnemar_exact(a_only, b_only)</code></td>
+<td>Two-sided exact binomial test on discordant pairs</td>
+<td>An effect size; little power with few discordant pairs</td>
+</tr>
+<tr>
+<td><code>paired_bootstrap(diffs)</code></td>
+<td>Percentile interval for the mean within-sample difference; 10,000 resamples of samples; seed 20261116</td>
+<td>Generalisation beyond the sampled population</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>analyze.compare(rows, a, b)</code> reports the primary false-positive difference, discordant counts for false alarms and for full detection, recall for both, and the recall guardrail. <code>analyze.counterfactual_trace</code> compares <code>no_evaluator</code> with <code>full</code> per sample: first-pass false positives removed downstream, surviving, and true findings lost.</p>
+<hr />
+<h2 id="tm-7-provenance">7. Provenance</h2>
+<p><code>codesentinel/provenance/attest.py</code>.</p>
+<h3 id="tm-7-1-statement">7.1 Statement</h3>
+<p>One per result row, hashed as <code>sha256</code> of the canonical JSON (sorted keys, compact separators) of the body, with <code>previous</code> set to the prior statement's hash and the first set to 64 zeros.</p>
+<pre><code class="language-json">{
+  &quot;schema&quot;: &quot;codesentinel.provenance/v1&quot;,
+  &quot;subject&quot;: {&quot;sample_id&quot;: &quot;PAIR-SQLI-TP&quot;, &quot;code_sha256&quot;: &quot;0c72...&quot;},
+  &quot;configuration&quot;: &quot;full&quot;,
+  &quot;replicate&quot;: 0,
+  &quot;model&quot;: &quot;…&quot;, &quot;seed&quot;: null,
+  &quot;model_calls&quot;: [&quot;528e…&quot;, &quot;b6ac…&quot;, &quot;d17e…&quot;],
+  &quot;model_responses_sha256&quot;: [&quot;7857…&quot;, &quot;0c54…&quot;, &quot;cf5f…&quot;],
+  &quot;prompt_sha256&quot;: [&quot;3338…&quot;, &quot;6c3d…&quot;, &quot;b569…&quot;],
+  &quot;retrieval&quot;: {&quot;backend&quot;: &quot;sklearn_tfidf&quot;, &quot;passages&quot;: [[&quot;patterns.md&quot;, &quot;PY-01&quot;], &quot;…&quot;]},
+  &quot;review_trail&quot;: [&quot;security_sentinel: produced 1 finding(s)&quot;, &quot;…&quot;],
+  &quot;findings&quot;: [[&quot;CWE-89&quot;, 8, 8]],
+  &quot;scoring&quot;: {&quot;rule&quot;: &quot;cwe-exact+line-overlap&quot;, &quot;tolerance_lines&quot;: 2},
+  &quot;code_version&quot;: {&quot;commit&quot;: &quot;…&quot;, &quot;uncommitted_changes&quot;: false,
+                   &quot;prompts_and_corpus_sha256&quot;: &quot;…&quot;, &quot;python&quot;: &quot;3.13.x&quot;},
+  &quot;previous&quot;: &quot;…&quot;,
+  &quot;hash&quot;: &quot;…&quot;
+}
+</code></pre>
+<h3 id="tm-7-2-verification">7.2 Verification</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chain</td>
+<td>Recompute each hash; compare <code>previous</code>; compare final hash and count with <code>attestation_head.json</code></td>
+</tr>
+<tr>
+<td>records</td>
+<td>Each cited key exists, <code>record_is_intact</code> holds, and the record's <code>response_sha256</code> equals the one in the statement</td>
+</tr>
+<tr>
+<td>subject</td>
+<td>The sample exists in the dataset and its code hashes to <code>code_sha256</code></td>
+</tr>
+<tr>
+<td>evidence</td>
+<td>Each finding satisfies <code>1 &lt;= line_start &lt;= line_end &lt;= lines in code</code></td>
+</tr>
+<tr>
+<td>replay</td>
+<td><code>run_arm</code> with a replay-only client over all record files; findings must equal the statement's</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="tm-7-3-threat-model">7.3 Threat model</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Threat</th>
+<th>Covered?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A finding is added, removed or altered after the run</td>
+<td>Yes: chain and replay</td>
+</tr>
+<tr>
+<td>A recorded model response is edited to support a finding</td>
+<td>Yes: records</td>
+</tr>
+<tr>
+<td>Results are presented with a different model, prompt or corpus than the one used</td>
+<td>Yes: model id, prompt hashes and corpus hash are in the statement</td>
+</tr>
+<tr>
+<td>The scanner code changed since the run</td>
+<td>Reported: <code>code_matches_attested_version</code></td>
+</tr>
+<tr>
+<td>The author regenerates the whole chain after tampering</td>
+<td>Only if the head hash was published out of the author's control beforehand. Statements are hashed, not signed</td>
+</tr>
+<tr>
+<td>The model provider served a different model than named</td>
+<td>Partly: the served model string is recorded, but it is the provider's own claim</td>
+</tr>
+<tr>
+<td>The finding is wrong</td>
+<td>No. That is the evaluation's job</td>
+</tr>
+</tbody>
+</table></div>
+<p>Signing statements (for example with Sigstore or an in-toto attestation envelope) is the natural next step and is not implemented.</p>
+<hr />
+<h2 id="tm-8-router">8. Router</h2>
+<p><code>codesentinel/router/offline.py</code> reuses <code>codesentinel.rl.bandit.UCB1Bandit</code> unchanged: one independent UCB-1 bandit per context bucket, exploration constant annealed from 1.414 toward 0.1.</p>
+<ul>
+<li><strong>Context</strong>: <code>complexity_bucket(code)</code> (short, medium, long by character count) and whether any of a fixed list of sink keywords appears. Both are available before any model call.</li>
+<li><strong>Arms</strong>: by default <code>single_prompt</code>, <code>no_evaluator</code>, <code>full</code>.</li>
+<li><strong>Utility</strong>: <code>correct - cost_weight * tokens / max tokens on that sample</code>, with <code>cost_weight = 0.2</code>; <code>correct</code> is 1 when a flawed sample is caught in full or a flaw-free sample raises no alarm.</li>
+<li><strong>Protocol</strong>: 200 random half splits. The bandit learns online on one half with utilities rescaled to [0, 1], then its greedy choice per context is scored on the other half. Contexts unseen in training fall back to the best fixed arm on the training half.</li>
+<li><strong>Comparators</strong>: always one arm, uniform choice, per-sample oracle.</li>
+</ul>
+<p>Because every arm is observed on every sample, no off-policy estimator is needed.</p>
+<p><strong>Router lab</strong> (<code>codesentinel/router/lab</code>): a separate sandbox with a four-arm contextual bandit, a REINFORCE policy-gradient agent (PyTorch), a feature extractor, simulated agents, a simulation environment and a live orchestrator with a rule-based mode. It is research code excluded from linting, installed with the <code>router-lab</code> extra. Its recorded simulation results (<code>study/router_sim/results</code>) show the bandit at 0.4654 mean reward against 0.4604 for a uniform policy with overlapping 95% intervals, which is why routing is judged on recorded real runs instead. The policy-gradient agent and simulator were not re-run after being moved into the package. The output is marked <code>"status": "exploratory"</code>. Wiring the router into the live scan path is not done.</p>
+<hr />
+<h2 id="tm-9-dataset-pipeline">9. Dataset pipeline</h2>
+<ol>
+<li><strong>Index</strong> (<code>study/data/candidates/advisories_index.json</code>): GitHub-reviewed advisories from 2025 and 2026 for PyPI packages that name exactly one CWE in the target classes and exactly one fix commit.</li>
+<li><strong>Candidates</strong> (<code>codesentinel/rig/candidates.py</code>): for each advisory, <code>git fetch --depth 2</code> the fix commit, find the changed non-test Python functions with <code>ast</code>, take the one with the most changed lines (at most 120 lines), and emit a pair: the function before the fix and after it, each prefixed by the file's import statements. Pairs where the fix touched other code are flagged <code>fix_touches_other_code</code>. Every skipped advisory is logged with its reason in <code>build_log.json</code>.</li>
+<li><strong>Labels</strong> (<code>codesentinel/rig/label_app.py</code>): a local HTTP server on 127.0.0.1 that appends decisions to JSON Lines with reviewer and time.</li>
+<li><strong>Dataset</strong> (<code>codesentinel/rig/dataset.py</code>): a before-fix candidate judged <code>flaw_visible</code> with lines becomes a flawed sample; an after-fix candidate judged <code>no_flaw</code> becomes a flaw-free sample; everything else is excluded and logged. <code>--pairs-only</code> keeps a pair only when both halves are included. <code>kappa</code> reports Cohen's kappa between two reviewers.</li>
+</ol>
+<p>The current candidate set is 204 pairs from 113 repositories.</p>
+<hr />
+<h2 id="tm-10-file-formats">10. File formats</h2>
+<p><strong>Dataset</strong> (<code>.jsonl</code>, or <code>.json</code> with a top-level <code>samples</code> list):</p>
+<pre><code class="language-json">{&quot;sample_id&quot;: &quot;GHSA-xxxx-V&quot;, &quot;language&quot;: &quot;python&quot;, &quot;code&quot;: &quot;…&quot;,
+ &quot;ground_truth&quot;: [{&quot;cwe_id&quot;: &quot;CWE-22&quot;, &quot;line_start&quot;: 14, &quot;line_end&quot;: 15}],
+ &quot;pair_id&quot;: &quot;GHSA-xxxx&quot;, &quot;role&quot;: &quot;before_fix&quot;, &quot;weakness_class&quot;: &quot;path_traversal&quot;,
+ &quot;provenance&quot;: {&quot;advisory&quot;: &quot;…&quot;, &quot;repo&quot;: &quot;…&quot;, &quot;fix_commit&quot;: &quot;…&quot;, &quot;url&quot;: &quot;…&quot;},
+ &quot;label&quot;: {&quot;verified_by&quot;: &quot;…&quot;, &quot;verified_at&quot;: &quot;…&quot;, &quot;notes&quot;: &quot;…&quot;}}
+</code></pre>
+<p>Only <code>sample_id</code>, <code>language</code>, <code>code</code> and <code>ground_truth</code> are required by the runner.</p>
+<p><strong>Run directory</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>One line or object per</th>
+<th>Key fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>per_sample_&lt;tag&gt;.jsonl</code></td>
+<td>configuration, sample, replicate</td>
+<td><code>arm</code>, <code>predictions</code>, <code>trace</code>, <code>error</code>, <code>parse_error</code>, <code>n_calls</code>, <code>call_keys</code>, <code>response_hashes</code>, <code>prompt_hashes</code>, <code>code_sha256</code>, token and latency totals, the scoring fields, <code>retrieval</code></td>
+</tr>
+<tr>
+<td><code>records_&lt;tag&gt;.jsonl</code></td>
+<td>distinct model request</td>
+<td><code>key</code>, <code>model</code>, <code>system_sha256</code>, <code>user</code>, <code>response</code>, <code>response_sha256</code>, <code>usage</code>, <code>latency_sec</code>, <code>recorded_at</code></td>
+</tr>
+<tr>
+<td><code>analysis.json</code></td>
+<td>run</td>
+<td>per-configuration tables per replicate, spread across replicates, paired comparisons, counterfactual trace</td>
+</tr>
+<tr>
+<td><code>attestations.jsonl</code>, <code>attestation_head.json</code></td>
+<td>statement; run</td>
+<td>section 7</td>
+</tr>
+<tr>
+<td><code>verification.json</code></td>
+<td>run</td>
+<td><code>verified</code>, <code>failures</code></td>
+</tr>
+<tr>
+<td><code>router_offline.json</code></td>
+<td>run</td>
+<td>section 8</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>&lt;tag&gt;</code> is <code>all</code>, or <code>shard&lt;i&gt;of&lt;n&gt;</code> for array jobs. <code>analyze</code>, <code>attest</code> and <code>verify</code> read every shard.</p>
+<hr />
+<h2 id="tm-11-running-on-a-cluster">11. Running on a cluster</h2>
+<p><code>study/hpc/run_array.sbatch</code> is a Slurm array job. Each task requests one GPU, starts a vLLM server for the model on a task-specific port, waits for <code>/v1/models</code>, then runs <code>python -m codesentinel.rig run --backend openai --shard i/n</code>. Shards write separate files, so tasks do not contend and a failed task can be resubmitted alone.</p>
+<p>Reproducibility captured per task: GPU model, <code>pip freeze</code>, the server's <code>/v1/models</code> response. Record the model's weight revision as well.</p>
+<p>The script has not been executed on a cluster yet. <code>study/hpc/README.md</code> has the setup and a four-sample smoke test to run first.</p>
+<hr />
+<h2 id="tm-12-extending-the-system">12. Extending the system</h2>
+<p><strong>Add a detection rule.</strong> Append a <code>Rule(...)</code> to <code>RULES</code> in <code>codesentinel/rules.py</code>, cite an existing passage id in <code>rag/data/patterns.md</code> or add one, and add a positive and a negative case to the tests. Remember that the first matching rule wins per line, so order matters.</p>
+<p><strong>Add a model backend.</strong> Write a class with a <code>model</code> attribute and <code>call(system, user, max_tokens, temperature, seed) -&gt; (text, usage_dict)</code>, where <code>usage_dict</code> has <code>input_tokens</code>, <code>output_tokens</code> and <code>served_model</code>. Register it in <code>runner.make_inner</code> and in the CLI's <code>--backend</code> choices.</p>
+<p><strong>Add a configuration.</strong> Add a branch to <code>arms.run_arm</code>, add the name to <code>ARMS</code> and to <code>runner.ORDER</code>. If it patches the scanner, do it inside <code>_patched</code> so the patch is undone. Add a comparison pair in <code>analyze.analyze</code> if it should be compared by default.</p>
+<p><strong>Change the scoring rule.</strong> Do not change <code>score_legacy</code>. Change <code>score</code> or <code>TOLERANCE</code> only before a pre-registration commit; the rule name and tolerance are written into every provenance statement.</p>
+<p><strong>Sign statements.</strong> Wrap <code>attest</code>'s output in a signature over <code>attestation_head.json</code>. The chain design needs no change.</p>
+<hr />
+<h2 id="tm-13-testing-and-quality-gates">13. Testing and quality gates</h2>
+<pre><code class="language-bash">make test                 # 72 tests
+make rig-test             # the v3 tests only
+ruff check codesentinel tests
+</code></pre>
+<p><code>tests/test_rig.py</code> covers: deduplication and sample-level scoring; known values for the Wilson interval and the exact McNemar test; <code>replay</code> reproducing every stored April count, including the direction the April summary printed wrongly; record-once behaviour, <code>ReplayMiss</code>, refusal to overwrite, record integrity; an offline end-to-end run matching the April mock (TP 9, FP 2, FN 0) with <code>equal_call</code> spending exactly as many calls as <code>full</code>; the end-to-end demo; the router lab bandit and orchestrator; provenance verifying a clean run and failing on a forged finding and on an edited model response; the router evaluation running.</p>
+<p>Not covered by tests: any behaviour against a real model, the Slurm script, and the candidate builder's network path.</p>
+<hr />
+<h2 id="tm-14-security-considerations">14. Security considerations</h2>
+<ul>
+<li><strong>Scanned code is untrusted input to a model.</strong> Text in comments can attempt to instruct the reviewer. The planned adversarial set measures this; nothing in the pipeline prevents it today.</li>
+<li><strong>AI review sends code to the model provider.</strong> Use the rule engine or a self-hosted model where that is not acceptable.</li>
+<li><strong>Record files contain the scanned code and model output in clear text.</strong> Treat a run directory with the same sensitivity as the code.</li>
+<li><strong>The label tool binds to 127.0.0.1 and has no authentication.</strong> Do not expose its port.</li>
+<li><strong>The candidate builder runs <code>git fetch</code> against third-party repositories.</strong> It executes no fetched code and parses Python with <code>ast</code> only.</li>
+<li><strong>Candidate samples are real vulnerable code</strong> from public fixes, redistributed for evaluation under each project's own licence. Check the licences before publishing a dataset built from them.</li>
+<li><strong>The retrieval index is a pickle.</strong> Load only an index you built with <code>codesentinel ingest</code>.</li>
+</ul>
+<hr />
+<h2 id="tm-15-known-issues-and-design-debts">15. Known issues and design debts</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Effect</th>
+<th>Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No evaluation on a verified dataset yet</td>
+<td>No accuracy claim can be made</td>
+<td><code>study/docs/PLAN.md</code></td>
+</tr>
+<tr>
+<td>Default hosted model changed to <code>claude-sonnet-5-5</code></td>
+<td>The April pilot ran on Claude Sonnet 4.5, retired by Anthropic on 30 Nov 2026. The AI pipeline has not been re-run on the new default, including whether it accepts the same request settings</td>
+<td>First hosted run in the plan; record the served model string</td>
+</tr>
+<tr>
+<td>Candidate snippets include the whole file's import block</td>
+<td>Long snippets, more tokens</td>
+<td>Trim to imports the function uses</td>
+</tr>
+<tr>
+<td><code>no_grounding</code> confounded with the citation policy</td>
+<td>Cannot isolate grounding alone</td>
+<td>Add a variant that relaxes the citation rules</td>
+</tr>
+<tr>
+<td><code>equal_call</code> matches calls, not tokens</td>
+<td>A residual compute difference remains</td>
+<td>Report tokens per configuration alongside</td>
+</tr>
+<tr>
+<td>Agents turn errors into "no findings"</td>
+<td>Silent failure in scanner output</td>
+<td>The rig records <code>error</code>; the scanner should surface it</td>
+</tr>
+<tr>
+<td>Statements are hashed, not signed</td>
+<td>No protection against the run's own author</td>
+<td>Section 12</td>
+</tr>
+<tr>
+<td>Router not connected to the live scan path</td>
+<td>Offline analysis only</td>
+<td>After the evaluation shows whether it helps</td>
+</tr>
+<tr>
+<td>Slurm script untested on a cluster</td>
+<td>May need partition or module changes</td>
+<td>Smoke test in <code>study/hpc/README.md</code></td>
+</tr>
+<tr>
+<td>Hosted models are not perfectly repeatable</td>
+<td>Replicates differ</td>
+<td>Measured by <code>--replicates</code>; pinned open weights for the repeatable arm</td>
+</tr>
+</tbody>
+</table></div></article><article class="view doc" data-view="market-analysis" hidden><a class="back" href="#docs">← All documentation</a><h1>Market analysis</h1><p>Prepared November 2026. Figures are from the public sources listed at the end and were read in November 2026. Analyst estimates disagree by a wide margin because they define the market differently; the ranges are shown as they are rather than averaged.</p>
+<h2 id="ma-1-summary">1. Summary</h2>
+<ul>
+<li>Application security testing is a multi-billion dollar market growing at double-digit rates. Static analysis is its largest testing segment in one analyst's breakdown.</li>
+<li>AI-written code is increasing the volume of code that needs review, and investors are funding review and governance tools heavily.</li>
+<li>Incumbents already use language models to cut false positives. "AI that finds bugs" is not a differentiator.</li>
+<li>CodeSentinel's defensible position is narrower and more specific: <strong>verifiable evidence</strong>. Every finding can be traced to a recorded model response and re-derived, and the evaluation rig lets a buyer measure an AI reviewer on their own code.</li>
+<li>CodeSentinel has no customers, no revenue and no completed large evaluation. This document describes an opportunity, not traction.</li>
+</ul>
+<h2 id="ma-2-market-size">2. Market size</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Estimate</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Application security (broad: testing tools, API security, runtime protection)</td>
+<td>USD 12.19 billion in 2025, 23.45 billion by 2031, 11.5% a year</td>
+<td>MarketsandMarkets</td>
+</tr>
+<tr>
+<td>Application security (broad)</td>
+<td>USD 11.9 billion in 2025, 37.6 billion by 2034, 13.21% a year</td>
+<td>IMARC Group</td>
+</tr>
+<tr>
+<td>Application security testing</td>
+<td>USD 1.83 billion in 2025, 7.60 billion by 2031, 26.7% a year</td>
+<td>MarketsandMarkets</td>
+</tr>
+<tr>
+<td>Static application security testing only</td>
+<td>USD 0.55 billion in 2025, 1.89 billion by 2031, 22.82% a year</td>
+<td>Mordor Intelligence</td>
+</tr>
+</tbody>
+</table></div>
+<p>IMARC puts static testing at 38.6% of the application security market by testing type in 2025.</p>
+<p>Reading: the directly relevant segment (static testing) is somewhere between half a billion and a few billion dollars today depending on definition, and every source has it growing faster than 20% a year where it is broken out.</p>
+<h2 id="ma-3-why-now">3. Why now</h2>
+<p><strong>AI-written code needs checking.</strong> A 2025 Veracode study reported that 45% of AI-generated code samples failed security tests.</p>
+<p><strong>Capital is moving into review and governance of AI-written code.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Company</th>
+<th>Event</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CodeRabbit (AI code review)</td>
+<td>Raised USD 143 million at a USD 1.5 billion valuation</td>
+</tr>
+<tr>
+<td>Endor Labs (scans AI-generated code)</td>
+<td>Raised USD 93 million</td>
+</tr>
+<tr>
+<td>Semgrep</td>
+<td>Raised a USD 100 million Series D in February 2025</td>
+</tr>
+<tr>
+<td>Snyk</td>
+<td>About USD 326 million in annual recurring revenue, growing 7% a year</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Regulation is asking for evidence.</strong> The EU Cyber Resilience Act's reporting duties for manufacturers of products with digital elements applied from 11 September 2026, and the Act applies in full from 11 December 2027. Organisations that must show how they handle vulnerabilities have a reason to prefer findings with a checkable record over findings without one.</p>
+<h2 id="ma-4-competitors">4. Competitors</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Type</th>
+<th>Strength</th>
+<th>Relevance to CodeSentinel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Semgrep</td>
+<td>Rule-based static analysis with AI triage</td>
+<td>Large rule ecosystem, cross-file analysis, published pricing</td>
+<td>Its 2026 engine pairs code parsing with model reasoning and targets near-zero false positives on AI-generated code. Direct overlap with CodeSentinel's original pitch</td>
+</tr>
+<tr>
+<td>Snyk Code</td>
+<td>Static analysis with an AI engine and fix suggestions</td>
+<td>Broad platform across code, dependencies, containers, cloud</td>
+<td>Much larger scope and distribution</td>
+</tr>
+<tr>
+<td>GitHub Advanced Security (CodeQL)</td>
+<td>Data-flow static analysis built into the platform</td>
+<td>Default choice for GitHub users</td>
+<td>Depth of analysis CodeSentinel's rules do not have</td>
+</tr>
+<tr>
+<td>Checkmarx, Veracode</td>
+<td>Enterprise suites</td>
+<td>Compliance reporting, enterprise sales</td>
+<td>Custom-priced, established in regulated buyers</td>
+</tr>
+<tr>
+<td>CodeRabbit and similar</td>
+<td>AI pull request reviewers</td>
+<td>Fast adoption, developer experience</td>
+<td>General review, not security evidence</td>
+</tr>
+<tr>
+<td>Endor Labs, Socket</td>
+<td>Supply chain and AI-code security</td>
+<td>Reachability, dependency risk</td>
+<td>Adjacent</td>
+</tr>
+</tbody>
+</table></div>
+<p>Published prices: Semgrep Teams at USD 30 per contributor per month; Snyk Team at USD 25 per contributing developer per month, capped at 10 developers.</p>
+<h2 id="ma-5-where-codesentinel-can-stand">5. Where CodeSentinel can stand</h2>
+<p>It cannot win on rule coverage, analysis depth or distribution. Three things are different:</p>
+<ol>
+<li><strong>Finding-level provenance.</strong> Each result carries a hash-chained statement of the model responses, prompts, retrieved passages and code version behind it, and a <code>verify</code> command re-derives the findings from recordings.</li>
+<li><strong>An open evaluation rig.</strong> A buyer can run a single prompt, an equal-call control, the full pipeline and its ablations on their own code and get paired statistics with intervals. This is a tool for deciding whether any AI reviewer earns its cost, not only CodeSentinel.</li>
+<li><strong>Stated limits.</strong> The repository publishes what its own pilot does and does not show.</li>
+</ol>
+<p>I did not find a mainstream scanner that publishes replayable per-finding provenance of this kind, but I have not surveyed the field exhaustively. Treat "unique" as a hypothesis to check with buyers, not a fact.</p>
+<p><strong>Most plausible first buyers</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Buyer</th>
+<th>Why they would care</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Application security leads evaluating AI reviewers</td>
+<td>Need evidence to justify or reject a purchase</td>
+</tr>
+<tr>
+<td>Regulated teams (finance, health, public sector)</td>
+<td>Need an audit trail for automated findings and may need code to stay on their own machines</td>
+</tr>
+<tr>
+<td>Research groups and vendors benchmarking scanners</td>
+<td>Need a reproducible harness</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ma-6-business-model">6. Business model</h2>
+<p>Open core. Scanning, evaluation and verification are free under Apache-2.0. Paid editions would add organisational controls: private rule packs, SSO, audit export, compliance report packs, supported air-gapped operation. The repository's price list is indicative (Team at USD 29 per contributor per month), which is roughly level with Semgrep's and Snyk's published team prices rather than below them.</p>
+<p>An evaluation-as-a-service offer (run the rig on a customer's code and deliver a verified report) may fit the first buyers better than seat licences. This is untested.</p>
+<p><strong>Illustrative arithmetic, not a forecast:</strong> 200 teams of 25 contributors at USD 29 a month would be about USD 1.7 million a year. Nothing in this repository supports a claim that such adoption is reachable.</p>
+<h2 id="ma-7-risks">7. Risks</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The evaluation may show the pipeline does not beat a single prompt</td>
+<td>The pilot evidence is thin; the product story must survive a null result. The rig and provenance layers do; the "fewer false positives" claim would not</td>
+</tr>
+<tr>
+<td>Incumbents add provenance</td>
+<td>Likely if buyers ask for it; the advantage is being early and open</td>
+</tr>
+<tr>
+<td>Single developer</td>
+<td>No support capacity, no security certification</td>
+</tr>
+<tr>
+<td>Model providers change behaviour</td>
+<td>Hosted results are not perfectly repeatable; the open-weight path mitigates this</td>
+</tr>
+<tr>
+<td>Licence and legal scaffolding incomplete</td>
+<td>Commercial licence unreviewed; contact addresses are placeholders</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ma-8-sources">8. Sources</h2>
+<ol>
+<li>MarketsandMarkets, Application Security Market: https://www.marketsandmarkets.com/Market-Reports/application-security-market-110170194.html</li>
+<li>MarketsandMarkets, Application Security Testing Market: https://www.marketsandmarkets.com/ResearchInsight/application-security-testing-companies.amp</li>
+<li>IMARC Group, Application Security Market: https://www.researchandmarkets.com/reports/5753231/application-security-market-size-share-trends</li>
+<li>Mordor Intelligence, Static Application Security Testing Market (via GII): https://www.giiresearch.com/report/moi2062426-static-application-security-testing-market-share.html</li>
+<li>Veracode 2025 GenAI Code Security Report, as cited by SSOJet: https://ssojet.com/blog/ai-application-security-tools.md</li>
+<li>CodeRabbit funding (Finimize, from Reuters): https://finimize.com/content/coderabbit-reached-a-15-billion-valuation-on-ai-code-review</li>
+<li>Endor Labs funding (TechCrunch): https://techcrunch.com/?p=2997524</li>
+<li>Semgrep funding and 2026 engine (Sacra): https://sacra.com/research/semgrep and https://sacra.com/c/semgrep/</li>
+<li>Snyk revenue (Sacra): https://sacra.com/research/snyk-at-326m-arr-growing-7-yoy/</li>
+<li>Semgrep pricing: https://semgrep.dev/pricing</li>
+<li>Snyk pricing breakdown: https://dev.to/rahulxsingh/is-snyk-worth-the-cost-complete-pricing-breakdown-for-2026-39m1</li>
+<li>EU Cyber Resilience Act timeline (Travers Smith): https://www.traverssmith.com/knowledge/knowledge-container/the-eu-cyber-resilience-acts-vulnerability-and-incident-reporting-requirements-are-now-live/</li>
+</ol>
+<p>Several of these are secondary reports of the original figure. Check the primary source before quoting a number in a funding conversation.</p></article>
+<article class="view doc" data-view="pitch-deck" hidden style="max-width:1040px"><a class="back" href="#docs">← All documentation</a>
+<h1>Pitch deck</h1><p>Thirteen slides. <a href="CodeSentinel_v3_Pitch_Deck.pdf" target="_blank" rel="noopener">Open the PDF version</a>.
+Market figures are sourced on the last slide and in the <a href="#market-analysis">market analysis</a>.</p>
+<div class="deck"><section class="slide"><header><span class="kicker">CodeSentinel v3</span><span class="num">1 / 13</span></header><h3>AI code security review that can prove where every finding came from</h3><div class="sbody"><p class="lead">An open-source scanner, a test rig that measures whether AI review earns its cost,
+     and a provenance layer that makes every finding replayable and tamper-evident.</p>
+     <p class="meta">Aravind Balaji · Northeastern University · November 2026<br>Built for INFO 7375 Computational Scepticism</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">The problem</span><span class="num">2 / 13</span></header><h3>AI reviewers produce findings nobody can trace</h3><div class="sbody"><div class="cols"><div><h4>More code, less scrutiny</h4><p>A 2025 Veracode study reported that
+     <b>45%</b> of AI-generated code samples failed security tests.<sup>5</sup> Teams are adding AI reviewers to cope.</p></div>
+     <div><h4>No record of why</h4><p>An AI finding arrives without the model version, prompt or evidence that
+     produced it. It cannot be re-derived, so it cannot be audited.</p></div>
+     <div><h4>No way to compare</h4><p>Vendors quote false-positive reductions measured on their own data.
+     A buyer has no controlled way to test the claim on their own code.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">The product</span><span class="num">3 / 13</span></header><h3>One tool, three layers</h3><div class="sbody"><table><tr><th>Layer</th><th>What it does</th><th>State</th></tr>
+     <tr><td><b>Scanner</b></td><td>32 offline rules across 7 languages, plus a three-agent AI pipeline: a Sentinel that must cite evidence, an Auditor, and an Evaluator that can reject findings</td><td>Built, tested</td></tr>
+     <tr><td><b>Verification and provenance</b></td><td>Records every model response once. Attaches a hash-chained statement to each result. <code>verify</code> re-derives the findings from recordings</td><td>Built, tested</td></tr>
+     <tr><td><b>Router</b></td><td>A bandit that learns when a cheaper configuration is enough, scored on recorded real runs</td><td>Built, exploratory</td></tr></table>
+     <p class="note">Open source under Apache-2.0. 72 automated tests pass.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">How verification works</span><span class="num">4 / 13</span></header><h3>Four checks, no model calls</h3><div class="sbody"><div class="cols four"><div><h4>1 · Chain</h4><p>Has any statement been altered, removed or reordered?</p></div>
+     <div><h4>2 · Records</h4><p>Does every cited model response still hash to what was recorded?</p></div>
+     <div><h4>3 · Replay</h4><p>Does re-running on the recordings give exactly the same findings?</p></div>
+     <div><h4>4 · Evidence</h4><p>Does every finding point at lines that exist?</p></div></div>
+     <p class="note">It proves a finding is the unedited, reproducible output of a named model and code version.
+     It does not prove the finding is true. That is what the labelled evaluation measures.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Evidence so far</span><span class="num">5 / 13</span></header><h3>What our own pilot does and does not show</h3><div class="sbody"><div class="cols"><div><h4>Established</h4><p>Every stored result from the April 2026 pilot is reproduced from its recordings.
+     In one real-model run on 10 samples, false positives were <b>30</b> for a single prompt and <b>1</b> for the pipeline, with equal recall.</p></div>
+     <div><h4>Weaker than it looked</h4><p>The pipeline returned nothing in 2 of 3 runs that day. 20 of the 30 false positives were
+     extra findings on flawed samples. The two arms used different prompts.</p></div>
+     <div><h4>Not done yet</h4><p>The evaluation on a hand-verified dataset with replicates, on a hosted model and an
+     open-weight model. 204 candidate pairs are collected and waiting for verification.</p></div></div>
+     <p class="note">We publish this because a product about verification has to pass its own test.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Market size</span><span class="num">6 / 13</span></header><h3>A multi-billion dollar market growing at double-digit rates</h3><div class="sbody"><table><tr><th>Scope</th><th>2025</th><th>Forecast</th><th>Growth a year</th></tr>
+     <tr><td>Application security, broad<sup>1</sup></td><td>$12.19B</td><td>$23.45B by 2031</td><td>11.5%</td></tr>
+     <tr><td>Application security, broad<sup>3</sup></td><td>$11.9B</td><td>$37.6B by 2034</td><td>13.21%</td></tr>
+     <tr><td>Application security testing<sup>2</sup></td><td>$1.83B</td><td>$7.60B by 2031</td><td>26.7%</td></tr>
+     <tr><td>Static testing only<sup>4</sup></td><td>$0.55B</td><td>$1.89B by 2031</td><td>22.82%</td></tr></table>
+     <p class="note">Analysts define the market differently, so the estimates differ widely. We show the range, not an average.
+     One analyst puts static testing at 38.6% of the market by testing type.<sup>3</sup></p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Why now</span><span class="num">7 / 13</span></header><h3>Money and regulation are both moving toward checkable AI output</h3><div class="sbody"><div class="cols"><div><h4>Capital</h4><p>CodeRabbit raised $143M at a $1.5B valuation for AI code review.<sup>6</sup>
+     Endor Labs raised $93M to scan AI-generated code.<sup>7</sup> Semgrep raised a $100M Series D.<sup>8</sup></p></div>
+     <div><h4>Regulation</h4><p>EU Cyber Resilience Act reporting duties applied from 11 September 2026; the Act applies in full from
+     11 December 2027.<sup>12</sup> Vulnerability handling now needs a record.</p></div>
+     <div><h4>Technology</h4><p>Open-weight code models can be served on a single GPU, so AI review with pinned weights and no code
+     leaving the building is practical.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Competition</span><span class="num">8 / 13</span></header><h3>Incumbents already use AI. We focus on evidence</h3><div class="sbody"><table><tr><th>Product</th><th>Strength</th><th>Published team price</th></tr>
+     <tr><td>Semgrep</td><td>Large rule ecosystem; a 2026 engine pairing code parsing with model reasoning<sup>8</sup></td><td>$30 per contributor a month<sup>10</sup></td></tr>
+     <tr><td>Snyk Code</td><td>Broad platform; about $326M annual recurring revenue<sup>9</sup></td><td>$25 per developer a month, up to 10<sup>11</sup></td></tr>
+     <tr><td>GitHub Advanced Security, Checkmarx, Veracode</td><td>Data-flow analysis in the platform; enterprise compliance suites</td><td>Add-on or custom</td></tr>
+     <tr><td><b>CodeSentinel</b></td><td>Replayable per-finding provenance; open evaluation rig; stated limits</td><td>Free core; $29 indicative</td></tr></table>
+     <p class="note">We do not compete on rule coverage or depth. "Unique" is a hypothesis to test with buyers, not a surveyed fact.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Positioning</span><span class="num">9 / 13</span></header><h3>The audit trail for AI code review</h3><div class="sbody"><div class="cols"><div><h4>Who buys first</h4><p>Application security leads deciding whether an AI reviewer earns its cost.
+     Regulated teams that need a record for automated findings and code that stays on their machines.</p></div>
+     <div><h4>What they get</h4><p>A controlled comparison on their own code with intervals, and findings that an auditor
+     can re-derive without trusting the vendor.</p></div>
+     <div><h4>Why it survives a null result</h4><p>If the pipeline does not beat a single prompt, the rig and the provenance
+     layer are still useful. Only the "fewer false positives" claim would go.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Business model</span><span class="num">10 / 13</span></header><h3>Open core, with evaluation as a service as the first offer to test</h3><div class="sbody"><table><tr><th>Edition</th><th>For</th><th>Adds</th></tr>
+     <tr><td>Community (free)</td><td>Everyone</td><td>Scanner, rig, provenance, router, all report formats</td></tr>
+     <tr><td>Team ($29 per contributor a month, indicative)</td><td>Squads</td><td>Private rule packs, support</td></tr>
+     <tr><td>Enterprise and Government (custom)</td><td>Regulated buyers</td><td>SSO, audit export, compliance packs, supported air-gapped operation</td></tr></table>
+     <p class="note">Illustrative arithmetic, not a forecast: 200 teams of 25 contributors at $29 a month is about $1.7M a year.
+     Prices are placeholders and the commercial licence has not had legal review.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Where we are</span><span class="num">11 / 13</span></header><h3>An honest status</h3><div class="sbody"><div class="cols"><div><h4>Done</h4><p>Unified v3 codebase. Rig, provenance and router working offline. Pilot results
+     recomputed. 204 candidate pairs from 113 open-source projects. Cluster job script written.</p></div>
+     <div><h4>Next four weeks</h4><p>Verify labels. Pre-register. Run on a hosted model and on an open-weight model with seeded
+     replicates. Adversarial and faithfulness checks. Course paper, then a preprint.</p></div>
+     <div><h4>Not yet</h4><p>No customers. No revenue. No large evaluation. One developer. Statements are hashed, not yet signed.</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">What we are asking for</span><span class="num">12 / 13</span></header><h3>Design partners and reviewers, not capital</h3><div class="sbody"><div class="cols"><div><h4>Design partners</h4><p>Two or three security teams willing to run the rig on their own code and
+     tell us whether the provenance record is what their auditors need.</p></div>
+     <div><h4>Reviewers</h4><p>A second labeller for the dataset, and critics for the pre-registration before any model is run.</p></div>
+     <div><h4>Contact</h4><p>Aravind Balaji<br>balaji.ara@northeastern.edu<br>github.com/AravindB98/CodeSentinel-v3</p></div></div></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Sources</span><span class="num">13 / 13</span></header><h3>Read in November 2026</h3><div class="sbody"><ol class="src">
+     <li>MarketsandMarkets, Application Security Market</li><li>MarketsandMarkets, Application Security Testing Market</li>
+     <li>IMARC Group, Application Security Market</li><li>Mordor Intelligence, Static Application Security Testing Market</li>
+     <li>Veracode 2025 GenAI Code Security Report, as cited by SSOJet</li><li>Finimize (Reuters), CodeRabbit funding</li>
+     <li>TechCrunch, Endor Labs funding</li><li>Sacra, Semgrep research</li><li>Sacra, Snyk research</li>
+     <li>semgrep.dev/pricing</li><li>Snyk pricing breakdown, dev.to</li><li>Travers Smith, EU Cyber Resilience Act timeline</li></ol>
+     <p class="note">Full links are in docs/MARKET_ANALYSIS.md. Several are secondary reports; check the primary source before quoting a figure.</p></div><footer>CodeSentinel v3 · Built for INFO 7375 Computational Scepticism</footer></section></div></article>
+</main>
+<footer class="site"><div class="in"><span><b>Built for INFO 7375 Computational Scepticism</b> · Northeastern University · Fall 2026</span>
+<span>Aravind Balaji · <a href="https://github.com/AravindB98/CodeSentinel-v3" target="_blank" rel="noopener">github.com/AravindB98/CodeSentinel-v3</a> · Apache-2.0</span>
+<span>Research preview. No accuracy claim is made for production code.</span></div></footer>
+<script>// CodeSentinel in-browser demo engine. Mirrors codesentinel/rules.py::detect and
+// the chain check of codesentinel/provenance/attest.py::verify.
+function csDetect(rules, code, language) {
+  const JS = new Set(["javascript", "typescript"]);
+  const applies = r => JS.has(r.language) ? JS.has(language) : r.language === language;
+  const applicable = rules.filter(applies).map(r => ({ r, rx: new RegExp(r.pattern, "i") }));
+  const out = [], lower = code.toLowerCase();
+  const lines = code.split(/\r\n|\r|\n/);
+  if (lines.length && lines[lines.length - 1] === "") lines.pop();
+  lines.forEach((line, i) => {
+    for (const { r, rx } of applicable) {
+      if (r.requires && !lower.includes(r.requires.toLowerCase())) continue;
+      if (rx.test(line)) { out.push({ rule: r, line: i + 1, snippet: line.trim().slice(0, 300) }); break; }
+    }
+  });
+  return out;
+}
+function csCanon(v) {
+  if (v === null || typeof v !== "object") return JSON.stringify(v);
+  if (Array.isArray(v)) return "[" + v.map(csCanon).join(",") + "]";
+  return "{" + Object.keys(v).sort().map(k => JSON.stringify(k) + ":" + csCanon(v[k])).join(",") + "}";
+}
+function csSha256(str) {
+  const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const bytes = Array.from(new TextEncoder().encode(str));
+  const bitLen = bytes.length * 8;
+  bytes.push(0x80);
+  while (bytes.length % 64 !== 56) bytes.push(0);
+  const hi = Math.floor(bitLen / 0x100000000), lo = bitLen >>> 0;
+  for (const w of [hi, lo]) bytes.push((w >>> 24) & 255, (w >>> 16) & 255, (w >>> 8) & 255, w & 255);
+  let h = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const rr = (x, n) => (x >>> n) | (x << (32 - n));
+  const w = new Array(64);
+  for (let o = 0; o < bytes.length; o += 64) {
+    for (let i = 0; i < 16; i++) w[i] = (bytes[o+4*i] << 24) | (bytes[o+4*i+1] << 16) | (bytes[o+4*i+2] << 8) | bytes[o+4*i+3];
+    for (let i = 16; i < 64; i++) {
+      const s0 = rr(w[i-15],7) ^ rr(w[i-15],18) ^ (w[i-15] >>> 3), s1 = rr(w[i-2],17) ^ rr(w[i-2],19) ^ (w[i-2] >>> 10);
+      w[i] = (w[i-16] + s0 + w[i-7] + s1) | 0;
+    }
+    let [a,b,c,d,e,f,g,hh] = h;
+    for (let i = 0; i < 64; i++) {
+      const t1 = (hh + (rr(e,6) ^ rr(e,11) ^ rr(e,25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+      const t2 = ((rr(a,2) ^ rr(a,13) ^ rr(a,22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+      hh = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    h = [h[0]+a, h[1]+b, h[2]+c, h[3]+d, h[4]+e, h[5]+f, h[6]+g, h[7]+hh].map(x => x | 0);
+  }
+  return h.map(x => (x >>> 0).toString(16).padStart(8, "0")).join("");
+}
+function csVerifyChain(stmts) {
+  let prev = "0".repeat(64);
+  return stmts.map((s, i) => {
+    const body = Object.assign({}, s); delete body.hash;
+    const calc = csSha256(csCanon(body));
+    const ok = s.previous === prev && calc === s.hash;
+    const why = s.previous !== prev ? "does not link to the statement before it" : (calc !== s.hash ? "content no longer matches its recorded hash" : "");
+    prev = s.hash;
+    return { index: i, ok, why, calc };
+  });
+}
+
+const RULES = [{"rule_id": "CS-PY-SQLI-FSTR", "language": "python", "cwe": "CWE-89", "owasp": "A03:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.94, "pattern": "execute\\s*\\(\\s*f[\"\\']", "fix": "Use parameterized queries with placeholders instead of f-strings. Example: cursor.execute(\"SELECT * FROM users WHERE id = ?\", (uid,)).", "rag_doc": "patterns.md", "rag_pid": "PY-01", "title": "SQL injection via f-string in execute()", "requires": null}, {"rule_id": "CS-PY-SQLI-CONCAT", "language": "python", "cwe": "CWE-89", "owasp": "A03:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "execute\\s*\\([^)]*(\\.format\\(|[\"\\'][^\"\\']*[\"\\']\\s*\\+)", "fix": "Use parameterized queries rather than .format() or string concatenation.", "rag_doc": "patterns.md", "rag_pid": "PY-01", "title": "SQL injection via concatenation/format", "requires": null}, {"rule_id": "CS-PY-PICKLE", "language": "python", "cwe": "CWE-502", "owasp": "A08:2025 Software and Data Integrity Failures", "category": "Insecure Deserialization", "severity": "CRITICAL", "confidence": 0.96, "pattern": "pickle\\.loads?\\s*\\(", "fix": "Never unpickle untrusted data. Use json.loads() with schema validation, or a signed serializer such as itsdangerous.", "rag_doc": "patterns.md", "rag_pid": "PY-02", "title": "Unsafe pickle deserialization", "requires": null}, {"rule_id": "CS-PY-YAML", "language": "python", "cwe": "CWE-502", "owasp": "A08:2025 Software and Data Integrity Failures", "category": "Insecure Deserialization", "severity": "HIGH", "confidence": 0.85, "pattern": "yaml\\.load\\s*\\((?![^)]*Safe)", "fix": "Replace yaml.load(data) with yaml.safe_load(data).", "rag_doc": "patterns.md", "rag_pid": "PY-07", "title": "yaml.load without SafeLoader", "requires": null}, {"rule_id": "CS-PY-CMDI", "language": "python", "cwe": "CWE-78", "owasp": "A03:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.88, "pattern": "subprocess\\.(run|Popen|call|check_output)\\s*\\([^)]*shell\\s*=\\s*True", "fix": "Remove shell=True and pass arguments as a list; validate against an allow-list.", "rag_doc": "patterns.md", "rag_pid": "PY-03", "title": "subprocess with shell=True", "requires": null}, {"rule_id": "CS-PY-OSSYSTEM", "language": "python", "cwe": "CWE-78", "owasp": "A03:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.84, "pattern": "os\\.system\\s*\\(", "fix": "Avoid os.system; use subprocess.run([...]) with a list of arguments.", "rag_doc": "patterns.md", "rag_pid": "PY-03", "title": "os.system command execution", "requires": null}, {"rule_id": "CS-PY-EVAL", "language": "python", "cwe": "CWE-94", "owasp": "A03:2025 Injection", "category": "Code Injection", "severity": "CRITICAL", "confidence": 0.92, "pattern": "\\beval\\s*\\(", "fix": "Do not eval request-derived input; parse explicitly or allow-list.", "rag_doc": "patterns.md", "rag_pid": "PY-04", "title": "eval() on untrusted input", "requires": "request"}, {"rule_id": "CS-PY-TLS", "language": "python", "cwe": "CWE-295", "owasp": "A02:2025 Cryptographic Failures", "category": "Improper Certificate Validation", "severity": "HIGH", "confidence": 0.9, "pattern": "verify\\s*=\\s*False", "fix": "Remove verify=False; pass a CA bundle path if a custom root is needed.", "rag_doc": "patterns.md", "rag_pid": "PY-06", "title": "TLS verification disabled", "requires": null}, {"rule_id": "CS-PY-WEAKHASH", "language": "python", "cwe": "CWE-327", "owasp": "A02:2025 Cryptographic Failures", "category": "Weak Cryptography", "severity": "MEDIUM", "confidence": 0.75, "pattern": "hashlib\\.(md5|sha1)\\s*\\(", "fix": "Use sha256+ for integrity; bcrypt/argon2 (passlib) for passwords.", "rag_doc": "patterns.md", "rag_pid": "PY-08", "title": "Weak hash (MD5/SHA1)", "requires": null}, {"rule_id": "CS-PY-SECRET", "language": "python", "cwe": "CWE-798", "owasp": "A07:2025 Identification and Authentication Failures", "category": "Hardcoded Credentials", "severity": "HIGH", "confidence": 0.8, "pattern": "(password|api_key|secret|token)\\s*=\\s*[\"\\'][A-Za-z0-9_\\-]{8,}[\"\\']", "fix": "Load secrets from env or a secrets manager; rotate any committed value.", "rag_doc": "patterns.md", "rag_pid": "PY-05", "title": "Hard-coded credential", "requires": null}, {"rule_id": "CS-PY-FLASKDEBUG", "language": "python", "cwe": "CWE-489", "owasp": "A05:2025 Security Misconfiguration", "category": "Security Misconfiguration", "severity": "MEDIUM", "confidence": 0.7, "pattern": "\\.run\\s*\\([^)]*debug\\s*=\\s*True", "fix": "Never run with debug=True in production; the Werkzeug debugger allows RCE.", "rag_doc": "patterns.md", "rag_pid": "PY-09", "title": "Flask debug mode enabled", "requires": null}, {"rule_id": "CS-JS-EVAL", "language": "javascript", "cwe": "CWE-94", "owasp": "A03:2025 Injection", "category": "Code Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "\\beval\\s*\\(", "fix": "Remove eval on user input; parse or allow-list operations.", "rag_doc": "patterns.md", "rag_pid": "JS-01", "title": "eval() on untrusted input", "requires": "req"}, {"rule_id": "CS-JS-SQLI", "language": "javascript", "cwe": "CWE-89", "owasp": "A03:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.93, "pattern": "\\.(query|execute)\\s*\\(\\s*`[^`]*\\$\\{", "fix": "Use parameterized queries: db.query(\"... WHERE id = ?\", [id]).", "rag_doc": "patterns.md", "rag_pid": "JS-02", "title": "SQL injection via template literal", "requires": null}, {"rule_id": "CS-JS-XSS", "language": "javascript", "cwe": "CWE-79", "owasp": "A03:2025 Injection", "category": "Cross-Site Scripting", "severity": "HIGH", "confidence": 0.8, "pattern": "\\.innerHTML\\s*=", "fix": "Use textContent, or sanitize with DOMPurify.sanitize() for rich HTML.", "rag_doc": "patterns.md", "rag_pid": "JS-04", "title": "DOM XSS via innerHTML", "requires": null}, {"rule_id": "CS-JS-CHILDPROC", "language": "javascript", "cwe": "CWE-78", "owasp": "A03:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.85, "pattern": "child_process\\.(exec|execSync)\\s*\\(", "fix": "Use execFile/spawn with an argument array; never interpolate user input.", "rag_doc": "patterns.md", "rag_pid": "JS-05", "title": "child_process.exec command injection", "requires": null}, {"rule_id": "CS-JS-PROTO", "language": "javascript", "cwe": "CWE-1321", "owasp": "A08:2025 Software and Data Integrity Failures", "category": "Prototype Pollution", "severity": "HIGH", "confidence": 0.7, "pattern": "Object\\.assign\\s*\\(\\s*\\{\\s*\\}\\s*,\\s*(req|JSON\\.parse)", "fix": "Validate/whitelist keys before merging untrusted objects; freeze prototypes.", "rag_doc": "patterns.md", "rag_pid": "JS-06", "title": "Prototype pollution via Object.assign", "requires": null}, {"rule_id": "CS-JS-SECRET", "language": "javascript", "cwe": "CWE-798", "owasp": "A07:2025 Identification and Authentication Failures", "category": "Hardcoded Credentials", "severity": "HIGH", "confidence": 0.78, "pattern": "(apiKey|api_key|secret|token|password)\\s*[:=]\\s*[\"\\'][A-Za-z0-9_\\-]{8,}[\"\\']", "fix": "Load secrets from environment variables; never commit them.", "rag_doc": "patterns.md", "rag_pid": "JS-07", "title": "Hard-coded credential", "requires": null}, {"rule_id": "CS-JAVA-SQLI", "language": "java", "cwe": "CWE-89", "owasp": "A03:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "(createStatement\\(\\)|Statement)[^;]*executeQuery\\s*\\([^)]*\\+", "fix": "Use PreparedStatement with bound parameters instead of string concatenation.", "rag_doc": "patterns.md", "rag_pid": "JAVA-01", "title": "SQL injection via Statement concatenation", "requires": null}, {"rule_id": "CS-JAVA-DESER", "language": "java", "cwe": "CWE-502", "owasp": "A08:2025 Software and Data Integrity Failures", "category": "Insecure Deserialization", "severity": "CRITICAL", "confidence": 0.9, "pattern": "new\\s+ObjectInputStream\\s*\\(", "fix": "Avoid Java native deserialization of untrusted data; use a safe format and an allow-list (e.g. ValidatingObjectInputStream).", "rag_doc": "patterns.md", "rag_pid": "JAVA-02", "title": "Unsafe ObjectInputStream deserialization", "requires": null}, {"rule_id": "CS-JAVA-CMDI", "language": "java", "cwe": "CWE-78", "owasp": "A03:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.86, "pattern": "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\(", "fix": "Validate inputs and prefer ProcessBuilder with a fixed argument list.", "rag_doc": "patterns.md", "rag_pid": "JAVA-03", "title": "Runtime.exec command injection", "requires": null}, {"rule_id": "CS-JAVA-XXE", "language": "java", "cwe": "CWE-611", "owasp": "A05:2025 Security Misconfiguration", "category": "XML External Entity", "severity": "HIGH", "confidence": 0.82, "pattern": "DocumentBuilderFactory\\.newInstance\\(\\)", "fix": "Disable external entities: setFeature(\"...disallow-doctype-decl\", true).", "rag_doc": "patterns.md", "rag_pid": "JAVA-04", "title": "XXE-prone DocumentBuilderFactory", "requires": null}, {"rule_id": "CS-GO-SQLI", "language": "go", "cwe": "CWE-89", "owasp": "A03:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "\\.(Query|Exec)\\s*\\(\\s*(fmt\\.Sprintf|\"[^\"]*\"\\s*\\+)", "fix": "Use parameterized queries with $1/? placeholders, not fmt.Sprintf.", "rag_doc": "patterns.md", "rag_pid": "GO-01", "title": "SQL injection via Sprintf", "requires": null}, {"rule_id": "CS-GO-CMDI", "language": "go", "cwe": "CWE-78", "owasp": "A03:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.85, "pattern": "exec\\.Command\\s*\\(\\s*\"(sh|bash|cmd)\"", "fix": "Avoid invoking a shell; call the binary directly with explicit args.", "rag_doc": "patterns.md", "rag_pid": "GO-02", "title": "exec.Command shell invocation", "requires": null}, {"rule_id": "CS-GO-TLS", "language": "go", "cwe": "CWE-295", "owasp": "A02:2025 Cryptographic Failures", "category": "Improper Certificate Validation", "severity": "HIGH", "confidence": 0.88, "pattern": "InsecureSkipVerify\\s*:\\s*true", "fix": "Never set InsecureSkipVerify: true in production.", "rag_doc": "patterns.md", "rag_pid": "GO-03", "title": "TLS verification disabled", "requires": null}, {"rule_id": "CS-GO-WEAKHASH", "language": "go", "cwe": "CWE-327", "owasp": "A02:2025 Cryptographic Failures", "category": "Weak Cryptography", "severity": "MEDIUM", "confidence": 0.72, "pattern": "(md5|sha1)\\.New\\s*\\(", "fix": "Use sha256+; for passwords use bcrypt/argon2.", "rag_doc": "patterns.md", "rag_pid": "GO-04", "title": "Weak hash (MD5/SHA1)", "requires": null}, {"rule_id": "CS-RB-CMDI", "language": "ruby", "cwe": "CWE-78", "owasp": "A03:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.85, "pattern": "(system|`|%x|exec)\\s*\\(?[\"\\'`][^\"\\'`]*#\\{", "fix": "Never interpolate input into shell commands; pass an argument array.", "rag_doc": "patterns.md", "rag_pid": "RB-01", "title": "Command injection via interpolation", "requires": null}, {"rule_id": "CS-RB-EVAL", "language": "ruby", "cwe": "CWE-94", "owasp": "A03:2025 Injection", "category": "Code Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "\\b(eval|instance_eval|class_eval)\\s*\\(", "fix": "Avoid eval on untrusted input; use explicit dispatch.", "rag_doc": "patterns.md", "rag_pid": "RB-02", "title": "eval() on untrusted input", "requires": "params"}, {"rule_id": "CS-RB-YAML", "language": "ruby", "cwe": "CWE-502", "owasp": "A08:2025 Software and Data Integrity Failures", "category": "Insecure Deserialization", "severity": "HIGH", "confidence": 0.83, "pattern": "YAML\\.load\\s*\\((?!.*safe)", "fix": "Use YAML.safe_load; YAML.load can instantiate arbitrary objects.", "rag_doc": "patterns.md", "rag_pid": "RB-03", "title": "YAML.load deserialization", "requires": null}, {"rule_id": "CS-PHP-SQLI", "language": "php", "cwe": "CWE-89", "owasp": "A03:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "(mysqli_query|->query)\\s*\\([^)]*\\$_(GET|POST|REQUEST)", "fix": "Use prepared statements with bound parameters (PDO/mysqli).", "rag_doc": "patterns.md", "rag_pid": "PHP-01", "title": "SQL injection from request superglobal", "requires": null}, {"rule_id": "CS-PHP-CMDI", "language": "php", "cwe": "CWE-78", "owasp": "A03:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.86, "pattern": "(system|exec|shell_exec|passthru)\\s*\\([^)]*\\$_(GET|POST|REQUEST)", "fix": "Never pass request data to shell functions; use escapeshellarg or avoid shells.", "rag_doc": "patterns.md", "rag_pid": "PHP-02", "title": "Command injection from request", "requires": null}, {"rule_id": "CS-PHP-EVAL", "language": "php", "cwe": "CWE-94", "owasp": "A03:2025 Injection", "category": "Code Injection", "severity": "CRITICAL", "confidence": 0.92, "pattern": "\\beval\\s*\\(\\s*\\$", "fix": "Never eval dynamic input; restructure to explicit logic.", "rag_doc": "patterns.md", "rag_pid": "PHP-03", "title": "eval() on dynamic input", "requires": null}, {"rule_id": "CS-PHP-INCLUDE", "language": "php", "cwe": "CWE-98", "owasp": "A03:2025 Injection", "category": "File Inclusion", "severity": "HIGH", "confidence": 0.84, "pattern": "(include|require)(_once)?\\s*\\(?\\s*\\$_(GET|POST|REQUEST)", "fix": "Never include files chosen by request data; use a fixed allow-list.", "rag_doc": "patterns.md", "rag_pid": "PHP-04", "title": "Remote/Local file inclusion", "requires": null}], SAMPLES = {"python": "import os, pickle, sqlite3, hashlib, requests, yaml\n\ndef get_user(cur, user_id):\n    cur.execute(f\"SELECT * FROM users WHERE id = {user_id}\")\n    return cur.fetchone()\n\ndef list_dir(path):\n    os.system(\"ls \" + path)\n\ndef load_session(blob):\n    return pickle.loads(blob)\n\ndef fetch(url):\n    return requests.get(url, verify=False)\n\ndef fingerprint(data):\n    return hashlib.md5(data).hexdigest()\n\ndef safe_lookup(cur, user_id):\n    cur.execute(\"SELECT * FROM users WHERE id = ?\", (user_id,))\n    return cur.fetchone()\n", "javascript": "const { exec } = require(\"child_process\");\n\nfunction findUser(db, id) {\n  return db.query(`SELECT * FROM users WHERE id = ${id}`);\n}\n\nfunction render(el, comment) {\n  el.innerHTML = comment;\n}\n\nfunction run(cmd) {\n  exec(\"ping \" + cmd);\n}\n\nfunction calc(expr) {\n  return eval(expr);\n}\n", "java": "import java.sql.*;\nimport java.io.*;\n\npublic class UserDao {\n  public ResultSet find(Connection c, String id) throws Exception {\n    Statement st = c.createStatement();\n    return st.executeQuery(\"SELECT * FROM users WHERE id = \" + id);\n  }\n  public void ping(String host) throws Exception {\n    Runtime.getRuntime().exec(\"ping \" + host);\n  }\n  public Object load(InputStream in) throws Exception {\n    return new ObjectInputStream(in).readObject();\n  }\n}\n", "go": "package main\n\nimport (\n  \"crypto/md5\"\n  \"crypto/tls\"\n  \"database/sql\"\n  \"fmt\"\n  \"os/exec\"\n)\n\nfunc find(db *sql.DB, id string) {\n  db.Query(fmt.Sprintf(\"SELECT * FROM users WHERE id = %s\", id))\n}\n\nfunc run(arg string) {\n  exec.Command(\"sh\", \"-c\", \"ls \"+arg).Run()\n}\n\nvar cfg = &tls.Config{InsecureSkipVerify: true}\nvar h = md5.New()\n", "php": "<?php\n$id = $_GET[\"id\"];\n$r = mysqli_query($conn, \"SELECT * FROM users WHERE id = \" . $_GET[\"id\"]);\nsystem(\"ls \" . $_GET[\"dir\"]);\neval($_POST[\"code\"]);\ninclude($_GET[\"page\"]);\n", "ruby": "require \"yaml\"\n\ndef list(dir)\n  system(\"ls #{dir}\")\nend\n\ndef calc(expr)\n  eval(expr)\nend\n\ndef load(text)\n  YAML.load(text)\nend\n"}, CHAIN0 = [{"schema": "codesentinel.provenance/v1", "subject": {"sample_id": "PAIR-SQLI-TP", "code_sha256": "0c72257273312c80600e8b8dfd5f8182a16ee9516eb1cc107ec70a8afca307f2"}, "configuration": "full", "replicate": 0, "model": "codesentinel-offline-mock", "seed": null, "model_calls": ["528ee4439d48283c8ab72078b62d4283a6a4d4215100e00b28b606edc3d19d9d", "b6ac635d793bda5cb1d8cde5c10aabcec0f4b2ed35463e628486fc4953b99437", "d17ea2062aafb8edc2e30a88b4c38fcf43d61ea54c4836e12eaa1b14618e6b00"], "model_responses_sha256": ["7857a8cc22d42cc1ca51bda1e8e2c924f028210707a352db9fa189d6660d5888", "0c54b7e283b24ef7991b013aeebef8a4d81bb93b6f4be6115a601c74ba708123", "cf5f59fd74e239877ebcd9a3e5ea42da5b8a955c70886e407f82c427838962af"], "prompt_sha256": ["3338debfab22d88ec6676fc6ca47897a4e1458031072563e16874116b78bb0b2", "6c3dfd44ef9e34c18933738495298b7b5cbe9e8f850eef5be0d8ee247e500b56", "b569b802823a8f5bd6ea7eaee7760ed01f763602d75a926915b12bea65fe2b58"], "retrieval": {"backend": "sklearn_tfidf", "passages": [["patterns.md", "PY-01"], ["patterns.md", "JS-02"], ["patterns.md", "JAVA-01"], ["patterns.md", "JS-05"], ["patterns.md", "JAVA-03"], ["patterns.md", "PY-04"]]}, "review_trail": ["security_sentinel: produced 1 finding(s)", "code_quality_auditor: produced 0 finding(s)", "evaluator: APPROVED (approved=1, rejected=0)", "assemble_report: done"], "findings": [["CWE-89", 8, 8]], "scoring": {"rule": "cwe-exact+line-overlap", "tolerance_lines": 2}, "code_version": {"commit": "49ea00d1b66bbd5ae1584b0e8cf61c9d31d8a506", "uncommitted_changes": true, "prompts_and_corpus_sha256": "ac99fdd4e7c77f9290bb4e3ab164fc3d1557dc5ed8df47965087ba59caa37220", "python": "3.13.18"}, "previous": "0000000000000000000000000000000000000000000000000000000000000000", "hash": "c6008cbad2f77582e98c78065b47e2a970dc48994c5d5c4cea2ed337bdcda86f"}, {"schema": "codesentinel.provenance/v1", "subject": {"sample_id": "PAIR-SQLI-TP", "code_sha256": "0c72257273312c80600e8b8dfd5f8182a16ee9516eb1cc107ec70a8afca307f2"}, "configuration": "no_evaluator", "replicate": 0, "model": "codesentinel-offline-mock", "seed": null, "model_calls": ["528ee4439d48283c8ab72078b62d4283a6a4d4215100e00b28b606edc3d19d9d"], "model_responses_sha256": ["7857a8cc22d42cc1ca51bda1e8e2c924f028210707a352db9fa189d6660d5888"], "prompt_sha256": ["b569b802823a8f5bd6ea7eaee7760ed01f763602d75a926915b12bea65fe2b58"], "retrieval": null, "review_trail": ["security_sentinel: produced 1 finding(s)"], "findings": [["CWE-89", 8, 8]], "scoring": {"rule": "cwe-exact+line-overlap", "tolerance_lines": 2}, "code_version": {"commit": "49ea00d1b66bbd5ae1584b0e8cf61c9d31d8a506", "uncommitted_changes": true, "prompts_and_corpus_sha256": "ac99fdd4e7c77f9290bb4e3ab164fc3d1557dc5ed8df47965087ba59caa37220", "python": "3.13.18"}, "previous": "c6008cbad2f77582e98c78065b47e2a970dc48994c5d5c4cea2ed337bdcda86f", "hash": "3ebb45a03f532f142eb7643e34133d2a66749ca73bd812455373fe4d1893e427"}, {"schema": "codesentinel.provenance/v1", "subject": {"sample_id": "PAIR-SQLI-FP", "code_sha256": "e928d999455cf2960f85de3ae35493be1597b25569f6a7a159371832eaca96ab"}, "configuration": "full", "replicate": 0, "model": "codesentinel-offline-mock", "seed": null, "model_calls": ["3d848f2f44f51897eaa9c1f38cef31f9da12e22d7d076181fffda903b13610bf", "4061f76f868dae5a521cc4f5307eddf4b3aef737a3cc6bed9ee29c42fe549e40"], "model_responses_sha256": ["0c54b7e283b24ef7991b013aeebef8a4d81bb93b6f4be6115a601c74ba708123", "0c54b7e283b24ef7991b013aeebef8a4d81bb93b6f4be6115a601c74ba708123"], "prompt_sha256": ["6c3dfd44ef9e34c18933738495298b7b5cbe9e8f850eef5be0d8ee247e500b56", "b569b802823a8f5bd6ea7eaee7760ed01f763602d75a926915b12bea65fe2b58"], "retrieval": {"backend": "sklearn_tfidf", "passages": [["patterns.md", "PY-01"], ["patterns.md", "JS-02"], ["patterns.md", "JAVA-01"], ["patterns.md", "JS-05"], ["patterns.md", "JAVA-03"], ["patterns.md", "PY-04"]]}, "review_trail": ["security_sentinel: produced 0 finding(s)", "code_quality_auditor: produced 0 finding(s)", "evaluator: APPROVED (approved=0, rejected=0)", "assemble_report: done"], "findings": [], "scoring": {"rule": "cwe-exact+line-overlap", "tolerance_lines": 2}, "code_version": {"commit": "49ea00d1b66bbd5ae1584b0e8cf61c9d31d8a506", "uncommitted_changes": true, "prompts_and_corpus_sha256": "ac99fdd4e7c77f9290bb4e3ab164fc3d1557dc5ed8df47965087ba59caa37220", "python": "3.13.18"}, "previous": "3ebb45a03f532f142eb7643e34133d2a66749ca73bd812455373fe4d1893e427", "hash": "e275259e6ecb8584eebe45c84ad7f6ca97a575977f4f6238c965908fb9a54569"}, {"schema": "codesentinel.provenance/v1", "subject": {"sample_id": "PAIR-SQLI-FP", "code_sha256": "e928d999455cf2960f85de3ae35493be1597b25569f6a7a159371832eaca96ab"}, "configuration": "no_evaluator", "replicate": 0, "model": "codesentinel-offline-mock", "seed": null, "model_calls": ["3d848f2f44f51897eaa9c1f38cef31f9da12e22d7d076181fffda903b13610bf"], "model_responses_sha256": ["0c54b7e283b24ef7991b013aeebef8a4d81bb93b6f4be6115a601c74ba708123"], "prompt_sha256": ["b569b802823a8f5bd6ea7eaee7760ed01f763602d75a926915b12bea65fe2b58"], "retrieval": null, "review_trail": ["security_sentinel: produced 0 finding(s)"], "findings": [], "scoring": {"rule": "cwe-exact+line-overlap", "tolerance_lines": 2}, "code_version": {"commit": "49ea00d1b66bbd5ae1584b0e8cf61c9d31d8a506", "uncommitted_changes": true, "prompts_and_corpus_sha256": "ac99fdd4e7c77f9290bb4e3ab164fc3d1557dc5ed8df47965087ba59caa37220", "python": "3.13.18"}, "previous": "e275259e6ecb8584eebe45c84ad7f6ca97a575977f4f6238c965908fb9a54569", "hash": "1f925dec924cab4c2df8d8ccaefb71a81795e38e195ff80c762ccf7697a0a8a7"}];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const NAMES = {python:"Python", javascript:"JavaScript", java:"Java", go:"Go", php:"PHP", ruby:"Ruby"};
+const ORDER = {CRITICAL:0, HIGH:1, MEDIUM:2, LOW:3, INFO:4};
+function scan() {
+  const lang = $("lang").value, found = csDetect(RULES, $("code").value, lang);
+  found.sort((a, b) => (ORDER[a.rule.severity] - ORDER[b.rule.severity]) || (a.line - b.line));
+  $("sum").textContent = found.length + " finding" + (found.length === 1 ? "" : "s") + " · " + RULES.filter(r => r.language === lang).length + " " + NAMES[lang] + " rules · offline engine";
+  $("out").innerHTML = found.length ? found.map(f => `<div class="finding ${f.rule.severity}"><div class="h"><span class="sev">${f.rule.severity}</span>
+    <span>${esc(f.rule.title)}</span><span class="prov">${f.rule.cwe} · line ${f.line}</span></div>
+    <code>${esc(f.snippet)}</code><div>${esc(f.rule.fix)}</div>
+    <div class="prov">${esc(f.rule.owasp)} · provenance ${esc(f.rule.rag_doc)}::${esc(f.rule.rag_pid)} · confidence ${f.rule.confidence} · ${f.rule.rule_id}</div></div>`).join("")
+    : '<div class="finding"><div class="h">No rule matched</div><div>That means no pattern fired. It does not mean the code is safe.</div></div>';
+}
+let chain = JSON.parse(JSON.stringify(CHAIN0));
+function drawChain(res) {
+  $("chain").innerHTML = chain.map((s, i) => { const r = res && res[i];
+    return `<div class="stmt ${r && !r.ok ? "bad" : ""}"><b>${i + 1}</b><span class="f">${esc(s.subject.sample_id)} · ${esc(s.configuration)} · findings ${esc(JSON.stringify(s.findings))}</span>
+      ${r ? `<span class="pill ${r.ok ? "ok" : "bad"}">${r.ok ? "OK" : "FAILED"}</span>` : "<span></span>"}
+      <span class="hash">hash ${s.hash.slice(0, 24)}…</span>${r && !r.ok ? `<span class="why">${r.why}</span>` : ""}</div>`; }).join("");
+  if (res) { const bad = res.filter(r => !r.ok).length;
+    $("vsum").textContent = bad ? `NOT VERIFIED · ${bad} of ${res.length} statements failed` : `VERIFIED · ${res.length} statements · head ${chain[chain.length - 1].hash.slice(0, 16)}…`;
+    $("vsum").style.color = bad ? "var(--bad)" : "var(--ok)"; } else { $("vsum").textContent = ""; }
+}
+const verifyChain = () => drawChain(csVerifyChain(chain));
+const VIEWS = ["user-manual", "technical-manual", "pitch-deck", "market-analysis"];
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  let view = "home", target = null;
+  if (VIEWS.includes(h)) view = h;
+  else if (h) { target = document.getElementById(h); const v = target && target.closest(".view"); if (v) view = v.dataset.view; }
+  document.querySelectorAll(".view").forEach(v => v.hidden = v.dataset.view !== view);
+  document.querySelectorAll("nav a").forEach(a => { const on = a.getAttribute("href") === "#" + view; if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (target && !VIEWS.includes(h)) target.scrollIntoView(); else window.scrollTo(0, 0);
+}
+document.addEventListener("DOMContentLoaded", () => {
+  $("lang").innerHTML = Object.keys(SAMPLES).map(k => `<option value="${k}">${NAMES[k]}</option>`).join("");
+  const load = () => { $("code").value = SAMPLES[$("lang").value]; scan(); };
+  $("lang").addEventListener("change", load); $("reset").addEventListener("click", load); $("scan").addEventListener("click", scan);
+  $("vchain").addEventListener("click", verifyChain);
+  $("tamper").addEventListener("click", () => { chain[1].findings = [["CWE-89", 8, 8], ["CWE-798", 2, 2]]; verifyChain(); });
+  $("restore").addEventListener("click", () => { chain = JSON.parse(JSON.stringify(CHAIN0)); verifyChain(); });
+  document.querySelectorAll(".copy").forEach(b => b.addEventListener("click", () => {
+    const t = b.previousElementSibling.textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = "Copied"; }, () => { b.textContent = "Select and copy"; });
+    setTimeout(() => { b.textContent = "Copy"; }, 1600); }));
+  load(); verifyChain(); route();
+});
+window.addEventListener("hashchange", route);
+</script></body></html>
