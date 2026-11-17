@@ -74,7 +74,7 @@ h2{font:500 clamp(28px,3.4vw,40px)/1.1 var(--display);letter-spacing:-.015em;mar
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 .card{background:var(--surface);border:1px solid var(--line);padding:26px;position:relative;overflow:hidden;transition:transform .35s var(--ease),border-color .3s,box-shadow .35s}
 .card::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--ease)}
-.card:hover{transform:translateY(-4px);border-color:var(--line-hot);box-shadow:0 24px 40px -30px rgba(26,28,23,.5)}.card:hover::before{transform:scaleX(1)}
+.card:hover{border-color:var(--line-hot);box-shadow:0 24px 40px -30px rgba(26,28,23,.5)}.card:hover::before{transform:scaleX(1)}
 .card h3{font:500 24px/1.15 var(--display);margin:6px 0 4px}.card .tag{font:500 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dim)}
 .card ul{margin:12px 0 0;padding-left:18px;font-size:16px;color:var(--muted)}.card li{margin:6px 0}
 .flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;align-items:stretch}
@@ -136,6 +136,62 @@ td{font-variant-numeric:tabular-nums}
 .back{font:500 12px/1 var(--mono);letter-spacing:.06em;text-decoration:none}
 .deck{display:grid;gap:22px;max-width:1040px}
 .rv.pre{opacity:0;transform:translateY(22px)}
+h2.rv{clip-path:inset(-10% 0 -25% 0);transition:clip-path .9s var(--ease),transform .9s var(--ease),opacity .2s}
+h2.rv.pre{opacity:1;clip-path:inset(0 0 100% 0);transform:translateY(45%)}
+/* hero field */
+.hero{position:relative}.hero>*{position:relative;z-index:1}
+#field{position:absolute;inset:-40px -24px -20px;width:calc(100% + 48px);height:calc(100% + 60px);z-index:0;pointer-events:none;opacity:.5}
+/* title-sequence intro */
+.intro{position:fixed;inset:0;z-index:100;background:var(--ink);color:var(--bg);display:grid;place-items:center;transition:transform .8s cubic-bezier(.7,0,.2,1)}
+.intro.out{transform:translateY(-100%)}
+.intro .c{display:grid;justify-items:center;gap:22px}
+.intro svg{width:84px;height:84px}
+.intro svg path{fill:none;stroke:var(--bg);stroke-width:1.6;stroke-dasharray:120;stroke-dashoffset:120;animation:draw 1s var(--ease) .1s forwards}
+.intro svg path.tick{stroke:var(--accent);stroke-width:2.4;stroke-dasharray:30;stroke-dashoffset:30;animation:draw .5s var(--ease) .95s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.intro .t{font:500 15px/1 var(--mono);letter-spacing:.42em;padding-left:.42em}
+.intro .s{font:400 11px/1 var(--mono);letter-spacing:.2em;color:var(--ghost);text-transform:uppercase;min-height:1em}
+.intro .skip{position:absolute;bottom:26px;right:28px;font:400 10.5px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ghost);background:none;border:0;cursor:pointer}
+/* marquee */
+.marq{overflow:hidden;border-bottom:1px solid var(--line-hot);padding:18px 0;margin:0 -24px}
+.marq div{display:inline-flex;gap:0;white-space:nowrap;animation:marq 36s linear infinite;font:500 italic clamp(34px,5vw,62px)/1 var(--display);letter-spacing:-.02em}
+.marq span{padding:0 .5em}.marq span:nth-child(even){color:transparent;-webkit-text-stroke:1px var(--line-hot)}.marq span:nth-child(3n){color:var(--accent-dim);-webkit-text-stroke:0}
+.marq:hover div{animation-play-state:paused}
+@keyframes marq{to{transform:translateX(-50%)}}
+/* scroll story: static list by default, pinned when .live */
+.story .pin{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:48px;align-items:start}
+.story .steps5{display:grid;gap:22px}
+.story .st h3{font:500 clamp(26px,3.2vw,42px)/1.08 var(--display);letter-spacing:-.015em;margin:8px 0 10px;text-wrap:balance}
+.story .st p{color:var(--muted);margin:0;max-width:44ch;font-size:18px}
+.story .st .n{font:500 11.5px/1 var(--mono);letter-spacing:.16em;color:var(--accent-dim)}
+.story .rail{display:none}
+.case{background:var(--surface);border:1px solid var(--line-hot);font:12.5px/1.55 var(--mono);box-shadow:0 30px 60px -40px rgba(26,28,23,.45)}
+.case .hd{padding:11px 16px;border-bottom:1px solid var(--line);background:var(--sunk);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.case .f{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:6px;position:relative;transition:opacity .5s,background .5s}
+.case .f b{font-weight:500}.case .f .src{color:var(--ghost)}
+.case .cite,.case .verd,.case .hashes,.case .stamp{transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.case .verd{font-weight:500;letter-spacing:.08em}.case .verd.ok{color:var(--ok)}.case .verd.no{color:var(--crit)}
+.case .hashes{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:5px;color:var(--muted)}
+.case .hashes i{font-style:normal;color:var(--accent-dim)}
+.case .stamp{padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.case .stamp .big{font:500 13px/1 var(--mono);letter-spacing:.2em;color:var(--ok);border:2px solid var(--ok);padding:9px 12px;transform:rotate(-3deg)}
+.case .note{padding:9px 16px;font-size:10.5px;letter-spacing:.06em;color:var(--ghost);border-top:1px solid var(--line)}
+.story.live{height:480vh}
+.story.live .pin{position:sticky;top:58px;height:calc(100vh - 58px);align-items:center;grid-template-columns:28px minmax(0,1fr) minmax(0,1.05fr);gap:36px}
+.story.live .rail{display:block;position:relative;width:2px;height:56%;background:var(--line-hot);justify-self:center}
+.story.live .rail i{position:absolute;left:0;top:0;width:2px;height:100%;background:var(--accent);transform-origin:50% 0;transform:scaleY(var(--p,0))}
+.story.live .rail b{position:absolute;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--bg);border:2px solid var(--line-hot);top:calc(var(--k)*25% - 5px);transition:border-color .3s,background .3s}
+.story.live .rail b.on{border-color:var(--accent);background:var(--accent)}
+.story.live .steps5{position:relative;height:320px}
+.story.live .st{position:absolute;inset:0;opacity:0;transform:translateY(26px);transition:opacity .55s var(--ease),transform .55s var(--ease);pointer-events:none}
+.story.live .st.on{opacity:1;transform:none}.story.live .st.past{transform:translateY(-26px)}
+.story.live .case [data-from]{opacity:0;transform:translateY(10px)}
+.story.live .case [data-from].in{opacity:1;transform:none}
+.story.live .case .f.rej{background:rgba(159,18,57,.05)}.story.live .case .f.rej b{text-decoration:line-through;text-decoration-color:var(--crit)}
+.story.live .case .stamp .big{transition:transform .5s cubic-bezier(.3,1.6,.5,1),opacity .3s}
+.story.live .case .stamp:not(.in) .big{transform:rotate(-3deg) scale(1.9);opacity:0}
+.card{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0))}
+.card:hover{--ty:-4px}
 .rv{transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:calc(var(--d,0)*90ms)}
 footer.site{border-top:1px solid var(--line-hot);margin-top:24px;background:var(--sunk)}
 footer.site .in{max-width:1180px;margin:auto;padding:26px 24px;display:flex;gap:10px 28px;flex-wrap:wrap;justify-content:space-between;font-size:15px;color:var(--muted)}
@@ -145,7 +201,8 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
  .grid3,.docs{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats>div{border-right:0;border-bottom:1px solid var(--line)}
  .flow,.flow.two{grid-template-columns:minmax(0,1fr);gap:18px}.node{margin-right:0}.node:not(:last-child)::after{left:22px;top:100%;width:2px;height:18px;background:var(--accent);animation:none}
  .slide .cols,.slide .cols.four{grid-template-columns:repeat(2,1fr)}}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.rv.pre{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.rv.pre,h2.rv.pre{opacity:1;transform:none;clip-path:none}}
+@media (max-width:900px){.story .pin,.story.live .pin{grid-template-columns:minmax(0,1fr);gap:20px}.story.live .rail{display:none}.story.live .steps5{height:230px}.story.live .pin{align-content:center}}
 
 .slide{background:var(--surface);color:var(--ink);border:1px solid var(--line);aspect-ratio:16/9;
   padding:4.2% 5%;display:flex;flex-direction:column;gap:2.2%;overflow:hidden;container-type:inline-size}
@@ -179,6 +236,7 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
 <main>
 <div class="view" data-view="home" id="home">
 <section class="hero">
+  <canvas id="field" aria-hidden="true"></canvas>
   <div>
     <p class="eyebrow">Open source · Apache-2.0 · Research preview</p>
     <h1><span class="w" style="--i:0">AI</span> <span class="w" style="--i:1">code</span> <span class="w" style="--i:2">review</span> <span class="w" style="--i:3">that</span> <span class="w" style="--i:4">can</span> <span class="w" style="--i:5"><em>prove</em></span> <span class="w" style="--i:6">where</span> <span class="w" style="--i:7">every</span> <span class="w" style="--i:8">finding</span> <span class="w" style="--i:9">came</span> <span class="w" style="--i:10">from</span></h1>
@@ -207,6 +265,8 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
   <div><b data-n="72">72</b><span>automated tests</span></div>
 </div>
 
+<div class="marq" aria-hidden="true"><div><span>Scan</span><span>Prove</span><span>Measure</span><span>Record</span><span>Attest</span><span>Verify</span><span>Replay</span><span>Evaluate</span><span>Route</span><span>Scan</span><span>Prove</span><span>Measure</span><span>Record</span><span>Attest</span><span>Verify</span><span>Replay</span><span>Evaluate</span><span>Route</span><span>Scan</span><span>Prove</span><span>Measure</span><span>Record</span><span>Attest</span><span>Verify</span><span>Replay</span><span>Evaluate</span><span>Route</span><span>Scan</span><span>Prove</span><span>Measure</span><span>Record</span><span>Attest</span><span>Verify</span><span>Replay</span><span>Evaluate</span><span>Route</span></div></div>
+
 <section class="sec" id="what">
   <p class="eyebrow">What it is</p><h2 class="rv">Scan. Prove. Measure.</h2>
   <p class="lede rv">One product with three jobs: find the flaw, keep a checkable record of what found it, and measure whether the AI doing the finding is worth its cost.</p>
@@ -225,15 +285,30 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
 
 <section class="sec" id="how">
   <p class="eyebrow">How it works</p><h2 class="rv">From source code to a finding you can check</h2>
-  <p class="lede rv">The AI pipeline grounds each claim in a knowledge base, has a second agent challenge it, then leaves a record anyone can replay.</p>
-  <div class="flow rv">
-    <div class="node" style="--i:0"><b>Input</b>Source code</div><div class="node" style="--i:1"><b>Retrieve</b>OWASP and CWE passages</div><div class="node" style="--i:2"><b>Sentinel</b>Finds flaws, must cite a passage</div>
-    <div class="node" style="--i:3"><b>Auditor</b>Maintainability findings</div><div class="node" style="--i:4"><b>Evaluator</b>Checks citation, evidence, fix</div><div class="node" style="--i:5"><b>Report</b>Approved findings only</div>
-  </div>
-  <p class="flownote"><i>↺</i> A rejected finding goes back to the Sentinel with feedback, for at most three rounds.</p>
-  <div class="flow two rv">
-    <div class="node" style="--i:0"><b>Record</b>Each model response stored once, keyed by hash</div><div class="node" style="--i:1"><b>Attest</b>A chained statement per result</div>
-    <div class="node" style="--i:2"><b>Verify</b>Chain, records, replay, evidence</div><div class="node" style="--i:3"><b>Measure</b>Paired comparison across six configurations</div>
+  <p class="lede rv">Follow one file through the AI pipeline. Scroll to advance.</p>
+  <div class="story" id="story">
+    <div class="pin">
+      <div class="rail" aria-hidden="true"><i></i><b style="--k:0"></b><b style="--k:1"></b><b style="--k:2"></b><b style="--k:3"></b><b style="--k:4"></b></div>
+      <div class="steps5">
+        <div class="st"><span class="n">01 / 05 · SCAN</span><h3>The Sentinel reads the code and raises findings</h3><p>A specialised agent looks for vulnerabilities and reports each one with a weakness class, a line and a fix.</p></div>
+        <div class="st"><span class="n">02 / 05 · GROUND</span><h3>Every claim must cite a passage</h3><p>Findings have to point at a passage retrieved from the OWASP and CWE knowledge base. The citation is checked in code, not taken on trust.</p></div>
+        <div class="st"><span class="n">03 / 05 · CHALLENGE</span><h3>A second agent rejects what it cannot support</h3><p>The Evaluator reviews each finding against the source and the passages. A rejected finding goes back with feedback, for at most three rounds.</p></div>
+        <div class="st"><span class="n">04 / 05 · RECORD</span><h3>Every model response is hashed and chained</h3><p>Responses are stored once. The result gets a statement naming the code, the calls, the prompts and the passages, linked by hash to the statement before it.</p></div>
+        <div class="st"><span class="n">05 / 05 · VERIFY</span><h3>Anyone can replay it</h3><p>Verification recomputes the chain, re-hashes the responses, re-runs the pipeline on the recordings and checks the lines exist. No model is called.</p></div>
+      </div>
+      <div class="case" aria-label="Illustration of one file moving through the pipeline">
+        <div class="hd"><span>case file · db.py</span><span class="pill run" id="cpill">SCANNING</span></div>
+        <div class="f" data-from="0"><span><b>CWE-89 SQL injection</b> · line 8</span>
+          <span class="cite" data-from="1"><span class="src">cites</span> patterns.md::PY-01 ✓ in retrieved set</span>
+          <span class="verd ok" data-from="2">APPROVED</span></div>
+        <div class="f" data-from="0" id="cf2"><span><b>CWE-20 improper input validation</b> · line 3</span>
+          <span class="cite" data-from="1"><span class="src">cites</span> owasp_top10::A04 ✗ not in retrieved set</span>
+          <span class="verd no" data-from="2">REJECTED · no supporting passage</span></div>
+        <div class="hashes" data-from="3"><span>response <i>528ee443…</i> → sha256 <i>7857c1a0…</i></span><span>response <i>b6ac635d…</i> → sha256 <i>0c54e9d2…</i></span><span>statement <i>c6008cba…</i> ← previous <i>00000000…</i></span></div>
+        <div class="stamp" data-from="4"><span>chain ✓ · records ✓ · replay ✓ · evidence ✓</span><span class="big">VERIFIED</span></div>
+        <div class="note">Illustration of the mechanism. Not a recorded run.</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -2075,6 +2150,77 @@ function count(el) {
   requestAnimationFrame(step);
 }
 
+function story() {
+  const el = $("story"); if (!el || CALM) return;
+  el.classList.add("live");
+  const sts = [...el.querySelectorAll(".st")], dots = [...el.querySelectorAll(".rail b")], parts = [...el.querySelectorAll("[data-from]")];
+  const rail = el.querySelector(".rail"), pill = $("cpill"), f2 = $("cf2");
+  const LAB = ["SCANNING", "GROUNDING", "REVIEWING", "ATTESTING", "VERIFIED"];
+  let last = -1, tick = false;
+  const upd = () => { tick = false;
+    const r = el.getBoundingClientRect(), span = r.height - innerHeight;
+    const p = Math.max(0, Math.min(1, -r.top / Math.max(1, span)));
+    rail.style.setProperty("--p", p.toFixed(3));
+    const k = Math.min(4, Math.floor(p * 5));
+    if (k === last) return; last = k;
+    sts.forEach((s, i) => { s.classList.toggle("on", i === k); s.classList.toggle("past", i < k); });
+    dots.forEach((d, i) => d.classList.toggle("on", i <= k));
+    parts.forEach(x => x.classList.toggle("in", +x.dataset.from <= k));
+    f2.classList.toggle("rej", k >= 2);
+    pill.textContent = LAB[k]; pill.className = "pill " + (k === 4 ? "ok" : "run"); };
+  addEventListener("scroll", () => { if (!tick) { tick = true; requestAnimationFrame(upd); } }, {passive: true});
+  addEventListener("resize", upd); upd();
+}
+function field() {
+  const c = $("field"); if (!c || CALM || !c.getContext) return;
+  const g = c.getContext("2d"), css = getComputedStyle(document.documentElement);
+  const LINE = css.getPropertyValue("--line-hot").trim(), ACC = css.getPropertyValue("--accent").trim();
+  let w = 0, h = 0, pts = [], mx = 0, my = 0, on = true, t0 = performance.now();
+  const size = () => { const r = c.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1);
+    w = r.width; h = r.height; c.width = w * d; c.height = h * d; g.setTransform(d, 0, 0, d, 0, 0);
+    const n = Math.max(14, Math.round(w / 46)); pts = Array.from({length: n}, (_, i) => ({
+      x: (i + .5) / n, y: .5 + .34 * Math.sin(i * 1.7) * Math.cos(i * .6), a: Math.random() * 6.28, s: .25 + Math.random() * .5 })); };
+  const draw = now => { if (!on) return; const t = (now - t0) / 1000; g.clearRect(0, 0, w, h);
+    const P = pts.map(p => [p.x * w + Math.cos(t * p.s + p.a) * 14 + mx * 12, p.y * h + Math.sin(t * p.s * 1.3 + p.a) * 18 + my * 10]);
+    g.lineWidth = 1; g.strokeStyle = LINE; g.beginPath(); P.forEach((q, i) => i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1])); g.stroke();
+    const head = (t * .22) % 1 * (P.length - 1), i = Math.floor(head), f = head - i;
+    P.forEach((q, j) => { const lit = j <= i && j > i - 4; g.fillStyle = lit ? ACC : LINE; const z = lit ? 7 : 5; g.fillRect(q[0] - z / 2, q[1] - z / 2, z, z); });
+    if (P[i + 1]) { g.fillStyle = ACC; g.beginPath(); g.arc(P[i][0] + (P[i + 1][0] - P[i][0]) * f, P[i][1] + (P[i + 1][1] - P[i][1]) * f, 3.2, 0, 6.29); g.fill(); }
+    requestAnimationFrame(draw); };
+  size(); addEventListener("resize", size);
+  addEventListener("pointermove", e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; }, {passive: true});
+  if ("IntersectionObserver" in window) new IntersectionObserver(es => { const was = on; on = es[0].isIntersecting && !document.hidden; if (on && !was) requestAnimationFrame(draw); }).observe(c);
+  document.addEventListener("visibilitychange", () => { const was = on; on = !document.hidden; if (on && !was) requestAnimationFrame(draw); });
+  requestAnimationFrame(draw);
+}
+function touches() {
+  if (CALM || !matchMedia("(hover:hover)").matches) return;
+  document.querySelectorAll(".card").forEach(c => {
+    c.addEventListener("pointermove", e => { const r = c.getBoundingClientRect();
+      c.style.setProperty("--ry", ((e.clientX - r.left) / r.width - .5) * 7 + "deg"); c.style.setProperty("--rx", (.5 - (e.clientY - r.top) / r.height) * 7 + "deg"); });
+    c.addEventListener("pointerleave", () => { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); }); });
+  const m = document.querySelector(".hero .btn.primary");
+  if (m) { m.addEventListener("pointermove", e => { const r = m.getBoundingClientRect();
+      m.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .22}px, ${(e.clientY - r.top - r.height / 2) * .3}px)`; });
+    m.addEventListener("pointerleave", () => { m.style.transform = ""; }); }
+}
+function intro(done) {
+  let seen = false; try { seen = sessionStorage.getItem("cs-intro") === "1"; sessionStorage.setItem("cs-intro", "1"); } catch (e) {}
+  if (CALM || seen || location.hash) return done();
+  const o = document.createElement("div"); o.className = "intro";
+  o.innerHTML = `<div class="c"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 6.5v8.2c0 7.3 4.9 12.6 12 15.3 7.1-2.7 12-8 12-15.3V6.5z"/><path class="tick" d="m10.5 16 3.8 3.8 7.4-8"/></svg>
+    <div class="t" id="it">${noise(12).toUpperCase()}</div><div class="s" id="is">recording</div></div><button type="button" class="skip">skip</button>`;
+  document.body.appendChild(o);
+  const WORD = "CODESENTINEL", t = o.querySelector("#it"), sub = o.querySelector("#is");
+  let n = 0, gone = false;
+  const iv = setInterval(() => { n++; const k = Math.floor(n / 3);
+    t.textContent = WORD.slice(0, k) + noise(Math.max(0, WORD.length - k)).toUpperCase();
+    sub.textContent = k < 5 ? "recording" : k < 10 ? "attesting" : "verifying";
+    if (k >= WORD.length) { clearInterval(iv); sub.textContent = "verified"; setTimeout(leave, 420); } }, 34);
+  function leave() { if (gone) return; gone = true; clearInterval(iv); o.classList.add("out"); done(); setTimeout(() => o.remove(), 900); }
+  o.addEventListener("click", leave); addEventListener("keydown", leave, {once: true});
+}
+
 const VIEWS = ["user-manual", "technical-manual", "pitch-deck", "market-analysis"];
 function route() {
   const h = decodeURIComponent(location.hash.slice(1));
@@ -2097,10 +2243,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const t = b.previousElementSibling.textContent;
     (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = "Copied"; }, () => { b.textContent = "Select and copy"; });
     setTimeout(() => { b.textContent = "Copy"; }, 1600); }));
-  load(); route(); motion();
+  load(); route(); motion(); story(); field(); touches();
   $("chain").innerHTML = chain.map((s, j) => stmtHtml(s, j, csVerifyChain(chain)[j], false)).join("");
   $("vsum").textContent = `VERIFIED · ${chain.length} statements · head ${chain[chain.length - 1].hash.slice(0, 16)}…`; $("vsum").style.color = "var(--ok)";
-  setTimeout(ledger, 900);
+  intro(() => setTimeout(ledger, 700));
 });
 window.addEventListener("hashchange", route);
 </script></body></html>
