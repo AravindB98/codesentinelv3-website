@@ -294,11 +294,11 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
   <p class="lede rv">The same four questions the project film answers, in the same order.</p>
   <div class="four">
     <a class="card rv" style="--d:0" href="#pb-1-executive-summary-what-am-i-doing-and-why-would-anybody-care"><span class="tag">01 · Executive summary</span><h3>What am I doing, and why would anybody care?</h3>
-      <p>An AI code reviewer that keeps a receipt for every finding, and a test of whether the reviewer is worth its cost. A warning nobody can check is an opinion.</p></a>
+      <p>An AI code reviewer that finds vulnerabilities, matches each to OWASP and CWE, proposes a fix and keeps a receipt for every finding. A warning nobody can check is an opinion.</p></a>
     <a class="card rv" style="--d:1" href="#pb-2-introduction-what-have-other-people-done"><span class="tag">02 · Introduction</span><h3>What have other people done?</h3>
       <p>Rule scanners, critic agents and build receipts exist separately. Careful studies found AI reviewers unreliable and the usual test data flattering.</p></a>
     <a class="card rv" style="--d:2" href="#pb-3-methods-how-am-i-going-to-do-it"><span class="tag">03 · Methods</span><h3>How am I going to do it?</h3>
-      <p>Hand-verified labels on real security fixes, one model run six ways, every answer recorded once, a chained statement per result. Label checking has not started.</p></a>
+      <p>Three orchestrated agents: one finds and cites, one audits quality, one rejects what it cannot support. Tested on hand-verified real fixes, six ways. Label checking has not started.</p></a>
     <a class="card rv" style="--d:3" href="#pb-4-evaluation-how-will-i-know-it-did-a-good-job"><span class="tag">04 · Evaluation</span><h3>How will I know it did a good job?</h3>
       <p>Rules fixed in advance: fewer false alarms without missing more flaws, a control for extra computing, and receipts that replay exactly and catch every tampering.</p></a>
   </div>
@@ -419,7 +419,7 @@ make replay</pre><button type="button" class="copy">Copy</button></div><p><code>
 <article class="view doc" data-view="project-brief" hidden><a class="back" href="#docs">← All documentation</a><h1>The project in four parts</h1><p>Written 23 November 2026 for INFO 7375 Computational Scepticism. This is the plain-language account of the project: what it is, what came before it, how it will be done, and how I will know whether it worked. The project film follows the same four parts in the same order.</p>
 <h2 id="pb-1-executive-summary-what-am-i-doing-and-why-would-anybody-care">1. Executive summary: what am I doing, and why would anybody care?</h2>
 <p>Companies now let artificial intelligence review their code for security holes. The reviewer says "line 8 is dangerous, fix it". Ask it "how do you know?" and there is nothing to show: no record of what it read, which version of the model answered, or whether anyone changed the answer afterwards.</p>
-<p>I am building CodeSentinel: an AI code reviewer that keeps a receipt for every finding, together with a test that measures whether the AI reviewer is worth what it costs.</p>
+<p>I am building CodeSentinel. It reads source code and finds security vulnerabilities. It matches each one to the public catalogues security teams already use, the OWASP Top 10 (Open Worldwide Application Security Project) and the CWE list (Common Weakness Enumeration), and proposes a concrete fix. For every finding it keeps a receipt, and it comes with a test that measures whether the AI reviewer is worth what it costs.</p>
 <p>Why anybody would care:</p>
 <ul>
 <li>A security warning nobody can check is an opinion. Teams lose hours chasing false alarms, and auditors cannot accept findings that have no trail behind them.</li>
@@ -472,6 +472,44 @@ make replay</pre><button type="button" class="copy">Copy</button></div><p><code>
 <p>What I could not find is the combination: a receipt for each individual AI finding that anyone can replay down to the model's recorded answer, with a fair test of whether the challenging agent helps or whether it is only extra computing. I have not surveyed every tool, so I treat "nobody has done this" as something to check, not as a fact.</p>
 <p>That is why this project is worth doing: the trust problem these studies describe is exactly the one a replayable receipt and a controlled test address.</p>
 <h2 id="pb-3-methods-how-am-i-going-to-do-it">3. Methods: how am I going to do it?</h2>
+<p><strong>How the reviewer is built: multi-agent orchestration.</strong> The reviewer is not one prompt. It is three agents, each with one job, run in a fixed order by an orchestrator (a LangGraph state graph) over one shared, typed state.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Agent</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Retrieval</td>
+<td>Looks up the most relevant passages in a knowledge base built from the OWASP Top 10 2025, a CWE subset and a catalogue of vulnerability patterns</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Security Sentinel</td>
+<td>Reads the code and reports each vulnerability with its CWE number, OWASP category, severity, line, a concrete fix and the passage that supports it</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Code Quality Auditor</td>
+<td>Reports maintainability problems, kept separate from security</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Evaluator Guardian</td>
+<td>The sceptic. Checks every finding: the citation must be one of the retrieved passages, the evidence must point at the code, the fix must be concrete. Rejects what fails and returns it with feedback</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Routing</td>
+<td>A rejected finding goes back to the Sentinel. The loop stops after three rounds. Only approved findings reach the report</td>
+</tr>
+</tbody>
+</table></div>
+<p>An offline rule engine (32 rules, seven languages) covers the cases where no model is available; it maps each match to the same CWE, OWASP category and fix.</p>
 <p><strong>Where the data comes from.</strong> 204 real security fixes from 113 public Python projects, taken from the GitHub Advisory Database (2025 and 2026 entries). Each fix gives a pair: the function before the fix and the same function after it. PrimeVul showed that labels taken straight from fix commits are often wrong, so every label is checked by hand before any model sees the data, and a second person independently checks a sample of 25. Target: 40 verified pairs, 80 samples.</p>
 <p><strong>Step by step.</strong></p>
 <ol>
