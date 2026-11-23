@@ -510,10 +510,15 @@ make replay</pre><button type="button" class="copy">Copy</button></div><p><code>
 </tbody>
 </table></div>
 <p>An offline rule engine (32 rules, seven languages) covers the cases where no model is available; it maps each match to the same CWE, OWASP category and fix.</p>
-<p><strong>Where the data comes from.</strong> 204 real security fixes from 113 public Python projects, taken from the GitHub Advisory Database (2025 and 2026 entries). Each fix gives a pair: the function before the fix and the same function after it. PrimeVul showed that labels taken straight from fix commits are often wrong, so every label is checked by hand before any model sees the data, and a second person independently checks a sample of 25. Target: 40 verified pairs, 80 samples.</p>
+<p><strong>Where the data comes from.</strong> Two sources, so that the result does not rest on labels I wrote myself.</p>
+<ol>
+<li><em>A published benchmark with expert answers.</em> The Python scenarios of SecLLMHolmes (Ullah and others, 2024): 12 hand-written scenarios for cross-site scripting (CWE-79) and SQL injection (CWE-89), six vulnerable and six patched, each with a ground-truth explanation written by the authors, plus 72 variants of them that rename or pad the code without changing its meaning. The benchmark is GPL-3 licensed, so it is fetched by a script and not copied into this repository.</li>
+<li><em>Recent real fixes.</em> 204 security fixes from 113 public Python projects, taken from the GitHub Advisory Database (2025 and 2026 entries). Each fix gives a pair: the function before the fix and the same function after it. These are newer than the benchmark, which matters because a model may have seen a published benchmark in training.</li>
+</ol>
+<p>PrimeVul showed that labels taken straight from fix commits are often wrong. So the advisory labels are not trusted blindly: a random sample of 25 pairs is checked by hand, by me and independently by a second person, and the measured label error rate and agreement are reported next to every result on that set. Checking every pair by hand was the earlier plan; the sample audit replaces it so the study can finish in the time available, at the cost of a known, reported amount of label noise.</p>
 <p><strong>Step by step.</strong></p>
 <ol>
-<li>Verify the labels with the project's labelling tool. Every decision is logged with the reviewer's name and the time.</li>
+<li>Fetch the benchmark, then audit a random sample of 25 of the 204 pairs with the project's labelling tool. Every decision is logged with the reviewer's name and the time.</li>
 <li>Freeze the dataset and commit the pre-registration, which fixes the measurements and the pass and fail rules before any run.</li>
 <li>Run the same model six ways on every sample: a single plain prompt; a plain prompt given the same number of calls as the full reviewer; the full three-agent reviewer; and the reviewer with one part removed at a time (no challenging agent, no knowledge base, no specialised prompt). Three repeats of everything.</li>
 <li>Record every model answer once and fingerprint it. Write a chained provenance statement for each result.</li>
@@ -538,8 +543,12 @@ make replay</pre><button type="button" class="copy">Copy</button></div><p><code>
 <td>Collected: 204 pairs</td>
 </tr>
 <tr>
-<td>Verified labels</td>
-<td><strong>Not started.</strong> This is the next task and everything else waits on it</td>
+<td>Benchmark with expert answers</td>
+<td>Public; fetch script to be added</td>
+</tr>
+<tr>
+<td>Hand audit of 25 sampled pairs</td>
+<td><strong>Not started.</strong> This is the next task</td>
 </tr>
 <tr>
 <td>Second reviewer</td>
