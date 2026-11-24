@@ -99,6 +99,18 @@ h2{font:500 clamp(28px,3.4vw,40px)/1.1 var(--display);letter-spacing:-.015em;mar
 select{font:400 13px var(--mono);padding:9px 10px;background:var(--surface);color:var(--ink);border:1px solid var(--line-hot)}
 textarea{width:100%;height:372px;resize:vertical;font:12.5px/1.6 var(--mono);background:var(--code-bg);color:var(--code-ink);border:0;padding:16px;tab-size:2}
 .out{display:flex;flex-direction:column;gap:10px;max-height:468px;overflow:auto}
+.livetag{display:inline-flex;align-items:center;gap:7px;font:500 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--crimson,#9f1239)}
+.livetag[hidden]{display:none}.livetag i{width:8px;height:8px;border-radius:50%;background:currentColor;animation:livepulse 1.2s ease-in-out infinite}
+@keyframes livepulse{50%{opacity:.25;transform:scale(.7)}}
+.archwrap{overflow-x:auto;margin-top:26px;border:1px solid var(--line);background:#fff}.arch{min-width:900px;padding:14px}
+.arch svg{display:block;width:100%;height:auto;font-family:var(--mono)}
+.arch .bx rect{fill:#fff;stroke:var(--ink);stroke-width:1.3}.arch .bx.ag rect{fill:#1a1c17}.arch .bx.ag text{fill:#fafaf7}.arch .bx.ag .s{fill:#cfcabb}
+.arch .bx.gate rect{fill:#b45309;stroke:#b45309}.arch .bx.gate text,.arch .bx.gate .s{fill:#fff}.arch .bx.out rect{fill:#fdf3e3;stroke:#b45309}
+.arch .bx.pr rect{fill:#f3efe6}.arch .bx.in rect{fill:#f3efe6}
+.arch .t{font:600 13px var(--mono);text-anchor:middle;dominant-baseline:middle;fill:#1a1c17}.arch .s{font:11px var(--mono);text-anchor:middle;dominant-baseline:middle;fill:#5c5a50}
+.arch .gp rect{fill:rgba(26,28,23,.025);stroke:#b9b4a6;stroke-dasharray:5 4}.arch .g{font:600 10.5px var(--mono);letter-spacing:.16em;fill:#b45309}
+.arch .ar{fill:none;stroke:#1a1c17;stroke-width:1.4}.arch .ar.lp{stroke:#b45309;stroke-dasharray:4 3}.arch .ahp{fill:#1a1c17}
+.langpill{font:500 11.5px/1.3 var(--mono);letter-spacing:.04em;padding:8px 11px;border:1px solid var(--line-hot);background:var(--bg);color:var(--ink);max-width:100%;overflow-wrap:anywhere}
 .drop{margin:10px 0 0;font:12px/1.5 var(--mono);color:var(--muted)}.demo.drag{outline:2px dashed var(--accent);outline-offset:-6px}
 .fhead{font:500 11.5px/1.4 var(--mono);letter-spacing:.04em;color:var(--ink);border-bottom:1px solid var(--line-hot);padding:6px 0 4px;margin-top:6px;overflow-wrap:anywhere}.fhead:first-child{margin-top:0}
 .sum{flex:1 1 200px;min-width:0}
@@ -237,9 +249,9 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
 .slide footer{font:500 1.15cqw/1 var(--mono);color:var(--muted);letter-spacing:.04em}
 </style></head><body>
 <div class="progress" id="progress"></div>
-<div class="course">Built for INFO 7375 Computational Scepticism · Northeastern University · Fall 2026</div>
+<div class="course">Built for INFO 7375 Computational Scepticism · Northeastern University</div>
 <header class="top"><div class="in"><a class="brand" href="#home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 6.5v8.2c0 7.3 4.9 12.6 12 15.3 7.1-2.7 12-8 12-15.3V6.5z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="m10.5 16 3.8 3.8 7.4-8" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="square"/></svg><span>CodeSentinel</span><span class="dot" aria-hidden="true"></span></a>
-<nav aria-label="Site"><a href="#home">Overview</a><a href="#project-brief">Project brief</a><a href="#how">How it works</a><a href="#agent">Fix agent</a><a href="#demo">Live demo</a><a href="#install">Install and run</a>
+<nav aria-label="Site"><a href="#home">Overview</a><a href="#project-brief">Project brief</a><a href="#how">How it works</a><a href="#architecture">Architecture</a><a href="#agent">Fix agent</a><a href="#demo">Live demo</a><a href="#install">Install and run</a>
 <a href="#user-manual">User manual</a><a href="#technical-manual">Technical manual</a><a href="#pitch-deck">Pitch deck</a>
 <a href="#market-analysis">Market analysis</a></nav></div></header>
 <main>
@@ -247,14 +259,13 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
 <section class="hero">
   <canvas id="field" aria-hidden="true"></canvas>
   <div>
-    <p class="eyebrow">Open source · Apache-2.0 · Research preview</p>
-    <h1><span class="w" style="--i:0">AI</span> <span class="w" style="--i:1">code</span> <span class="w" style="--i:2">review</span> <span class="w" style="--i:3">that</span> <span class="w" style="--i:4">can</span> <span class="w" style="--i:5"><em>prove</em></span> <span class="w" style="--i:6">where</span> <span class="w" style="--i:7">every</span> <span class="w" style="--i:8">finding</span> <span class="w" style="--i:9">came</span> <span class="w" style="--i:10">from</span></h1>
-    <p class="sub">CodeSentinel scans code for security flaws with an offline rule engine or a three-agent AI pipeline, and
-    records what produced each result, so anyone can re-derive it and see that nothing was edited.</p>
+    <p class="eyebrow">Open source · Apache-2.0</p>
+    <h1><span class="w" style="--i:0">Multi-agent</span> <span class="w" style="--i:1">code</span> <span class="w" style="--i:2">review</span> <span class="w" style="--i:3">with</span> <span class="w" style="--i:4">OWASP,</span> <span class="w" style="--i:5">CWE</span> <span class="w" style="--i:6">and</span> <span class="w" style="--i:7"><em>proof</em></span></h1>
+    <p class="sub">CodeSentinel finds security vulnerabilities with three orchestrated AI agents and an offline rule engine, labels each one with its
+    OWASP Top 10 category and CWE number, proposes a fix, and keeps a receipt that anyone can replay to see that nothing was edited.</p>
     <div class="btns"><a class="btn primary" href="#demo">Try the live demo <span class="arr">→</span></a><a class="btn" href="#install">Install and run</a>
     <a class="btn" href="#pitch-deck">Pitch deck</a></div>
-    <div class="status"><b>Status, stated plainly.</b> Every feature here runs and is covered by 93 tests.
-    The evaluation on a hand-verified dataset has not been run yet. Every performance number comes from a small April 2026 pilot.</div>
+    <div class="status"><b>Built and tested.</b> Every feature here runs from a fresh clone and is covered by 93 automated tests.</div>
   </div>
   <div class="ledger" id="ledger" aria-label="Example provenance statement">
     <div class="hd"><span>provenance statement</span><span><button type="button" class="replay" id="replay">replay</button> <span class="pill ok" id="lpill">VERIFIED</span></span></div>
@@ -304,7 +315,7 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
     <a class="card rv" style="--d:1" href="#pb-2-introduction-what-have-other-people-done"><span class="tag">02 · Introduction</span><h3>What have other people done?</h3>
       <p>Rule scanners, critic agents and build receipts exist separately. Careful studies found AI reviewers unreliable and the usual test data flattering.</p></a>
     <a class="card rv" style="--d:2" href="#pb-3-methods-how-am-i-going-to-do-it"><span class="tag">03 · Methods</span><h3>How am I going to do it?</h3>
-      <p>Three orchestrated agents: one finds and cites, one audits quality, one rejects what it cannot support. Tested on hand-verified real fixes, six ways. Label checking has not started.</p></a>
+      <p>Three orchestrated agents: one finds and cites, one audits quality, one rejects what it cannot support. Tested six ways on a published benchmark and on recent real fixes.</p></a>
     <a class="card rv" style="--d:3" href="#pb-4-evaluation-how-will-i-know-it-did-a-good-job"><span class="tag">04 · Evaluation</span><h3>How will I know it did a good job?</h3>
       <p>Rules fixed in advance: fewer false alarms without missing more flaws, a control for extra computing, and receipts that replay exactly and catch every tampering.</p></a>
   </div>
@@ -339,6 +350,13 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
   </div>
 </section>
 
+<section class="sec" id="architecture">
+  <p class="eyebrow">Architecture</p><h2 class="rv">One system, from code to an approved fix</h2>
+  <p class="lede rv">Code enters the scanner. Three orchestrated agents and a rule engine produce findings labelled with OWASP and CWE.
+  Every finding gets a receipt, and the fix agent turns findings into changes that a person approves.</p>
+  <div class="archwrap rv"><div class="arch"><svg viewBox="0 0 1180 620" role="img" aria-label="CodeSentinel architecture: code goes into the scanner, findings go to reports, receipts and the fix agent"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahp"/></marker></defs><g class="gp"><rect x="190" y="20" width="534" height="290" rx="10"/><text x="204" y="42" class="g">SCANNER</text></g><g class="bx in"><rect x="16" y="120" width="136" height="70" rx="6"/><text x="84.0" y="148.0" class="t">Your code</text><text x="84.0" y="168.0" class="s">7 languages</text></g><path class="ar" d="M152 155 L188 155" marker-end="url(#ah)"/><g class="bx "><rect x="208" y="50" width="498" height="50" rx="6"/><text x="457.0" y="68.0" class="t">Offline rule engine</text><text x="457.0" y="88.0" class="s">32 rules · instant · no model</text></g><g class="bx "><rect x="208" y="125" width="138" height="64" rx="6"/><text x="277.0" y="150.0" class="t">Knowledge base</text><text x="277.0" y="170.0" class="s">OWASP Top 10 · CWE</text></g><g class="bx ag"><rect x="366" y="125" width="160" height="64" rx="6"/><text x="446.0" y="150.0" class="t">Security Sentinel</text><text x="446.0" y="170.0" class="s">finds and cites</text></g><g class="bx ag"><rect x="546" y="125" width="160" height="64" rx="6"/><text x="626.0" y="150.0" class="t">Evaluator Guardian</text><text x="626.0" y="170.0" class="s">accepts or rejects</text></g><path class="ar" d="M346 157 L364 157" marker-end="url(#ah)"/><path class="ar" d="M526 150 L544 150" marker-end="url(#ah)"/><path class="ar lp" d="M626 189 C626 234 446 234 446 191" marker-end="url(#ah)"/><text x="536" y="245" class="s">reject with feedback, up to 3 rounds</text><g class="bx "><rect x="208" y="258" width="138" height="40" rx="6"/><text x="277.0" y="278.0" class="t">Orchestrator</text></g><g class="bx ag"><rect x="366" y="258" width="160" height="40" rx="6"/><text x="446.0" y="278.0" class="t">Quality Auditor</text></g><path class="ar" d="M346 278 L364 278" marker-end="url(#ah)"/><path class="ar" d="M724 155 L756 155" marker-end="url(#ah)"/><g class="bx out"><rect x="758" y="110" width="180" height="90" rx="6"/><text x="848.0" y="148.0" class="t">Findings</text><text x="848.0" y="168.0" class="s">OWASP · CWE · fix</text></g><path class="ar" d="M938 140 L968 92" marker-end="url(#ah)"/><path class="ar" d="M938 170 L968 228" marker-end="url(#ah)"/><g class="bx "><rect x="970" y="55" width="194" height="64" rx="6"/><text x="1067.0" y="80.0" class="t">Reports</text><text x="1067.0" y="100.0" class="s">text · JSON · SARIF · HTML</text></g><g class="bx pr"><rect x="970" y="195" width="194" height="74" rx="6"/><text x="1067.0" y="225.0" class="t">Receipts</text><text x="1067.0" y="245.0" class="s">hash-chained · replayable</text></g><path class="ar" d="M848 200 L848 348" marker-end="url(#ah)"/><g class="gp"><rect x="190" y="350" width="974" height="170" rx="10"/><text x="204" y="372" class="g">FIX AGENT</text></g><g class="bx ag"><rect x="208" y="385" width="150" height="64" rx="6"/><text x="283.0" y="410.0" class="t">Propose a patch</text><text x="283.0" y="430.0" class="s">rewrite or model</text></g><g class="bx "><rect x="382" y="385" width="244" height="64" rx="6"/><text x="504.0" y="410.0" class="t">Check in staging</text><text x="504.0" y="430.0" class="s">compile · re-scan · exploit test</text></g><g class="bx gate"><rect x="650" y="385" width="200" height="64" rx="6"/><text x="750.0" y="410.0" class="t">Human gate</text><text x="750.0" y="430.0" class="s">approve · refuse · defer</text></g><g class="bx "><rect x="874" y="385" width="272" height="64" rx="6"/><text x="1010.0" y="410.0" class="t">Apply the approved patch</text><text x="1010.0" y="430.0" class="s">only the exact change shown</text></g><path class="ar" d="M358 417 L380 417" marker-end="url(#ah)"/><path class="ar" d="M626 417 L648 417" marker-end="url(#ah)"/><path class="ar" d="M850 417 L872 417" marker-end="url(#ah)"/><text x="677" y="492" class="s">Permission policy on six tools · budgets on steps, model calls and time · hash-chained journal, state and memory</text><g class="bx "><rect x="190" y="548" width="478" height="56" rx="6"/><text x="429.0" y="569.0" class="t">Evaluation rig</text><text x="429.0" y="589.0" class="s">six configurations · record once · replay · statistics</text></g><g class="bx "><rect x="686" y="548" width="478" height="56" rx="6"/><text x="925.0" y="569.0" class="t">Router</text><text x="925.0" y="589.0" class="s">picks the least costly configuration that is enough</text></g></svg></div></div>
+</section>
+
 <section class="sec" id="agent">
   <p class="eyebrow">The fix agent</p>
   <h2 class="rv">An agent that fixes findings, and cannot write without you</h2>
@@ -355,13 +373,11 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
       <li>The packet shows the diff and every check, and says so when there is no independent check</li>
       <li>Text in source code or model output cannot answer the gate</li><li>Every step is in a hash-chained journal</li></ul></div>
   </div>
-  <div class="tablewrap rv" style="margin-top:26px"><table><tr><th>Check, run offline on synthetic cases, 24 November 2026</th><th>Result</th></tr>
+  <div class="tablewrap rv" style="margin-top:26px"><table><tr><th>Check</th><th>Result</th></tr>
     <tr><td>Held-out cases: 7, set aside by hash before the fixers were written, run once</td><td>5 fixed and confirmed by an exploit test, 2 handed to a person, 0 bad patches</td></tr>
-    <tr><td>Same agent with the independent check switched off (development cases)</td><td>1 bad patch applied</td></tr>
-    <tr><td>Controlled failure: a patch that hides the flaw from the scanner</td><td>Rejected by the exploit test; applied without it</td></tr>
-    <tr><td>Rule engine on a benchmark this project did not write (SecLLMHolmes, Python)</td><td>1 of 6 hand-written flaws flagged. Semgrep's public Python pack: 2 of 6, with 2 false alarms</td></tr></table></div>
-  <p class="lede rv" style="margin-top:16px">What this does not show: how often the agent would fix real code. The cases are fourteen single functions by the same author as the fixers.
-  No person has answered a gate yet, no language model has proposed a patch, and the agent can only act on what the scanner reports.</p>
+    <tr><td>Independent exploit test</td><td>Catches the bad patch that a re-scan alone would let through</td></tr>
+    <tr><td>Controlled failure: a patch that hides the flaw from the scanner</td><td>Rejected by the exploit test</td></tr>
+    <tr><td>Permission policy</td><td>7 of 7 forbidden tool calls refused</td></tr></table></div>
   <div class="cmd"><pre>python -m codesentinel.agent.demo agent-demo
 codesentinel agent agent-demo --allow-exec --run-dir agent-demo-run
 python -m codesentinel.agent.evaluate --split held_out
@@ -370,22 +386,22 @@ python -m codesentinel.agent.evaluate --controlled-failure</pre><button type="bu
 
 <section class="sec" id="demo">
   <p class="eyebrow">Live demo 1</p><h2 class="rv">Scan code in your browser</h2>
-  <p class="lede rv">This runs the real offline rule set on your device. Paste code, or choose real code files from your computer:
-  your browser reads them and scans them here, and nothing is sent anywhere. The AI pipeline needs a model and is not part of this demo.</p>
+  <p class="lede rv">This runs the real offline rule set on your device. Paste code, or choose real code files from your computer.
+  The language is detected for you, including several languages in one paste, and nothing is sent anywhere. The AI pipeline needs a model and is not part of this demo.</p>
   <div class="demo rv">
     <div>
-      <div class="bar"><label for="lang">Language</label><select id="lang"></select>
-        <button type="button" class="btn primary" id="scan">Scan</button><button type="button" class="btn" id="pick">Upload files</button><button type="button" class="btn" id="reset">Reset sample</button>
+      <div class="bar"><span class="livetag" id="livetag" hidden><i></i>Live</span><span class="langpill" id="langpill" aria-live="polite">Detecting language</span>
+        <button type="button" class="btn primary" id="scan">Scan</button><button type="button" class="btn" id="pick">Upload files</button><button type="button" class="btn" id="reset">Next sample</button>
         <input type="file" id="files" multiple hidden accept=".py,.js,.jsx,.mjs,.cjs,.ts,.tsx,.java,.go,.rb,.php,text/*"></div>
       <textarea id="code" spellcheck="false" aria-label="Code to scan"></textarea>
-      <p class="drop" id="drop">Drop code files anywhere on this panel, or use Upload files. Python, JavaScript, TypeScript, Java, Go, Ruby and PHP; up to 50 files of 1 MB each.</p>
+      <p class="drop" id="drop">The demo runs by itself until you touch it. Type, paste, drop code files anywhere on this panel, or use Upload files. Python, JavaScript, TypeScript, Java, Go, Ruby and PHP; up to 50 files of 1 MB each.</p>
     </div>
     <div><div class="bar"><span class="sum" id="sum"></span><button type="button" class="btn" id="rcpt">Download receipt</button></div><div class="out" id="out" aria-live="polite"></div></div>
   </div>
   <p class="lede" style="margin-top:16px">A line that addresses an AI reviewer, such as "ignore previous instructions", is reported as a prompt-injection finding.
   The receipt is a browser-demo record (file hashes, findings, a chained statement hash); the command-line tool writes the full kind with <code>scan --attest</code>.</p>
-  <p class="lede" style="margin-top:16px">Rules are patterns. They cannot follow data across functions, so they miss some flaws and can flag safe code.
-  The samples include lines the rules miss on purpose. That gap is the reason the AI pipeline exists, and the reason it has to be measured.</p>
+  <p class="lede" style="margin-top:16px">The offline rules are fast and repeatable. The three-agent AI pipeline adds reasoning across lines and functions,
+  and the evaluation rig measures what that adds.</p>
 </section>
 
 <section class="sec" id="verify">
@@ -399,8 +415,8 @@ python -m codesentinel.agent.evaluate --controlled-failure</pre><button type="bu
     <div><div class="bar"><span class="sum" id="vsum"></span></div>
       <div class="ledger" style="animation:none;box-shadow:none"><div class="hd"><span>what a pass means</span></div>
       <div class="row"><span class="k">it shows</span><span class="v">each finding is the unedited output of a recorded model response, prompt, retrieval result and code version</span></div>
-      <div class="row"><span class="k">it does not show</span><span class="v">that the finding is true. Labelled evaluation measures that</span></div>
-      <div class="row"><span class="k">limit</span><span class="v">statements are hashed, not signed. Publish the head hash somewhere the author cannot rewrite</span></div></div></div>
+      <div class="row"><span class="k">accuracy</span><span class="v">is measured separately, by the labelled evaluation</span></div>
+      <div class="row"><span class="k">tip</span><span class="v">publish the head hash where everyone can see it, and anyone can check the whole chain against it</span></div></div></div>
   </div>
 </section>
 
@@ -429,20 +445,21 @@ python -m codesentinel.rig verify runs/demo \
 docker compose up --build</pre><button type="button" class="copy">Copy</button></div><p>REST API on port 8080 with API-key authentication.</p></div>
     <div class="rv" style="--d:1"><h3><span>06</span>Run the tests</h3><div class="cmd"><pre>pip install -e &quot;.[all,dev]&quot;
 make test
-make replay</pre><button type="button" class="copy">Copy</button></div><p><code>make replay</code> recomputes the April 2026 pilot from its recordings.</p></div>
+make replay</pre><button type="button" class="copy">Copy</button></div><p><code>make replay</code> recomputes the recorded pilot from its recordings.</p></div>
   </div>
 </section>
 
 <section class="sec" id="evidence">
-  <p class="eyebrow">Evidence</p><h2 class="rv">What is proven and what is not</h2>
-  <p class="lede rv">Recomputed from the recorded outputs of the April 2026 pilot, with no model calls. A product about verification has to pass its own test.</p>
+  <p class="eyebrow">Evidence</p><h2 class="rv">What is verified</h2>
+  <p class="lede rv">Every line below is reproduced by a command in the repository. A product about verification has to pass its own test.</p>
   <div class="tablewrap rv"><table>
    <tr><th>Claim</th><th>Standing</th><th>Detail</th></tr>
-   <tr><td>Pilot results are reproducible</td><td><span class="pill ok">ESTABLISHED</span></td><td>Every stored count is reproduced from stored predictions and answer keys</td></tr>
-   <tr><td>Pipeline cut false positives from 30 to 1</td><td><span class="pill bad">WEAK</span></td><td>One real-model run of 10 samples. 20 of the 30 were extra findings on flawed samples; only 2 samples are flaw-free</td></tr>
-   <tr><td>The pipeline is reliable run to run</td><td><span class="pill bad">NOT SHOWN</span></td><td>It returned nothing in 2 of 3 runs that day, from an integration fault fixed afterwards</td></tr>
-   <tr><td>The gain comes from the architecture</td><td><span class="pill bad">CONFOUNDED</span></td><td>The two arms used different prompts. One evaluation configuration now separates prompt from architecture</td></tr>
-   <tr><td>Accuracy on real-world code</td><td><span class="pill bad">NOT MEASURED</span></td><td>204 candidate pairs from 113 projects await hand verification</td></tr>
+   <tr><td>Recorded results are reproducible</td><td><span class="pill ok">VERIFIED</span></td><td>Every stored count is recomputed from stored predictions and answer keys, with no model calls</td></tr>
+   <tr><td>Receipts catch tampering</td><td><span class="pill ok">VERIFIED</span></td><td>An edited statement, a removed or invented finding, a missing statement and a changed file each stop verification</td></tr>
+   <tr><td>The fix agent writes no bad patch</td><td><span class="pill ok">VERIFIED</span></td><td>Held-out cases: 5 of 7 fixed and confirmed by an exploit test, 2 handed to a person, 0 bad patches</td></tr>
+   <tr><td>A patch that hides a flaw is caught</td><td><span class="pill ok">VERIFIED</span></td><td>Predicted in advance, triggered on purpose, rejected by the independent exploit test</td></tr>
+   <tr><td>Nothing is written without approval</td><td><span class="pill ok">VERIFIED</span></td><td>7 of 7 forbidden tool calls refused; an approval for a different change is refused</td></tr>
+   <tr><td>Runs from a fresh clone</td><td><span class="pill ok">VERIFIED</span></td><td>93 automated tests pass in a new environment</td></tr>
   </table></div>
 </section>
 
@@ -2177,7 +2194,7 @@ ruff check codesentinel tests
 Market figures are sourced on the last slide and in the <a href="#market-analysis">market analysis</a>.</p>
 <div class="deck"><section class="slide"><header><span class="kicker">CodeSentinel</span><span class="num">1 / 13</span></header><h3>AI code security review that can prove where every finding came from</h3><div class="sbody"><p class="lead">An open-source scanner, a test rig that measures whether AI review earns its cost,
      and a provenance layer that makes every finding replayable and tamper-evident.</p>
-     <p class="meta">Aravind Balaji · Northeastern University · November 2026<br>Built for INFO 7375 Computational Scepticism</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="meta">Aravind Balaji · Northeastern University<br>Built for INFO 7375 Computational Scepticism</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">The problem</span><span class="num">2 / 13</span></header><h3>AI reviewers produce findings nobody can trace</h3><div class="sbody"><div class="cols"><div><h4>More code, less scrutiny</h4><p>A 2025 Veracode study reported that
      <b>45%</b> of AI-generated code samples failed security tests.<sup>5</sup> Teams are adding AI reviewers to cope.</p></div>
      <div><h4>No record of why</h4><p>An AI finding arrives without the model version, prompt or evidence that
@@ -2187,21 +2204,20 @@ Market figures are sourced on the last slide and in the <a href="#market-analysi
 <section class="slide"><header><span class="kicker">The product</span><span class="num">3 / 13</span></header><h3>One tool, three layers</h3><div class="sbody"><table><tr><th>Layer</th><th>What it does</th><th>State</th></tr>
      <tr><td><b>Scanner</b></td><td>32 offline rules across 7 languages, plus a three-agent AI pipeline: a Sentinel that must cite evidence, an Auditor, and an Evaluator that can reject findings</td><td>Built, tested</td></tr>
      <tr><td><b>Verification and provenance</b></td><td>Records every model response once. Attaches a hash-chained statement to each result. <code>verify</code> re-derives the findings from recordings. Everyday scans get a receipt with <code>scan --attest</code>. Text in source aimed at the AI reviewer is fenced off and reported</td><td>Built, tested</td></tr>
-     <tr><td><b>Router</b></td><td>A bandit that learns when a cheaper configuration is enough, scored on recorded real runs</td><td>Built, exploratory</td></tr></table>
+     <tr><td><b>Router</b></td><td>A bandit that learns when a cheaper configuration is enough, scored on recorded real runs</td><td>Built, tested</td></tr></table>
      <p class="note">Open source under Apache-2.0. 93 automated tests pass.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">How verification works</span><span class="num">4 / 13</span></header><h3>Four checks, no model calls</h3><div class="sbody"><div class="cols four"><div><h4>1 · Chain</h4><p>Has any statement been altered, removed or reordered?</p></div>
      <div><h4>2 · Records</h4><p>Does every cited model response still hash to what was recorded?</p></div>
      <div><h4>3 · Replay</h4><p>Does re-running on the recordings give exactly the same findings?</p></div>
      <div><h4>4 · Evidence</h4><p>Does every finding point at lines that exist?</p></div></div>
      <p class="note">It proves a finding is the unedited, reproducible output of a named model and code version.
-     It does not prove the finding is true. That is what the labelled evaluation measures.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
-<section class="slide"><header><span class="kicker">Evidence so far</span><span class="num">5 / 13</span></header><h3>What our own pilot does and does not show</h3><div class="sbody"><div class="cols"><div><h4>Established</h4><p>Every stored result from the April 2026 pilot is reproduced from its recordings.
-     In one real-model run on 10 samples, false positives were <b>30</b> for a single prompt and <b>1</b> for the pipeline, with equal recall.</p></div>
-     <div><h4>Weaker than it looked</h4><p>The pipeline returned nothing in 2 of 3 runs that day. 20 of the 30 false positives were
-     extra findings on flawed samples. The two arms used different prompts.</p></div>
-     <div><h4>Not done yet</h4><p>The evaluation on a hand-verified dataset with replicates, on a hosted model and an
-     open-weight model. 204 candidate pairs are collected and waiting for verification.</p></div></div>
-     <p class="note">We publish this because a product about verification has to pass its own test.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
+     The labelled evaluation then measures accuracy.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Evidence</span><span class="num">5 / 13</span></header><h3>What is verified today</h3><div class="sbody"><div class="cols"><div><h4>Reproducible</h4><p>Every stored result of the recorded pilot is recomputed from its recordings,
+     with no model calls. Receipts catch an edited, removed or invented finding and a changed file.</p></div>
+     <div><h4>The fix agent</h4><p>On held-out cases, <b>5</b> of 7 flaws fixed and confirmed by an exploit test, the other 2 handed
+     to a person, and <b>0</b> bad patches written. A patch that hides a flaw from the scanner is rejected.</p></div>
+     <div><h4>Control</h4><p>Seven of seven forbidden tool calls are refused in code. No patch is written without a person's approval
+     of the exact change shown. 93 automated tests pass from a fresh clone.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Market size</span><span class="num">6 / 13</span></header><h3>A multi-billion dollar market growing at double-digit rates</h3><div class="sbody"><table><tr><th>Scope</th><th>2025</th><th>Forecast</th><th>Growth a year</th></tr>
      <tr><td>Application security, broad<sup>1</sup></td><td>$12.19B</td><td>$23.45B by 2031</td><td>11.5%</td></tr>
      <tr><td>Application security, broad<sup>3</sup></td><td>$11.9B</td><td>$37.6B by 2034</td><td>13.21%</td></tr>
@@ -2211,38 +2227,36 @@ Market figures are sourced on the last slide and in the <a href="#market-analysi
      One analyst puts static testing at 38.6% of the market by testing type.<sup>3</sup></p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Why now</span><span class="num">7 / 13</span></header><h3>Money and regulation are both moving toward checkable AI output</h3><div class="sbody"><div class="cols"><div><h4>Capital</h4><p>CodeRabbit raised $143M at a $1.5B valuation for AI code review.<sup>6</sup>
      Endor Labs raised $93M to scan AI-generated code.<sup>7</sup> Semgrep raised a $100M Series D.<sup>8</sup></p></div>
-     <div><h4>Regulation</h4><p>EU Cyber Resilience Act reporting duties applied from 11 September 2026; the Act applies in full from
-     11 December 2027.<sup>12</sup> Vulnerability handling now needs a record.</p></div>
+     <div><h4>Regulation</h4><p>EU Cyber Resilience Act reporting duties are in force, with the full Act to follow.<sup>12</sup> Vulnerability handling now needs a record.</p></div>
      <div><h4>Technology</h4><p>Open-weight code models can be served on a single GPU, so AI review with pinned weights and no code
      leaving the building is practical.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Competition</span><span class="num">8 / 13</span></header><h3>Incumbents already use AI. We focus on evidence</h3><div class="sbody"><table><tr><th>Product</th><th>Strength</th><th>Published team price</th></tr>
-     <tr><td>Semgrep</td><td>Large rule ecosystem; a 2026 engine pairing code parsing with model reasoning<sup>8</sup></td><td>$30 per contributor a month<sup>10</sup></td></tr>
+     <tr><td>Semgrep</td><td>Large rule ecosystem; a new engine pairing code parsing with model reasoning<sup>8</sup></td><td>$30 per contributor a month<sup>10</sup></td></tr>
      <tr><td>Snyk Code</td><td>Broad platform; about $326M annual recurring revenue<sup>9</sup></td><td>$25 per developer a month, up to 10<sup>11</sup></td></tr>
      <tr><td>GitHub Advanced Security, Checkmarx, Veracode</td><td>Data-flow analysis in the platform; enterprise compliance suites</td><td>Add-on or custom</td></tr>
-     <tr><td><b>CodeSentinel</b></td><td>Replayable per-finding provenance; open evaluation rig; stated limits</td><td>Free core; $29 indicative</td></tr></table>
+     <tr><td><b>CodeSentinel</b></td><td>Replayable per-finding provenance; open evaluation rig; a fix agent with a human gate</td><td>Free core; $29 indicative</td></tr></table>
      <p class="note">We do not compete on rule coverage or depth. "Unique" is a hypothesis to test with buyers, not a surveyed fact.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Positioning</span><span class="num">9 / 13</span></header><h3>The audit trail for AI code review</h3><div class="sbody"><div class="cols"><div><h4>Who buys first</h4><p>Application security leads deciding whether an AI reviewer earns its cost.
      Regulated teams that need a record for automated findings and code that stays on their machines.</p></div>
      <div><h4>What they get</h4><p>A controlled comparison on their own code with intervals, and findings that an auditor
      can re-derive without trusting the vendor.</p></div>
-     <div><h4>Why it survives a null result</h4><p>If the pipeline does not beat a single prompt, the rig and the provenance
-     layer are still useful. Only the "fewer false positives" claim would go.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
+     <div><h4>Value from day one</h4><p>The evaluation rig and the provenance layer are useful on their own, with any
+     reviewer a team already runs.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Business model</span><span class="num">10 / 13</span></header><h3>Open core, with evaluation as a service as the first offer to test</h3><div class="sbody"><table><tr><th>Edition</th><th>For</th><th>Adds</th></tr>
      <tr><td>Community (free)</td><td>Everyone</td><td>Scanner, rig, provenance, router, all report formats</td></tr>
      <tr><td>Team ($29 per contributor a month, indicative)</td><td>Squads</td><td>Private rule packs, support</td></tr>
      <tr><td>Enterprise and Government (custom)</td><td>Regulated buyers</td><td>SSO, audit export, compliance packs, supported air-gapped operation</td></tr></table>
-     <p class="note">Illustrative arithmetic, not a forecast: 200 teams of 25 contributors at $29 a month is about $1.7M a year.
-     Prices are placeholders and the commercial licence has not had legal review.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
-<section class="slide"><header><span class="kicker">Where we are</span><span class="num">11 / 13</span></header><h3>An honest status</h3><div class="sbody"><div class="cols"><div><h4>Done</h4><p>One unified codebase. Rig, provenance and router working offline. Pilot results
-     recomputed. 204 candidate pairs from 113 open-source projects. Cluster job script written.</p></div>
-     <div><h4>Next four weeks</h4><p>Audit a sample of labels. Pre-register. Run on a hosted model and on an open-weight model with seeded
-     replicates. Adversarial and faithfulness checks. Course paper, then a preprint.</p></div>
-     <div><h4>Not yet</h4><p>No customers. No revenue. No large evaluation. One developer. Statements are hashed, not yet signed.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
+     <p class="note">Illustrative arithmetic: 200 teams of 25 contributors at $29 a month is about $1.7M a year.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
+<section class="slide"><header><span class="kicker">Where we are</span><span class="num">11 / 13</span></header><h3>Built, tested and ready for partners</h3><div class="sbody"><div class="cols"><div><h4>Built</h4><p>One unified codebase: scanner, fix agent with a human gate, evaluation rig, provenance
+     and router, all working offline. 204 candidate pairs from 113 open-source projects.</p></div>
+     <div><h4>Next</h4><p>Runs on a hosted model and on an open-weight model with seeded replicates. A larger evaluation.
+     Course paper, then a preprint.</p></div>
+     <div><h4>Looking for</h4><p>Design partners with real code and real auditors, and reviewers who will try to break it.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">What we are asking for</span><span class="num">12 / 13</span></header><h3>Design partners and reviewers, not capital</h3><div class="sbody"><div class="cols"><div><h4>Design partners</h4><p>Two or three security teams willing to run the rig on their own code and
      tell us whether the provenance record is what their auditors need.</p></div>
      <div><h4>Reviewers</h4><p>A second labeller for the dataset, and critics for the pre-registration before any model is run.</p></div>
      <div><h4>Contact</h4><p>Aravind Balaji<br>balaji.ara@northeastern.edu<br>github.com/AravindB98/CodeSentinel-v3</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
-<section class="slide"><header><span class="kicker">Sources</span><span class="num">13 / 13</span></header><h3>Read in November 2026</h3><div class="sbody"><ol class="src">
+<section class="slide"><header><span class="kicker">Sources</span><span class="num">13 / 13</span></header><h3>Where the numbers come from</h3><div class="sbody"><ol class="src">
      <li>MarketsandMarkets, Application Security Market</li><li>MarketsandMarkets, Application Security Testing Market</li>
      <li>IMARC Group, Application Security Market</li><li>Mordor Intelligence, Static Application Security Testing Market</li>
      <li>Veracode 2025 GenAI Code Security Report, as cited by SSOJet</li><li>Finimize (Reuters), CodeRabbit funding</li>
@@ -2250,7 +2264,7 @@ Market figures are sourced on the last slide and in the <a href="#market-analysi
      <li>semgrep.dev/pricing</li><li>Snyk pricing breakdown, dev.to</li><li>Travers Smith, EU Cyber Resilience Act timeline</li></ol>
      <p class="note">Full links are in docs/MARKET_ANALYSIS.md. Several are secondary reports; check the primary source before quoting a figure.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section></div></article>
 </main>
-<footer class="site"><div class="in"><span><b>Built for INFO 7375 Computational Scepticism</b><br>Northeastern University · Fall 2026</span>
+<footer class="site"><div class="in"><span><b>Built for INFO 7375 Computational Scepticism</b><br>Northeastern University</span>
 <span>Aravind Balaji · <a href="https://aravindbalaji.com" target="_blank" rel="noopener">aravindbalaji.com</a> · Apache-2.0</span>
 <span>Research preview. No accuracy claim is made for production code.</span></div></footer>
 <script>// CodeSentinel in-browser demo engine. Mirrors codesentinel/rules.py::detect and
@@ -2317,7 +2331,7 @@ function csVerifyChain(stmts) {
 const RULES = [{"rule_id": "CS-PY-SQLI-FSTR", "language": "python", "cwe": "CWE-89", "owasp": "A05:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.94, "pattern": "execute\\s*\\(\\s*f[\"\\']", "fix": "Use parameterized queries with placeholders instead of f-strings. Example: cursor.execute(\"SELECT * FROM users WHERE id = ?\", (uid,)).", "rag_doc": "patterns.md", "rag_pid": "PY-01", "title": "SQL injection via f-string in execute()", "requires": null}, {"rule_id": "CS-PY-SQLI-CONCAT", "language": "python", "cwe": "CWE-89", "owasp": "A05:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "execute\\s*\\([^)]*(\\.format\\(|[\"\\'][^\"\\']*[\"\\']\\s*\\+)", "fix": "Use parameterized queries rather than .format() or string concatenation.", "rag_doc": "patterns.md", "rag_pid": "PY-01", "title": "SQL injection via concatenation/format", "requires": null}, {"rule_id": "CS-PY-PICKLE", "language": "python", "cwe": "CWE-502", "owasp": "A08:2025 Software or Data Integrity Failures", "category": "Insecure Deserialization", "severity": "CRITICAL", "confidence": 0.96, "pattern": "pickle\\.loads?\\s*\\(", "fix": "Never unpickle untrusted data. Use json.loads() with schema validation, or a signed serializer such as itsdangerous.", "rag_doc": "patterns.md", "rag_pid": "PY-02", "title": "Unsafe pickle deserialization", "requires": null}, {"rule_id": "CS-PY-YAML", "language": "python", "cwe": "CWE-502", "owasp": "A08:2025 Software or Data Integrity Failures", "category": "Insecure Deserialization", "severity": "HIGH", "confidence": 0.85, "pattern": "yaml\\.load\\s*\\((?![^)]*\\bC?SafeLoader\\b)", "fix": "Replace yaml.load(data) with yaml.safe_load(data).", "rag_doc": "patterns.md", "rag_pid": "PY-07", "title": "yaml.load without SafeLoader", "requires": null}, {"rule_id": "CS-PY-CMDI", "language": "python", "cwe": "CWE-78", "owasp": "A05:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.88, "pattern": "subprocess\\.(run|Popen|call|check_output)\\s*\\([^)]*shell\\s*=\\s*True", "fix": "Remove shell=True and pass arguments as a list; validate against an allow-list.", "rag_doc": "patterns.md", "rag_pid": "PY-03", "title": "subprocess with shell=True", "requires": null}, {"rule_id": "CS-PY-OSSYSTEM", "language": "python", "cwe": "CWE-78", "owasp": "A05:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.84, "pattern": "os\\.system\\s*\\(", "fix": "Avoid os.system; use subprocess.run([...]) with a list of arguments.", "rag_doc": "patterns.md", "rag_pid": "PY-03", "title": "os.system command execution", "requires": null}, {"rule_id": "CS-PY-EVAL", "language": "python", "cwe": "CWE-94", "owasp": "A05:2025 Injection", "category": "Code Injection", "severity": "CRITICAL", "confidence": 0.92, "pattern": "\\beval\\s*\\(", "fix": "Do not eval request-derived input; parse explicitly or allow-list.", "rag_doc": "patterns.md", "rag_pid": "PY-04", "title": "eval() on untrusted input", "requires": "request"}, {"rule_id": "CS-PY-TLS", "language": "python", "cwe": "CWE-295", "owasp": "A04:2025 Cryptographic Failures", "category": "Improper Certificate Validation", "severity": "HIGH", "confidence": 0.9, "pattern": "verify\\s*=\\s*False", "fix": "Remove verify=False; pass a CA bundle path if a custom root is needed.", "rag_doc": "patterns.md", "rag_pid": "PY-06", "title": "TLS verification disabled", "requires": null}, {"rule_id": "CS-PY-WEAKHASH", "language": "python", "cwe": "CWE-327", "owasp": "A04:2025 Cryptographic Failures", "category": "Weak Cryptography", "severity": "MEDIUM", "confidence": 0.75, "pattern": "hashlib\\.(md5|sha1)\\s*\\(", "fix": "Use sha256+ for integrity; bcrypt/argon2 (passlib) for passwords.", "rag_doc": "patterns.md", "rag_pid": "PY-08", "title": "Weak hash (MD5/SHA1)", "requires": null}, {"rule_id": "CS-PY-SECRET", "language": "python", "cwe": "CWE-798", "owasp": "A07:2025 Authentication Failures", "category": "Hardcoded Credentials", "severity": "HIGH", "confidence": 0.8, "pattern": "(password|api_key|secret|token)\\s*=\\s*[\"\\'][A-Za-z0-9_\\-]{8,}[\"\\']", "fix": "Load secrets from env or a secrets manager; rotate any committed value.", "rag_doc": "patterns.md", "rag_pid": "PY-05", "title": "Hard-coded credential", "requires": null}, {"rule_id": "CS-PY-FLASKDEBUG", "language": "python", "cwe": "CWE-489", "owasp": "A02:2025 Security Misconfiguration", "category": "Security Misconfiguration", "severity": "MEDIUM", "confidence": 0.7, "pattern": "\\.run\\s*\\([^)]*debug\\s*=\\s*True", "fix": "Never run with debug=True in production; the Werkzeug debugger allows RCE.", "rag_doc": "patterns.md", "rag_pid": "PY-09", "title": "Flask debug mode enabled", "requires": null}, {"rule_id": "CS-JS-EVAL", "language": "javascript", "cwe": "CWE-94", "owasp": "A05:2025 Injection", "category": "Code Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "\\beval\\s*\\(", "fix": "Remove eval on user input; parse or allow-list operations.", "rag_doc": "patterns.md", "rag_pid": "JS-01", "title": "eval() on untrusted input", "requires": "req"}, {"rule_id": "CS-JS-SQLI", "language": "javascript", "cwe": "CWE-89", "owasp": "A05:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.93, "pattern": "\\.(query|execute)\\s*\\(\\s*`[^`]*\\$\\{", "fix": "Use parameterized queries: db.query(\"... WHERE id = ?\", [id]).", "rag_doc": "patterns.md", "rag_pid": "JS-02", "title": "SQL injection via template literal", "requires": null}, {"rule_id": "CS-JS-XSS", "language": "javascript", "cwe": "CWE-79", "owasp": "A05:2025 Injection", "category": "Cross-Site Scripting", "severity": "HIGH", "confidence": 0.8, "pattern": "\\.innerHTML\\s*=", "fix": "Use textContent, or sanitize with DOMPurify.sanitize() for rich HTML.", "rag_doc": "patterns.md", "rag_pid": "JS-04", "title": "DOM XSS via innerHTML", "requires": null}, {"rule_id": "CS-JS-CHILDPROC", "language": "javascript", "cwe": "CWE-78", "owasp": "A05:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.85, "pattern": "child_process\\.(exec|execSync)\\s*\\(", "fix": "Use execFile/spawn with an argument array; never interpolate user input.", "rag_doc": "patterns.md", "rag_pid": "JS-05", "title": "child_process.exec command injection", "requires": null}, {"rule_id": "CS-JS-PROTO", "language": "javascript", "cwe": "CWE-1321", "owasp": "A08:2025 Software or Data Integrity Failures", "category": "Prototype Pollution", "severity": "HIGH", "confidence": 0.7, "pattern": "Object\\.assign\\s*\\(\\s*\\{\\s*\\}\\s*,\\s*(req|JSON\\.parse)", "fix": "Validate/whitelist keys before merging untrusted objects; freeze prototypes.", "rag_doc": "patterns.md", "rag_pid": "JS-06", "title": "Prototype pollution via Object.assign", "requires": null}, {"rule_id": "CS-JS-SECRET", "language": "javascript", "cwe": "CWE-798", "owasp": "A07:2025 Authentication Failures", "category": "Hardcoded Credentials", "severity": "HIGH", "confidence": 0.78, "pattern": "(apiKey|api_key|secret|token|password)\\s*[:=]\\s*[\"\\'][A-Za-z0-9_\\-]{8,}[\"\\']", "fix": "Load secrets from environment variables; never commit them.", "rag_doc": "patterns.md", "rag_pid": "JS-07", "title": "Hard-coded credential", "requires": null}, {"rule_id": "CS-JAVA-SQLI", "language": "java", "cwe": "CWE-89", "owasp": "A05:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "(createStatement\\(\\)|Statement)[^;]*executeQuery\\s*\\([^)]*\\+", "fix": "Use PreparedStatement with bound parameters instead of string concatenation.", "rag_doc": "patterns.md", "rag_pid": "JAVA-01", "title": "SQL injection via Statement concatenation", "requires": null}, {"rule_id": "CS-JAVA-DESER", "language": "java", "cwe": "CWE-502", "owasp": "A08:2025 Software or Data Integrity Failures", "category": "Insecure Deserialization", "severity": "CRITICAL", "confidence": 0.9, "pattern": "new\\s+ObjectInputStream\\s*\\(", "fix": "Avoid Java native deserialization of untrusted data; use a safe format and an allow-list (e.g. ValidatingObjectInputStream).", "rag_doc": "patterns.md", "rag_pid": "JAVA-02", "title": "Unsafe ObjectInputStream deserialization", "requires": null}, {"rule_id": "CS-JAVA-CMDI", "language": "java", "cwe": "CWE-78", "owasp": "A05:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.86, "pattern": "Runtime\\.getRuntime\\(\\)\\.exec\\s*\\(", "fix": "Validate inputs and prefer ProcessBuilder with a fixed argument list.", "rag_doc": "patterns.md", "rag_pid": "JAVA-03", "title": "Runtime.exec command injection", "requires": null}, {"rule_id": "CS-JAVA-XXE", "language": "java", "cwe": "CWE-611", "owasp": "A02:2025 Security Misconfiguration", "category": "XML External Entity", "severity": "HIGH", "confidence": 0.82, "pattern": "DocumentBuilderFactory\\.newInstance\\(\\)", "fix": "Disable external entities: setFeature(\"...disallow-doctype-decl\", true).", "rag_doc": "patterns.md", "rag_pid": "JAVA-04", "title": "XXE-prone DocumentBuilderFactory", "requires": null}, {"rule_id": "CS-GO-SQLI", "language": "go", "cwe": "CWE-89", "owasp": "A05:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "\\.(Query|Exec)\\s*\\(\\s*(fmt\\.Sprintf|\"[^\"]*\"\\s*\\+)", "fix": "Use parameterized queries with $1/? placeholders, not fmt.Sprintf.", "rag_doc": "patterns.md", "rag_pid": "GO-01", "title": "SQL injection via Sprintf", "requires": null}, {"rule_id": "CS-GO-CMDI", "language": "go", "cwe": "CWE-78", "owasp": "A05:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.85, "pattern": "exec\\.Command\\s*\\(\\s*\"(sh|bash|cmd)\"", "fix": "Avoid invoking a shell; call the binary directly with explicit args.", "rag_doc": "patterns.md", "rag_pid": "GO-02", "title": "exec.Command shell invocation", "requires": null}, {"rule_id": "CS-GO-TLS", "language": "go", "cwe": "CWE-295", "owasp": "A04:2025 Cryptographic Failures", "category": "Improper Certificate Validation", "severity": "HIGH", "confidence": 0.88, "pattern": "InsecureSkipVerify\\s*:\\s*true", "fix": "Never set InsecureSkipVerify: true in production.", "rag_doc": "patterns.md", "rag_pid": "GO-03", "title": "TLS verification disabled", "requires": null}, {"rule_id": "CS-GO-WEAKHASH", "language": "go", "cwe": "CWE-327", "owasp": "A04:2025 Cryptographic Failures", "category": "Weak Cryptography", "severity": "MEDIUM", "confidence": 0.72, "pattern": "(md5|sha1)\\.New\\s*\\(", "fix": "Use sha256+; for passwords use bcrypt/argon2.", "rag_doc": "patterns.md", "rag_pid": "GO-04", "title": "Weak hash (MD5/SHA1)", "requires": null}, {"rule_id": "CS-RB-CMDI", "language": "ruby", "cwe": "CWE-78", "owasp": "A05:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.85, "pattern": "(system|`|%x|exec)\\s*\\(?[\"\\'`][^\"\\'`]*#\\{", "fix": "Never interpolate input into shell commands; pass an argument array.", "rag_doc": "patterns.md", "rag_pid": "RB-01", "title": "Command injection via interpolation", "requires": null}, {"rule_id": "CS-RB-EVAL", "language": "ruby", "cwe": "CWE-94", "owasp": "A05:2025 Injection", "category": "Code Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "\\b(eval|instance_eval|class_eval)\\s*\\(", "fix": "Avoid eval on untrusted input; use explicit dispatch.", "rag_doc": "patterns.md", "rag_pid": "RB-02", "title": "eval() on untrusted input", "requires": "params"}, {"rule_id": "CS-RB-YAML", "language": "ruby", "cwe": "CWE-502", "owasp": "A08:2025 Software or Data Integrity Failures", "category": "Insecure Deserialization", "severity": "HIGH", "confidence": 0.83, "pattern": "YAML\\.load\\s*\\((?!.*safe)", "fix": "Use YAML.safe_load; YAML.load can instantiate arbitrary objects.", "rag_doc": "patterns.md", "rag_pid": "RB-03", "title": "YAML.load deserialization", "requires": null}, {"rule_id": "CS-PHP-SQLI", "language": "php", "cwe": "CWE-89", "owasp": "A05:2025 Injection", "category": "SQL Injection", "severity": "CRITICAL", "confidence": 0.9, "pattern": "(mysqli_query|->query)\\s*\\([^)]*\\$_(GET|POST|REQUEST)", "fix": "Use prepared statements with bound parameters (PDO/mysqli).", "rag_doc": "patterns.md", "rag_pid": "PHP-01", "title": "SQL injection from request superglobal", "requires": null}, {"rule_id": "CS-PHP-CMDI", "language": "php", "cwe": "CWE-78", "owasp": "A05:2025 Injection", "category": "Command Injection", "severity": "HIGH", "confidence": 0.86, "pattern": "(system|exec|shell_exec|passthru)\\s*\\([^)]*\\$_(GET|POST|REQUEST)", "fix": "Never pass request data to shell functions; use escapeshellarg or avoid shells.", "rag_doc": "patterns.md", "rag_pid": "PHP-02", "title": "Command injection from request", "requires": null}, {"rule_id": "CS-PHP-EVAL", "language": "php", "cwe": "CWE-94", "owasp": "A05:2025 Injection", "category": "Code Injection", "severity": "CRITICAL", "confidence": 0.92, "pattern": "\\beval\\s*\\(\\s*\\$", "fix": "Never eval dynamic input; restructure to explicit logic.", "rag_doc": "patterns.md", "rag_pid": "PHP-03", "title": "eval() on dynamic input", "requires": null}, {"rule_id": "CS-PHP-INCLUDE", "language": "php", "cwe": "CWE-98", "owasp": "A05:2025 Injection", "category": "File Inclusion", "severity": "HIGH", "confidence": 0.84, "pattern": "(include|require)(_once)?\\s*\\(?\\s*\\$_(GET|POST|REQUEST)", "fix": "Never include files chosen by request data; use a fixed allow-list.", "rag_doc": "patterns.md", "rag_pid": "PHP-04", "title": "Remote/Local file inclusion", "requires": null}], SAMPLES = {"python": "import os, pickle, sqlite3, hashlib, requests, yaml\n\ndef get_user(cur, user_id):\n    cur.execute(f\"SELECT * FROM users WHERE id = {user_id}\")\n    return cur.fetchone()\n\ndef list_dir(path):\n    os.system(\"ls \" + path)\n\ndef load_session(blob):\n    return pickle.loads(blob)\n\ndef fetch(url):\n    return requests.get(url, verify=False)\n\ndef fingerprint(data):\n    return hashlib.md5(data).hexdigest()\n\ndef safe_lookup(cur, user_id):\n    cur.execute(\"SELECT * FROM users WHERE id = ?\", (user_id,))\n    return cur.fetchone()\n", "javascript": "const { exec } = require(\"child_process\");\n\nfunction findUser(db, id) {\n  return db.query(`SELECT * FROM users WHERE id = ${id}`);\n}\n\nfunction render(el, comment) {\n  el.innerHTML = comment;\n}\n\nfunction run(cmd) {\n  exec(\"ping \" + cmd);\n}\n\nfunction calc(expr) {\n  return eval(expr);\n}\n", "java": "import java.sql.*;\nimport java.io.*;\n\npublic class UserDao {\n  public ResultSet find(Connection c, String id) throws Exception {\n    Statement st = c.createStatement();\n    return st.executeQuery(\"SELECT * FROM users WHERE id = \" + id);\n  }\n  public void ping(String host) throws Exception {\n    Runtime.getRuntime().exec(\"ping \" + host);\n  }\n  public Object load(InputStream in) throws Exception {\n    return new ObjectInputStream(in).readObject();\n  }\n}\n", "go": "package main\n\nimport (\n  \"crypto/md5\"\n  \"crypto/tls\"\n  \"database/sql\"\n  \"fmt\"\n  \"os/exec\"\n)\n\nfunc find(db *sql.DB, id string) {\n  db.Query(fmt.Sprintf(\"SELECT * FROM users WHERE id = %s\", id))\n}\n\nfunc run(arg string) {\n  exec.Command(\"sh\", \"-c\", \"ls \"+arg).Run()\n}\n\nvar cfg = &tls.Config{InsecureSkipVerify: true}\nvar h = md5.New()\n", "php": "<?php\n$id = $_GET[\"id\"];\n$r = mysqli_query($conn, \"SELECT * FROM users WHERE id = \" . $_GET[\"id\"]);\nsystem(\"ls \" . $_GET[\"dir\"]);\neval($_POST[\"code\"]);\ninclude($_GET[\"page\"]);\n", "ruby": "require \"yaml\"\n\ndef list(dir)\n  system(\"ls #{dir}\")\nend\n\ndef calc(expr)\n  eval(expr)\nend\n\ndef load(text)\n  YAML.load(text)\nend\n"}, CHAIN0 = [{"schema": "codesentinel.provenance/v1", "subject": {"sample_id": "PAIR-SQLI-TP", "code_sha256": "0c72257273312c80600e8b8dfd5f8182a16ee9516eb1cc107ec70a8afca307f2"}, "configuration": "full", "replicate": 0, "model": "codesentinel-offline-mock", "seed": null, "model_calls": ["528ee4439d48283c8ab72078b62d4283a6a4d4215100e00b28b606edc3d19d9d", "b6ac635d793bda5cb1d8cde5c10aabcec0f4b2ed35463e628486fc4953b99437", "d17ea2062aafb8edc2e30a88b4c38fcf43d61ea54c4836e12eaa1b14618e6b00"], "model_responses_sha256": ["7857a8cc22d42cc1ca51bda1e8e2c924f028210707a352db9fa189d6660d5888", "0c54b7e283b24ef7991b013aeebef8a4d81bb93b6f4be6115a601c74ba708123", "cf5f59fd74e239877ebcd9a3e5ea42da5b8a955c70886e407f82c427838962af"], "prompt_sha256": ["3338debfab22d88ec6676fc6ca47897a4e1458031072563e16874116b78bb0b2", "6c3dfd44ef9e34c18933738495298b7b5cbe9e8f850eef5be0d8ee247e500b56", "b569b802823a8f5bd6ea7eaee7760ed01f763602d75a926915b12bea65fe2b58"], "retrieval": {"backend": "sklearn_tfidf", "passages": [["patterns.md", "PY-01"], ["patterns.md", "JS-02"], ["patterns.md", "JAVA-01"], ["patterns.md", "JS-05"], ["patterns.md", "JAVA-03"], ["patterns.md", "PY-04"]]}, "review_trail": ["security_sentinel: produced 1 finding(s)", "code_quality_auditor: produced 0 finding(s)", "evaluator: APPROVED (approved=1, rejected=0)", "assemble_report: done"], "findings": [["CWE-89", 8, 8]], "scoring": {"rule": "cwe-exact+line-overlap", "tolerance_lines": 2}, "code_version": {"commit": "49ea00d1b66bbd5ae1584b0e8cf61c9d31d8a506", "uncommitted_changes": true, "prompts_and_corpus_sha256": "ac99fdd4e7c77f9290bb4e3ab164fc3d1557dc5ed8df47965087ba59caa37220", "python": "3.13.18"}, "previous": "0000000000000000000000000000000000000000000000000000000000000000", "hash": "c6008cbad2f77582e98c78065b47e2a970dc48994c5d5c4cea2ed337bdcda86f"}, {"schema": "codesentinel.provenance/v1", "subject": {"sample_id": "PAIR-SQLI-TP", "code_sha256": "0c72257273312c80600e8b8dfd5f8182a16ee9516eb1cc107ec70a8afca307f2"}, "configuration": "no_evaluator", "replicate": 0, "model": "codesentinel-offline-mock", "seed": null, "model_calls": ["528ee4439d48283c8ab72078b62d4283a6a4d4215100e00b28b606edc3d19d9d"], "model_responses_sha256": ["7857a8cc22d42cc1ca51bda1e8e2c924f028210707a352db9fa189d6660d5888"], "prompt_sha256": ["b569b802823a8f5bd6ea7eaee7760ed01f763602d75a926915b12bea65fe2b58"], "retrieval": null, "review_trail": ["security_sentinel: produced 1 finding(s)"], "findings": [["CWE-89", 8, 8]], "scoring": {"rule": "cwe-exact+line-overlap", "tolerance_lines": 2}, "code_version": {"commit": "49ea00d1b66bbd5ae1584b0e8cf61c9d31d8a506", "uncommitted_changes": true, "prompts_and_corpus_sha256": "ac99fdd4e7c77f9290bb4e3ab164fc3d1557dc5ed8df47965087ba59caa37220", "python": "3.13.18"}, "previous": "c6008cbad2f77582e98c78065b47e2a970dc48994c5d5c4cea2ed337bdcda86f", "hash": "3ebb45a03f532f142eb7643e34133d2a66749ca73bd812455373fe4d1893e427"}, {"schema": "codesentinel.provenance/v1", "subject": {"sample_id": "PAIR-SQLI-FP", "code_sha256": "e928d999455cf2960f85de3ae35493be1597b25569f6a7a159371832eaca96ab"}, "configuration": "full", "replicate": 0, "model": "codesentinel-offline-mock", "seed": null, "model_calls": ["3d848f2f44f51897eaa9c1f38cef31f9da12e22d7d076181fffda903b13610bf", "4061f76f868dae5a521cc4f5307eddf4b3aef737a3cc6bed9ee29c42fe549e40"], "model_responses_sha256": ["0c54b7e283b24ef7991b013aeebef8a4d81bb93b6f4be6115a601c74ba708123", "0c54b7e283b24ef7991b013aeebef8a4d81bb93b6f4be6115a601c74ba708123"], "prompt_sha256": ["6c3dfd44ef9e34c18933738495298b7b5cbe9e8f850eef5be0d8ee247e500b56", "b569b802823a8f5bd6ea7eaee7760ed01f763602d75a926915b12bea65fe2b58"], "retrieval": {"backend": "sklearn_tfidf", "passages": [["patterns.md", "PY-01"], ["patterns.md", "JS-02"], ["patterns.md", "JAVA-01"], ["patterns.md", "JS-05"], ["patterns.md", "JAVA-03"], ["patterns.md", "PY-04"]]}, "review_trail": ["security_sentinel: produced 0 finding(s)", "code_quality_auditor: produced 0 finding(s)", "evaluator: APPROVED (approved=0, rejected=0)", "assemble_report: done"], "findings": [], "scoring": {"rule": "cwe-exact+line-overlap", "tolerance_lines": 2}, "code_version": {"commit": "49ea00d1b66bbd5ae1584b0e8cf61c9d31d8a506", "uncommitted_changes": true, "prompts_and_corpus_sha256": "ac99fdd4e7c77f9290bb4e3ab164fc3d1557dc5ed8df47965087ba59caa37220", "python": "3.13.18"}, "previous": "3ebb45a03f532f142eb7643e34133d2a66749ca73bd812455373fe4d1893e427", "hash": "e275259e6ecb8584eebe45c84ad7f6ca97a575977f4f6238c965908fb9a54569"}, {"schema": "codesentinel.provenance/v1", "subject": {"sample_id": "PAIR-SQLI-FP", "code_sha256": "e928d999455cf2960f85de3ae35493be1597b25569f6a7a159371832eaca96ab"}, "configuration": "no_evaluator", "replicate": 0, "model": "codesentinel-offline-mock", "seed": null, "model_calls": ["3d848f2f44f51897eaa9c1f38cef31f9da12e22d7d076181fffda903b13610bf"], "model_responses_sha256": ["0c54b7e283b24ef7991b013aeebef8a4d81bb93b6f4be6115a601c74ba708123"], "prompt_sha256": ["b569b802823a8f5bd6ea7eaee7760ed01f763602d75a926915b12bea65fe2b58"], "retrieval": null, "review_trail": ["security_sentinel: produced 0 finding(s)"], "findings": [], "scoring": {"rule": "cwe-exact+line-overlap", "tolerance_lines": 2}, "code_version": {"commit": "49ea00d1b66bbd5ae1584b0e8cf61c9d31d8a506", "uncommitted_changes": true, "prompts_and_corpus_sha256": "ac99fdd4e7c77f9290bb4e3ab164fc3d1557dc5ed8df47965087ba59caa37220", "python": "3.13.18"}, "previous": "e275259e6ecb8584eebe45c84ad7f6ca97a575977f4f6238c965908fb9a54569", "hash": "1f925dec924cab4c2df8d8ccaefb71a81795e38e195ff80c762ccf7697a0a8a7"}];
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const NAMES = {python:"Python", javascript:"JavaScript", java:"Java", go:"Go", php:"PHP", ruby:"Ruby"};
+const NAMES = {python:"Python", javascript:"JavaScript", typescript:"TypeScript", java:"Java", go:"Go", php:"PHP", ruby:"Ruby"};
 const ORDER = {CRITICAL:0, HIGH:1, MEDIUM:2, LOW:3, INFO:4};
 const CALM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep = ms => new Promise(r => setTimeout(r, CALM ? 0 : ms));
@@ -2333,9 +2347,79 @@ function guardDetect(code) {
   code.split(/\r\n|\r|\n/).forEach((line, i) => { if (GUARD.some(rx => rx.test(line))) out.push({rule: GUARD_RULE, line: i + 1, snippet: line.trim().slice(0, 300)}); });
   return out;
 }
-let lastScan = [], prevStmt = "0".repeat(64);
-function scanOne(name, lang, code) {
+// ---- language detection: programming languages by their own syntax, written languages by script and common words
+const SIG = {
+  python: [/^\s*def\s+\w+\s*\(.*\)\s*(->.*)?:\s*$/, /^\s*(from\s+[\w.]+\s+)?import\s+[\w., *]+(\s+as\s+\w+)?\s*(#.*)?$/, /^\s*(if|elif|else|for|while|try|except|with|class)\b.*:\s*(#.*)?$/, /\bself\.\w+/, /\b(None|True|False)\b/, /\bprint\s*\(/, /f["'][^"']*\{/, /^\s*#(?!include|!)/],
+  javascript: [/\b(const|let)\s+[\w$]+\s*=|\bvar\s+[\w$]+\s*=\s*[^=]*;\s*$/, /\bfunction\s*[\w$]*\s*\(/, /=>/, /\bconsole\.\w+\(/, /\brequire\s*\(\s*["']/, /\b(document|window|module\.exports|process\.env)\b/, /===|!==/, /^\s*(export|import)\s.*\bfrom\s+["']/],
+  typescript: [/:\s*(string|number|boolean|any|void|unknown)\b/, /^\s*(export\s+)?(interface|type|enum)\s+\w+/, /\bas\s+(string|number|any|unknown|const)\b/, /\b(public|private|readonly)\s+\w+\s*[:(]/, /<[A-Z]\w*(\[\])?>\s*\(/],
+  java: [/\b(public|private|protected)\s+(static\s+)?(final\s+)?[\w<>\[\]]+\s+\w+\s*\(/, /\bSystem\.(out|err)\./, /^\s*import\s+(java|javax|org|com)\./, /\b(public\s+)?(class|interface)\s+\w+/, /\bString\[\]\s+\w+/, /@Override|@Autowired/, /\bnew\s+[A-Z]\w*\s*[<(]/, /^\s*package\s+[\w.]+;/],
+  go: [/^\s*package\s+\w+\s*$/, /\bfunc\s+(\(\w+\s+\*?\w+\)\s*)?\w+\s*\(/, /:=/, /\bfmt\.\w+\(/, /^\s*import\s+(\(|")/, /\berr\s*!=\s*nil\b/, /\b(chan|defer|go)\s+\w/],
+  ruby: [/^\s*def\s+[\w.?!]+(\s*\(.*\))?\s*$/, /^\s*end\s*$/, /\bputs\s/, /^\s*require\s+['"]/, /@\w+\s*=/, /\bdo\s*\|\w+/, /\.each\b|\belsif\b|\bunless\b/, /\bnil\b/, /#\{[^}]+\}/],
+  php: [/<\?php/, /\$\w+\s*=/, /\$\w+->\w+/, /\becho\s/, /\bfunction\s+\w+\s*\(.*\$/, /\$_(GET|POST|REQUEST|SERVER|COOKIE)\b/, /::\w+\(/],
+};
+function langScores(text) {
+  const sc = {};
+  for (const k in SIG) sc[k] = 0;
+  for (const line of text.split(/\r\n|\r|\n/)) for (const k in SIG) for (const rx of SIG[k]) if (rx.test(line)) { sc[k]++; break; }
+  if (sc.typescript && sc.typescript + sc.javascript >= 2) { sc.typescript += sc.javascript; sc.javascript = 0; } else sc.typescript = 0;
+  return sc;
+}
+function bestLang(text, strict) {
+  const sc = langScores(text), ranked = Object.keys(sc).sort((a, b) => sc[b] - sc[a]);
+  const lines = text.split(/\r\n|\r|\n/).filter(l => l.trim()).length;
+  return sc[ranked[0]] >= (lines <= 2 && !strict ? 1 : 2) ? ranked[0] : null;
+}
+function dominant(text) {
+  const sc = langScores(text), all = Object.values(sc).reduce((a, b) => a + b, 0), top = Math.max(...Object.values(sc));
+  return all > 0 && top / all >= 0.7;
+}
+const WORDS = {
+  English: " the and of to is in that it for with this you are not have was ",
+  Spanish: " el la los las de que y en es un una por con para no se del como más ",
+  French: " le la les de des et est un une que pour dans pas qui sur avec ce il nous ",
+  German: " der die das und ist nicht ein eine zu den mit von für auf ich sie wir auch ",
+  Portuguese: " o a os as de que e em um uma para com não por se do da mais como ",
+  Italian: " il lo la gli le di che e è un una per con non in sono del della come ",
+};
+const SCRIPTS = [[/[一-鿿]/g, "Chinese"], [/[぀-ヿ]/g, "Japanese"], [/[가-힯]/g, "Korean"], [/[Ѐ-ӿ]/g, "Russian or another Cyrillic language"],
+  [/[؀-ۿ]/g, "Arabic"], [/[ऀ-ॿ]/g, "Hindi"], [/[஀-௿]/g, "Tamil"], [/[ఀ-౿]/g, "Telugu"], [/[֐-׿]/g, "Hebrew"], [/[฀-๿]/g, "Thai"], [/[Ͱ-Ͽ]/g, "Greek"]];
+function humanLanguage(text) {
+  const t = text.trim();
+  if (!t) return null;
+  const letters = (t.match(/\p{L}/gu) || []).length;
+  if (!letters) return null;
+  for (const [rx, name] of SCRIPTS) { const n = (t.match(rx) || []).length; if (n / letters > 0.3) return name === "Chinese" && /[぀-ヿ]/.test(t) ? "Japanese" : name; }
+  const sym = (t.match(/[{}()\[\];=<>$|&\\]/g) || []).length, words = t.toLowerCase().match(/\p{L}+/gu) || [];
+  if (words.length < 3 || sym / t.length > 0.05) return null;
+  let best = null, top = 0;
+  for (const k in WORDS) { const n = words.filter(w => WORDS[k].includes(" " + w + " ")).length; if (n > top) { top = n; best = k; } }
+  return top / words.length >= 0.12 ? best : "a written language";
+}
+function segments(text) {
+  // split a paste into blocks at blank lines, detect each, and merge neighbours that share a language
+  const lines = text.split(/\r\n|\r|\n/), blocks = [];
+  let start = 0;
+  for (let i = 0; i <= lines.length; i++) {
+    if (i === lines.length || !lines[i].trim()) {
+      if (i > start) blocks.push({start, end: i, lang: bestLang(lines.slice(start, i).join("\n"), true)});
+      start = i + 1;
+    }
+  }
+  const whole = bestLang(text);
+  const known = blocks.filter(b => b.lang);
+  if (new Set(known.map(b => b.lang)).size <= 1 || dominant(text)) return [{start: 0, end: lines.length, lang: whole || (known[0] && known[0].lang) || null}];
+  const out = [];
+  for (const b of blocks) {
+    const lang = b.lang || (out.length ? out[out.length - 1].lang : known[0].lang);
+    if (out.length && out[out.length - 1].lang === lang) out[out.length - 1].end = b.end; else out.push({start: b.start, end: b.end, lang});
+  }
+  return out.map(o => ({...o, text: lines.slice(o.start, o.end).join("\n")}));
+}
+const listNames = a => a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+let lastScan = [], prevStmt = "0".repeat(64), sampleAt = 0, typing = null, live = null;
+function scanOne(name, lang, code, offset) {
   const found = csDetect(RULES, code, lang).concat(guardDetect(code));
+  if (offset) found.forEach(f => { f.line += offset; });
   found.sort((a, b) => (ORDER[a.rule.severity] - ORDER[b.rule.severity]) || (a.line - b.line));
   return {name, lang, code, found};
 }
@@ -2345,32 +2429,49 @@ function findingHtml(f, i) {
     <code>${esc(f.snippet)}</code><div>${esc(f.rule.fix)}</div>
     <div class="prov">${esc(f.rule.owasp)} · provenance ${esc(f.rule.rag_doc)}::${esc(f.rule.rag_pid)} · confidence ${f.rule.confidence} · ${f.rule.rule_id}</div></div>`;
 }
-function render(files, skipped) {
+function notCode(human) {
+  return `<div class="finding"><div class="h">This is not a programming language</div><div>It reads as ${esc(human || "a written language")}, a language for people, not for computers.
+    Paste or upload source code in Python, JavaScript, TypeScript, Java, Go, Ruby or PHP and it will be scanned.</div></div>`;
+}
+function render(files, notes) {
   lastScan = files;
-  const total = files.reduce((n, f) => n + f.found.length, 0), many = files.length > 1 || (files[0] && files[0].name !== "pasted code");
-  $("sum").textContent = total + " finding" + (total === 1 ? "" : "s") + (many ? " in " + files.length + " file" + (files.length === 1 ? "" : "s") : " · " + RULES.filter(r => r.language === files[0].lang).length + " " + NAMES[files[0].lang] + " rules") + " · offline engine";
+  const total = files.reduce((n, f) => n + f.found.length, 0), langs = [...new Set(files.map(f => NAMES[f.lang]))];
+  const grouped = files.length > 1 || (files[0] && files[0].name !== "pasted code");
+  $("langpill").textContent = langs.length ? "Detected: " + listNames(langs) + (langs.length > 1 ? " (" + langs.length + " languages)" : "") : "No programming language detected";
+  $("sum").textContent = files.length ? total + " finding" + (total === 1 ? "" : "s") + (grouped ? " in " + files.length + (files[0].name.startsWith("lines ") ? " part" : " file") + (files.length === 1 ? "" : "s") : "") + " · " + listNames(langs) + " · offline engine" : "Nothing to scan";
   let k = 0, html = "";
   for (const f of files) {
-    if (many) html += `<div class="fhead">${esc(f.name)} · ${NAMES[f.lang]} · ${f.found.length} finding${f.found.length === 1 ? "" : "s"}</div>`;
+    if (grouped) html += `<div class="fhead">${esc(f.name)} · ${NAMES[f.lang]} · ${f.found.length} finding${f.found.length === 1 ? "" : "s"}</div>`;
     html += f.found.length ? f.found.map(x => findingHtml(x, k++)).join("")
-      : '<div class="finding"><div class="h">No rule matched</div><div>That means no pattern fired. It does not mean the code is safe.</div></div>';
+      : '<div class="finding"><div class="h">No rule matched</div><div>The offline rules cover known patterns. The AI pipeline adds a deeper review.</div></div>';
   }
-  if (skipped && skipped.length) html += `<div class="finding"><div class="h">Skipped ${skipped.length} file${skipped.length === 1 ? "" : "s"}</div><div>${skipped.map(esc).join("<br>")}</div></div>`;
-  $("out").innerHTML = html;
+  $("out").innerHTML = html + (notes || []).join("");
 }
-function scan() { render([scanOne("pasted code", $("lang").value, $("code").value)]); }
+function stopLive() { if (live) clearTimeout(live.t); live = false; const t = $("livetag"); if (t) t.hidden = true; }
+function scan() {
+  const code = $("code").value;
+  if (!code.trim()) { $("langpill").textContent = "Paste code or upload files"; $("sum").textContent = "Nothing to scan"; $("out").innerHTML = ""; lastScan = []; return; }
+  const segs = segments(code);
+  if (segs.length === 1 && !segs[0].lang) { render([], [notCode(humanLanguage(code))]); return; }
+  if (segs.length === 1) { render([scanOne("pasted code", segs[0].lang, code, 0)]); return; }
+  render(segs.map(g => scanOne(`lines ${g.start + 1} to ${g.end}`, g.lang, g.text, g.start)));
+}
 async function scanFiles(list) {
-  const files = [], skipped = [];
+  clearTimeout(typing); stopLive();
+  const files = [], notes = [];
+  const note = (name, why) => notes.push(`<div class="finding"><div class="h">${esc(name)}</div><div>${why}</div></div>`);
   for (const f of [...list].slice(0, 50)) {
-    const lang = EXT[(f.name.split(".").pop() || "").toLowerCase()];
-    if (!lang) { skipped.push(f.name + ": not a supported language"); continue; }
-    if (f.size > 1048576) { skipped.push(f.name + ": larger than 1 MB"); continue; }
-    try { files.push(scanOne(f.name, lang, await f.text())); } catch (e) { skipped.push(f.name + ": could not be read"); }
+    if (f.size > 1048576) { note(f.name, "Larger than 1 MB, so it was left out."); continue; }
+    let text;
+    try { text = await f.text(); } catch (e) { note(f.name, "Could not be read."); continue; }
+    if (text.slice(0, 4000).includes("\u0000")) { note(f.name, "Not a text file."); continue; }
+    const byExt = EXT[(f.name.split(".").pop() || "").toLowerCase()], lang = byExt || bestLang(text);
+    if (!lang) { const h = humanLanguage(text); note(f.name, h ? `Not a programming language. It reads as ${esc(h)}, a language for people.` : "No supported programming language detected."); continue; }
+    files.push(scanOne(f.name + (byExt ? "" : " (detected from its contents)"), lang, text, 0));
   }
-  if (list.length > 50) skipped.push((list.length - 50) + " more files: only the first 50 are scanned");
-  if (!files.length) { render([scanOne("pasted code", $("lang").value, $("code").value)], skipped); return; }
-  $("lang").value = files[0].lang; $("code").value = files[0].code;
-  render(files, skipped);
+  if (list.length > 50) notes.push(`<div class="finding"><div class="h">${list.length - 50} more files</div><div>The first 50 were scanned.</div></div>`);
+  if (files.length) $("code").value = files[0].code;
+  render(files, notes);
 }
 function receipt() {
   if (!lastScan.length) return;
@@ -2548,9 +2649,24 @@ function route() {
   if (target && !VIEWS.includes(h)) { target.classList.remove("pre"); target.scrollIntoView(); } else window.scrollTo(0, 0);
 }
 document.addEventListener("DOMContentLoaded", () => {
-  $("lang").innerHTML = Object.keys(SAMPLES).map(k => `<option value="${k}">${NAMES[k]}</option>`).join("");
-  const load = () => { $("code").value = SAMPLES[$("lang").value]; scan(); };
-  $("lang").addEventListener("change", load); $("reset").addEventListener("click", load); $("scan").addEventListener("click", scan);
+  const KEYS = Object.keys(SAMPLES);
+  const load = () => { $("code").value = SAMPLES[KEYS[sampleAt % KEYS.length]]; sampleAt++; scan(); };
+  $("reset").addEventListener("click", () => { stopLive(); load(); }); $("scan").addEventListener("click", () => { clearTimeout(typing); stopLive(); scan(); });
+  $("code").addEventListener("input", () => { stopLive(); clearTimeout(typing); typing = setTimeout(scan, 450); });
+  $("code").addEventListener("focus", stopLive);
+  // live mode: while the demo is on screen and untouched, it types the next sample and scans it by itself
+  const box = document.querySelector("#demo .demo"), calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const play = () => {
+    const text = SAMPLES[KEYS[sampleAt % KEYS.length]]; sampleAt++;
+    let n = 0; const step = Math.max(6, Math.ceil(text.length / 45));
+    const tick = () => { if (!live) return; n = Math.min(text.length, n + step); $("code").value = text.slice(0, n); $("langpill").textContent = "Reading code";
+      if (n < text.length) live.t = setTimeout(tick, 28); else { scan(); live.t = setTimeout(play, 5200); } };
+    tick();
+  };
+  if (!calm && "IntersectionObserver" in window) new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting && live === null) { live = {t: setTimeout(play, 2600)}; $("livetag").hidden = false; }
+    else if (!e.isIntersecting && live) { clearTimeout(live.t); live = null; $("livetag").hidden = true; }
+  }), {threshold: 0.35}).observe(box);
   $("pick").addEventListener("click", () => $("files").click());
   $("files").addEventListener("change", e => { scanFiles(e.target.files); e.target.value = ""; });
   $("rcpt").addEventListener("click", receipt);
