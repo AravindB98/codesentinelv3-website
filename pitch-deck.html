@@ -46,7 +46,7 @@
      A buyer has no controlled way to test the claim on their own code.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">The product</span><span class="num">3 / 13</span></header><h3>One tool, three layers</h3><div class="sbody"><table><tr><th>Layer</th><th>What it does</th><th>State</th></tr>
      <tr><td><b>Scanner</b></td><td>32 offline rules across 7 languages, plus a three-agent AI pipeline: a Sentinel that must cite evidence, an Auditor, and an Evaluator that can reject findings</td><td>Built, tested</td></tr>
-     <tr><td><b>Verification and provenance</b></td><td>Records every model response once. Attaches a hash-chained statement to each result. <code>verify</code> re-derives the findings from recordings</td><td>Built, tested</td></tr>
+     <tr><td><b>Verification and provenance</b></td><td>Records every model response once. Attaches a hash-chained statement to each result. <code>verify</code> re-derives the findings from recordings. Everyday scans get a receipt with <code>scan --attest</code>. Text in source aimed at the AI reviewer is fenced off and reported</td><td>Built, tested</td></tr>
      <tr><td><b>Router</b></td><td>A bandit that learns when a cheaper configuration is enough, scored on recorded real runs</td><td>Built, exploratory</td></tr></table>
      <p class="note">Open source under Apache-2.0. 79 automated tests pass.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">How verification works</span><span class="num">4 / 13</span></header><h3>Four checks, no model calls</h3><div class="sbody"><div class="cols four"><div><h4>1 · Chain</h4><p>Has any statement been altered, removed or reordered?</p></div>
@@ -95,7 +95,7 @@
      Prices are placeholders and the commercial licence has not had legal review.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Where we are</span><span class="num">11 / 13</span></header><h3>An honest status</h3><div class="sbody"><div class="cols"><div><h4>Done</h4><p>One unified codebase. Rig, provenance and router working offline. Pilot results
      recomputed. 204 candidate pairs from 113 open-source projects. Cluster job script written.</p></div>
-     <div><h4>Next four weeks</h4><p>Verify labels. Pre-register. Run on a hosted model and on an open-weight model with seeded
+     <div><h4>Next four weeks</h4><p>Audit a sample of labels. Pre-register. Run on a hosted model and on an open-weight model with seeded
      replicates. Adversarial and faithfulness checks. Course paper, then a preprint.</p></div>
      <div><h4>Not yet</h4><p>No customers. No revenue. No large evaluation. One developer. Statements are hashed, not yet signed.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">What we are asking for</span><span class="num">12 / 13</span></header><h3>Design partners and reviewers, not capital</h3><div class="sbody"><div class="cols"><div><h4>Design partners</h4><p>Two or three security teams willing to run the rig on their own code and

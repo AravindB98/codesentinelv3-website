@@ -98,7 +98,10 @@ h2{font:500 clamp(28px,3.4vw,40px)/1.1 var(--display);letter-spacing:-.015em;mar
 .bar .btn{padding:10px 14px}
 select{font:400 13px var(--mono);padding:9px 10px;background:var(--surface);color:var(--ink);border:1px solid var(--line-hot)}
 textarea{width:100%;height:372px;resize:vertical;font:12.5px/1.6 var(--mono);background:var(--code-bg);color:var(--code-ink);border:0;padding:16px;tab-size:2}
-.out{display:flex;flex-direction:column;gap:10px;max-height:424px;overflow:auto}
+.out{display:flex;flex-direction:column;gap:10px;max-height:468px;overflow:auto}
+.drop{margin:10px 0 0;font:12px/1.5 var(--mono);color:var(--muted)}.demo.drag{outline:2px dashed var(--accent);outline-offset:-6px}
+.fhead{font:500 11.5px/1.4 var(--mono);letter-spacing:.04em;color:var(--ink);border-bottom:1px solid var(--line-hot);padding:6px 0 4px;margin-top:6px;overflow-wrap:anywhere}.fhead:first-child{margin-top:0}
+.sum{flex:1 1 200px;min-width:0}
 .finding{border:1px solid var(--line);border-left:4px solid var(--low);padding:11px 13px;font-size:15px;animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0)*70ms)}
 .finding.CRITICAL{border-left-color:var(--crit)}.finding.HIGH{border-left-color:var(--high)}.finding.MEDIUM{border-left-color:var(--med)}
 .finding .h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-weight:500}
@@ -279,10 +282,13 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
   <div class="grid3">
     <div class="card rv" style="--d:0"><span class="tag">01 · Scan</span><h3>Two engines</h3><ul><li>32 offline rules across Python, JavaScript, TypeScript, Java, Go, Ruby and PHP</li>
       <li>An AI pipeline: a Sentinel that must cite evidence, a Quality Auditor, and an Evaluator that can reject findings</li>
-      <li>Text, JSON, SARIF, Markdown and HTML reports; CI gating; REST service; Docker and Helm</li></ul></div>
+      <li>Text, JSON, SARIF, Markdown and HTML reports; CI gating; REST service; Docker and Helm</li>
+      <li>Source is treated as untrusted: text aimed at an AI reviewer is fenced off and reported (CWE-1427)</li>
+      <li>A failed AI review is an error with exit status 2, never a clean result</li></ul></div>
     <div class="card rv" style="--d:1"><span class="tag">02 · Prove</span><h3>Provenance</h3><ul><li>Every model response recorded once and never requested again</li>
       <li>A hash-chained statement per result: code, model calls, prompts, retrieval, review trail, findings, code version</li>
-      <li><code>verify</code> checks the chain, the records, a full replay and the evidence, with no model calls</li></ul></div>
+      <li><code>verify</code> checks the chain, the records, a full replay and the evidence, with no model calls</li>
+      <li>A receipt for everyday scans too: <code>scan --attest</code>, then <code>codesentinel verify</code></li></ul></div>
     <div class="card rv" style="--d:2"><span class="tag">03 · Measure</span><h3>Evaluation and routing</h3><ul><li>Six configurations of one model, compared with paired statistics and intervals</li>
       <li>Hosted models or your own open-weight model, including on an HPC cluster</li>
       <li>A router that learns when a cheaper configuration is enough, scored on recorded runs</li></ul></div>
@@ -335,16 +341,20 @@ footer.site b{color:var(--ink);font:500 12px/1.4 var(--mono);letter-spacing:.1em
 
 <section class="sec" id="demo">
   <p class="eyebrow">Live demo 1</p><h2 class="rv">Scan code in your browser</h2>
-  <p class="lede rv">This runs the real offline rule set on your device. Nothing is uploaded. Edit the code and scan again.
-  The AI pipeline needs a model and is not part of this demo.</p>
+  <p class="lede rv">This runs the real offline rule set on your device. Paste code, or choose real code files from your computer:
+  your browser reads them and scans them here, and nothing is sent anywhere. The AI pipeline needs a model and is not part of this demo.</p>
   <div class="demo rv">
     <div>
       <div class="bar"><label for="lang">Language</label><select id="lang"></select>
-        <button type="button" class="btn primary" id="scan">Scan</button><button type="button" class="btn" id="reset">Reset sample</button></div>
+        <button type="button" class="btn primary" id="scan">Scan</button><button type="button" class="btn" id="pick">Upload files</button><button type="button" class="btn" id="reset">Reset sample</button>
+        <input type="file" id="files" multiple hidden accept=".py,.js,.jsx,.mjs,.cjs,.ts,.tsx,.java,.go,.rb,.php,text/*"></div>
       <textarea id="code" spellcheck="false" aria-label="Code to scan"></textarea>
+      <p class="drop" id="drop">Drop code files anywhere on this panel, or use Upload files. Python, JavaScript, TypeScript, Java, Go, Ruby and PHP; up to 50 files of 1 MB each.</p>
     </div>
-    <div><div class="bar"><span class="sum" id="sum"></span></div><div class="out" id="out" aria-live="polite"></div></div>
+    <div><div class="bar"><span class="sum" id="sum"></span><button type="button" class="btn" id="rcpt">Download receipt</button></div><div class="out" id="out" aria-live="polite"></div></div>
   </div>
+  <p class="lede" style="margin-top:16px">A line that addresses an AI reviewer, such as "ignore previous instructions", is reported as a prompt-injection finding.
+  The receipt is a browser-demo record (file hashes, findings, a chained statement hash); the command-line tool writes the full kind with <code>scan --attest</code>.</p>
   <p class="lede" style="margin-top:16px">Rules are patterns. They cannot follow data across functions, so they miss some flaws and can flag safe code.
   The samples include lines the rules miss on purpose. That gap is the reason the AI pipeline exists, and the reason it has to be measured.</p>
 </section>
@@ -374,7 +384,9 @@ cd CodeSentinel-v3
 pip install -e .
 python -m codesentinel.demo</pre><button type="button" class="copy">Copy</button></div><p>No API key, no network at run time. The demo takes about ten seconds.</p></div>
     <div class="rv" style="--d:1"><h3><span>02</span>Scan</h3><div class="cmd"><pre>codesentinel scan ./your-repo --mock
-codesentinel scan . --mock --fail-on HIGH -f sarif -o results.sarif</pre><button type="button" class="copy">Copy</button></div><p>The second line gates a build and writes SARIF for code scanning.</p></div>
+codesentinel scan . --mock --fail-on HIGH -f sarif -o results.sarif
+codesentinel scan . --mock --attest receipts.jsonl
+codesentinel verify receipts.jsonl</pre><button type="button" class="copy">Copy</button></div><p>The second line gates a build and writes SARIF. The last two write a receipt for the scan and check it later: an edited or missing entry, or a changed file, fails.</p></div>
     <div class="rv"><h3><span>03</span>Add AI review (optional)</h3><div class="cmd"><pre>pip install -e &quot;.[llm,rag,graph]&quot;
 export ANTHROPIC_API_KEY=sk-ant-...
 codesentinel ingest
@@ -536,7 +548,7 @@ make replay</pre><button type="button" class="copy">Copy</button></div><p><code>
 <tbody>
 <tr>
 <td>The scanner, the test rig and the provenance system</td>
-<td>Built. 79 automated tests pass (72 when the film was recorded). An end-to-end offline demo runs in about ten seconds</td>
+<td>Built. 79 automated tests pass. An end-to-end offline demo runs in about ten seconds</td>
 </tr>
 <tr>
 <td>Candidate data</td>
@@ -2140,7 +2152,7 @@ Market figures are sourced on the last slide and in the <a href="#market-analysi
      A buyer has no controlled way to test the claim on their own code.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">The product</span><span class="num">3 / 13</span></header><h3>One tool, three layers</h3><div class="sbody"><table><tr><th>Layer</th><th>What it does</th><th>State</th></tr>
      <tr><td><b>Scanner</b></td><td>32 offline rules across 7 languages, plus a three-agent AI pipeline: a Sentinel that must cite evidence, an Auditor, and an Evaluator that can reject findings</td><td>Built, tested</td></tr>
-     <tr><td><b>Verification and provenance</b></td><td>Records every model response once. Attaches a hash-chained statement to each result. <code>verify</code> re-derives the findings from recordings</td><td>Built, tested</td></tr>
+     <tr><td><b>Verification and provenance</b></td><td>Records every model response once. Attaches a hash-chained statement to each result. <code>verify</code> re-derives the findings from recordings. Everyday scans get a receipt with <code>scan --attest</code>. Text in source aimed at the AI reviewer is fenced off and reported</td><td>Built, tested</td></tr>
      <tr><td><b>Router</b></td><td>A bandit that learns when a cheaper configuration is enough, scored on recorded real runs</td><td>Built, exploratory</td></tr></table>
      <p class="note">Open source under Apache-2.0. 79 automated tests pass.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">How verification works</span><span class="num">4 / 13</span></header><h3>Four checks, no model calls</h3><div class="sbody"><div class="cols four"><div><h4>1 · Chain</h4><p>Has any statement been altered, removed or reordered?</p></div>
@@ -2189,7 +2201,7 @@ Market figures are sourced on the last slide and in the <a href="#market-analysi
      Prices are placeholders and the commercial licence has not had legal review.</p></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">Where we are</span><span class="num">11 / 13</span></header><h3>An honest status</h3><div class="sbody"><div class="cols"><div><h4>Done</h4><p>One unified codebase. Rig, provenance and router working offline. Pilot results
      recomputed. 204 candidate pairs from 113 open-source projects. Cluster job script written.</p></div>
-     <div><h4>Next four weeks</h4><p>Verify labels. Pre-register. Run on a hosted model and on an open-weight model with seeded
+     <div><h4>Next four weeks</h4><p>Audit a sample of labels. Pre-register. Run on a hosted model and on an open-weight model with seeded
      replicates. Adversarial and faithfulness checks. Course paper, then a preprint.</p></div>
      <div><h4>Not yet</h4><p>No customers. No revenue. No large evaluation. One developer. Statements are hashed, not yet signed.</p></div></div></div><footer>CodeSentinel · Built for INFO 7375 Computational Scepticism</footer></section>
 <section class="slide"><header><span class="kicker">What we are asking for</span><span class="num">12 / 13</span></header><h3>Design partners and reviewers, not capital</h3><div class="sbody"><div class="cols"><div><h4>Design partners</h4><p>Two or three security teams willing to run the rig on their own code and
@@ -2278,15 +2290,68 @@ const sleep = ms => new Promise(r => setTimeout(r, CALM ? 0 : ms));
 const HEX = "0123456789abcdef";
 const noise = n => Array.from({length: n}, () => HEX[Math.floor(Math.random() * 16)]).join("");
 
-function scan() {
-  const lang = $("lang").value, found = csDetect(RULES, $("code").value, lang);
+const EXT = {py: "python", js: "javascript", jsx: "javascript", mjs: "javascript", cjs: "javascript", ts: "typescript", tsx: "typescript", java: "java", go: "go", rb: "ruby", php: "php"};
+const GUARD = [["override", "\\b(ignore|disregard|forget|override)\\b.{0,40}\\b(previous|prior|above|earlier|all|your|system)\\b.{0,30}\\b(instruction|prompt|rule|direction)s?\\b"], ["suppress", "\\b(do not|don't|never|must not)\\b.{0,30}\\b(report|flag|mention|list|raise)\\b.{0,40}\\b(finding|vulnerabilit|issue|flaw|weakness)"], ["suppress", "\\b(report|return|output|say)\\b.{0,25}\\b(no|zero|0|empty)\\b.{0,25}\\b(finding|vulnerabilit|issue)"], ["verdict", "\\b(this|the)\\b.{0,20}\\b(code|file|function)\\b.{0,20}\\bis\\b.{0,20}\\b(safe|secure|approved|already (reviewed|audited))\\b.{0,40}\\b(ai|assistant|model|reviewer|scanner|llm)\\b"], ["role", "\\b(you are now|act as|new system prompt|system\\s*:\\s*you)\\b"], ["address", "\\b(dear|attention|note to|hey)\\b.{0,12}\\b(ai|assistant|llm|language model|reviewer bot|scanner)\\b"], ["approve", "\\b(mark|set|approve)\\b.{0,30}\\b(all|every|this)\\b.{0,20}\\b(finding|result)s?\\b.{0,20}\\b(approved|as approved|as safe)\\b"]].map(g => new RegExp(g[1], "i"));
+const GUARD_RULE = {severity: "MEDIUM", title: "Prompt injection aimed at an AI reviewer", cwe: "CWE-1427", owasp: "LLM01:2025 Prompt Injection",
+  fix: "Remove the text, then review this file by hand: a scan by an AI reviewer may have been steered.", rag_doc: "guard", rag_pid: "pattern", confidence: 0.6, rule_id: "CS-GUARD-INJECT"};
+function guardDetect(code) {
+  const out = [];
+  code.split(/\r\n|\r|\n/).forEach((line, i) => { if (GUARD.some(rx => rx.test(line))) out.push({rule: GUARD_RULE, line: i + 1, snippet: line.trim().slice(0, 300)}); });
+  return out;
+}
+let lastScan = [], prevStmt = "0".repeat(64);
+function scanOne(name, lang, code) {
+  const found = csDetect(RULES, code, lang).concat(guardDetect(code));
   found.sort((a, b) => (ORDER[a.rule.severity] - ORDER[b.rule.severity]) || (a.line - b.line));
-  $("sum").textContent = found.length + " finding" + (found.length === 1 ? "" : "s") + " · " + RULES.filter(r => r.language === lang).length + " " + NAMES[lang] + " rules · offline engine";
-  $("out").innerHTML = found.length ? found.map((f, i) => `<div class="finding ${f.rule.severity}" style="--i:${i}"><div class="h"><span class="sev">${f.rule.severity}</span>
+  return {name, lang, code, found};
+}
+function findingHtml(f, i) {
+  return `<div class="finding ${f.rule.severity}" style="--i:${Math.min(i, 12)}"><div class="h"><span class="sev">${f.rule.severity}</span>
     <span>${esc(f.rule.title)}</span><span class="prov">${f.rule.cwe} · line ${f.line}</span></div>
     <code>${esc(f.snippet)}</code><div>${esc(f.rule.fix)}</div>
-    <div class="prov">${esc(f.rule.owasp)} · provenance ${esc(f.rule.rag_doc)}::${esc(f.rule.rag_pid)} · confidence ${f.rule.confidence} · ${f.rule.rule_id}</div></div>`).join("")
-    : '<div class="finding"><div class="h">No rule matched</div><div>That means no pattern fired. It does not mean the code is safe.</div></div>';
+    <div class="prov">${esc(f.rule.owasp)} · provenance ${esc(f.rule.rag_doc)}::${esc(f.rule.rag_pid)} · confidence ${f.rule.confidence} · ${f.rule.rule_id}</div></div>`;
+}
+function render(files, skipped) {
+  lastScan = files;
+  const total = files.reduce((n, f) => n + f.found.length, 0), many = files.length > 1 || (files[0] && files[0].name !== "pasted code");
+  $("sum").textContent = total + " finding" + (total === 1 ? "" : "s") + (many ? " in " + files.length + " file" + (files.length === 1 ? "" : "s") : " · " + RULES.filter(r => r.language === files[0].lang).length + " " + NAMES[files[0].lang] + " rules") + " · offline engine";
+  let k = 0, html = "";
+  for (const f of files) {
+    if (many) html += `<div class="fhead">${esc(f.name)} · ${NAMES[f.lang]} · ${f.found.length} finding${f.found.length === 1 ? "" : "s"}</div>`;
+    html += f.found.length ? f.found.map(x => findingHtml(x, k++)).join("")
+      : '<div class="finding"><div class="h">No rule matched</div><div>That means no pattern fired. It does not mean the code is safe.</div></div>';
+  }
+  if (skipped && skipped.length) html += `<div class="finding"><div class="h">Skipped ${skipped.length} file${skipped.length === 1 ? "" : "s"}</div><div>${skipped.map(esc).join("<br>")}</div></div>`;
+  $("out").innerHTML = html;
+}
+function scan() { render([scanOne("pasted code", $("lang").value, $("code").value)]); }
+async function scanFiles(list) {
+  const files = [], skipped = [];
+  for (const f of [...list].slice(0, 50)) {
+    const lang = EXT[(f.name.split(".").pop() || "").toLowerCase()];
+    if (!lang) { skipped.push(f.name + ": not a supported language"); continue; }
+    if (f.size > 1048576) { skipped.push(f.name + ": larger than 1 MB"); continue; }
+    try { files.push(scanOne(f.name, lang, await f.text())); } catch (e) { skipped.push(f.name + ": could not be read"); }
+  }
+  if (list.length > 50) skipped.push((list.length - 50) + " more files: only the first 50 are scanned");
+  if (!files.length) { render([scanOne("pasted code", $("lang").value, $("code").value)], skipped); return; }
+  $("lang").value = files[0].lang; $("code").value = files[0].code;
+  render(files, skipped);
+}
+function receipt() {
+  if (!lastScan.length) return;
+  const body = {schema: "codesentinel.scan-receipt/browser-demo", created_utc: new Date().toISOString().slice(0, 19) + "Z", engine: "offline rules (browser)",
+    files: lastScan.map(f => ({path: f.name, language: f.lang, sha256: csSha256(f.code)})),
+    findings: lastScan.flatMap(f => f.found.map(x => ({path: f.name, line: x.line, rule_id: x.rule.rule_id, cwe: x.rule.cwe, severity: x.rule.severity}))),
+    previous_statement_sha256: prevStmt};
+  body.findings_sha256 = csSha256(csCanon(body.findings));
+  body.statement_sha256 = csSha256(csCanon(body));
+  prevStmt = body.statement_sha256;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(body, null, 2) + "\n"], {type: "application/json"}));
+  a.download = "codesentinel-receipt.json"; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  $("rcpt").textContent = "Receipt " + body.statement_sha256.slice(0, 8); setTimeout(() => { $("rcpt").textContent = "Download receipt"; }, 2200);
 }
 
 let chain = JSON.parse(JSON.stringify(CHAIN0)), vrun = 0;
@@ -2452,6 +2517,13 @@ document.addEventListener("DOMContentLoaded", () => {
   $("lang").innerHTML = Object.keys(SAMPLES).map(k => `<option value="${k}">${NAMES[k]}</option>`).join("");
   const load = () => { $("code").value = SAMPLES[$("lang").value]; scan(); };
   $("lang").addEventListener("change", load); $("reset").addEventListener("click", load); $("scan").addEventListener("click", scan);
+  $("pick").addEventListener("click", () => $("files").click());
+  $("files").addEventListener("change", e => { scanFiles(e.target.files); e.target.value = ""; });
+  $("rcpt").addEventListener("click", receipt);
+  const demo = document.querySelector(".demo");
+  ["dragenter", "dragover"].forEach(t => demo.addEventListener(t, e => { e.preventDefault(); demo.classList.add("drag"); }));
+  ["dragleave", "drop"].forEach(t => demo.addEventListener(t, e => { e.preventDefault(); demo.classList.remove("drag"); }));
+  demo.addEventListener("drop", e => { if (e.dataTransfer && e.dataTransfer.files.length) scanFiles(e.dataTransfer.files); });
   $("vchain").addEventListener("click", verifyChain);
   $("tamper").addEventListener("click", () => { chain[1].findings = [["CWE-89", 8, 8], ["CWE-798", 2, 2]]; verifyChain(); });
   $("restore").addEventListener("click", () => { chain = JSON.parse(JSON.stringify(CHAIN0)); verifyChain(); });
